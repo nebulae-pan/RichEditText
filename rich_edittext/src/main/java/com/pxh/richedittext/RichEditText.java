@@ -26,11 +26,12 @@ import android.view.WindowManager;
 
 public class RichEditText extends AppCompatEditText
 {
-    private Bitmap bitmap;
-    private int screenWidth;
     private Context context;
 
+    private BitmapCreator bitmapCreator;
+
     SparseArray<ImageSite> imgArray = new SparseArray<>();
+    private int screenWidth;
 
     /**
      * Description:用于存储插入editText的图片信息:起止位置，路径信息 <br/>
@@ -75,22 +76,18 @@ public class RichEditText extends AppCompatEditText
         DisplayMetrics metric = new DisplayMetrics();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(metric);
-
         screenWidth = (int) ((metric.widthPixels) - getPaddingRight() - getPaddingLeft() / 1.1);
-        //setOnKeyListener(this);
-
     }
 
     public void insertImage(Uri uri)
     {
-        String path;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
-            path = UriUtils.getPath(context, uri);
-        } else {
-            path = UriUtils.selectImage(context, uri);
+        if (bitmapCreator == null) {
+            bitmapCreator = new InsertBitmapCreator(screenWidth);
         }
+        String path = UriUtils.getValidPath(context, uri);
+        Bitmap bitmap = bitmapCreator.getBitmapByDiskPath(path);
+
         SpannableString ss = new SpannableString(path);
-        bitmap = generateImage(path);
 
         ImageSpan span = new ImageSpan(context, bitmap);
         ss.setSpan(span, 0, path.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -145,70 +142,14 @@ public class RichEditText extends AppCompatEditText
         return true;
     }
 
-    private Bitmap generateImage(String path)
-    {
-        Options option = new Options();
-        option.inJustDecodeBounds = true;
-        Bitmap bmp = BitmapFactory.decodeFile(path, option);
-        int bmpWidth = option.outWidth;
-        int bmpHeight = option.outHeight;
-        if (200 < bmpHeight) {
-            int scale = bmpHeight / (200);
-            option.outWidth = bmpWidth / scale;
-            option.outHeight = 200;
-            option.inSampleSize = scale;
-        } else if (screenWidth < bmpWidth) {
-            float scale = bmpWidth / (float) screenWidth;
-            option.outWidth = screenWidth;
-            option.outHeight = (int) (bmpHeight / scale);
-            option.inSampleSize = (int) scale;
-        }
-
-        Bitmap bgm = Bitmap.createBitmap(screenWidth, option.outHeight, Config.ARGB_8888);
-        bgm.eraseColor(Color.argb(0, 0, 0, 0)); // 透明位图
-        Canvas canvas = new Canvas(bgm);
-        option.inJustDecodeBounds = false;
-        bmp = BitmapFactory.decodeFile(path, option);
-        canvas.drawBitmap(bmp, (screenWidth - option.outWidth) / 2, 0l, null);
-        bmp.recycle();
-        canvas.save();
-        return bgm;
-    }
-
-    public String getRealFilePath(final Uri uri)
-    {
-        if (null == uri) return null;
-        final String scheme = uri.getScheme();
-        String data = null;
-        if (scheme == null)
-            data = uri.getPath();
-        else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            data = uri.getPath();
-        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-            Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.ImageColumns
-                    .DATA}, null, null, null);
-            if (null != cursor) {
-                if (cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                    if (index > -1) {
-                        data = cursor.getString(index);
-                    }
-                }
-                cursor.close();
-            }
-        }
-        return data;
-    }
-
-    /**
-     * if use this method , it will occur a bug that can't delete a inserted image with press delete key only once
-     * a
-     */
-    @Override
-    public void setOnKeyListener(OnKeyListener l)
-    {
-        super.setOnKeyListener(l);
-    }
+//    /**
+//     * if use this method , it will occur a bug that can't delete a inserted image with press delete key only once
+//     */
+//    @Override
+//    public void setOnKeyListener(OnKeyListener l)
+//    {
+//        super.setOnKeyListener(l);
+//    }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event)
@@ -222,20 +163,10 @@ public class RichEditText extends AppCompatEditText
         return super.dispatchKeyEvent(event);
     }
 
-    /*@Override
-    public boolean onKey(View v, int keyCode, KeyEvent event)
+    public void setBitmapCreator(BitmapCreator bitmapCreator)
     {
-        L.v(keyCode + "");
-        L.v(event.toString());
-        if (event.getKeyCode() == KeyEvent.KEYCODE_DEL && event.getAction() != KeyEvent.ACTION_UP) {
-            L.v("delete!!");
-            if (!deleteImg()) {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }*/
+        this.bitmapCreator = bitmapCreator;
+    }
 
     public String getContent()
     {

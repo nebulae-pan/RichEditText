@@ -15,6 +15,17 @@ import android.provider.MediaStore;
  */
 public class UriUtils
 {
+    public static String getValidPath(final Context context, final Uri uri)
+    {
+        String path;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
+            path = UriUtils.getPath(context, uri);
+        } else {
+            path = UriUtils.getPathBelowKITKAT(context, uri);
+        }
+        return path;
+    }
+
     public static String getPath(final Context context, final Uri uri)
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -148,7 +159,7 @@ public class UriUtils
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
-    public static String selectImage(Context context, Uri selectedImage)
+    public static String getPathBelowKITKAT(Context context, Uri selectedImage)
     {
         if (selectedImage != null) {
             String uriStr = selectedImage.toString();
