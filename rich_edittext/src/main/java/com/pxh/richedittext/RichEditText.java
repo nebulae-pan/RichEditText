@@ -77,13 +77,11 @@ public class RichEditText extends AppCompatEditText
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(metric);
         screenWidth = (int) ((metric.widthPixels) - getPaddingRight() - getPaddingLeft() / 1.1);
+        bitmapCreator = new InsertBitmapCreator(screenWidth);
     }
 
     public void insertImage(Uri uri)
     {
-        if (bitmapCreator == null) {
-            bitmapCreator = new InsertBitmapCreator(screenWidth);
-        }
         String path = UriUtils.getValidPath(context, uri);
         Bitmap bitmap = bitmapCreator.getBitmapByDiskPath(path);
 
@@ -100,7 +98,14 @@ public class RichEditText extends AppCompatEditText
         setSelection(start + ss.length());// 设置EditText中光标在最后面显示
     }
 
-    public void insertImage(String s, int start, int end, Bitmap bitmap)
+    /**
+     * replace a string start to end with s, and s replaced by image
+     * @param s the string to be replaced by image
+     * @param start start
+     * @param end end
+     * @param bitmap insert bitmap
+     */
+    public void insertImageByReplace(String s, int start, int end, Bitmap bitmap)
     {
         SpannableString ss = new SpannableString(s);
 
@@ -116,10 +121,7 @@ public class RichEditText extends AppCompatEditText
 
     public void insertImage(String s, Bitmap bitmap)
     {
-        SpannableString ss = new SpannableString(s);
-
-        ImageSpan span = new ImageSpan(context, bitmap);
-        ss.setSpan(span, 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        SpannableString ss = getSpannableString(s, bitmap);
 
         int start = getSelectionStart();
         imgArray.put(start + ss.length(), new ImageSite(start, start + ss.length(), ss.toString()));
@@ -129,6 +131,19 @@ public class RichEditText extends AppCompatEditText
         setSelection(start + ss.length());// 设置EditText中光标在最后面显示
     }
 
+    private SpannableString getSpannableString(String s, Bitmap bitmap)
+    {
+        SpannableString ss = new SpannableString(s);
+
+        ImageSpan span = new ImageSpan(context, bitmap);
+        ss.setSpan(span, 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return ss;
+    }
+
+    /**
+     * delete all string that replaced by image
+     * @return if true , delete success, else delete failure
+     */
     public boolean deleteImg()
     {
         int pos = this.getSelectionStart();
