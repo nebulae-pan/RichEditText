@@ -36,7 +36,6 @@ public class InsertBitmapCreator implements BitmapCreator
             option.outHeight = (int) (bmpHeight / scale);
             option.inSampleSize = (int) scale;
         }
-
         Bitmap bgm = Bitmap.createBitmap(screenWidth, option.outHeight, Bitmap.Config.ARGB_8888);
         bgm.eraseColor(Color.argb(0, 0, 0, 0)); // 透明位图
         Canvas canvas = new Canvas(bgm);
