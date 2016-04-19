@@ -8,5 +8,6 @@ import android.graphics.Bitmap;
 public interface BitmapCreator
 {
     Bitmap getBitmapByDiskPath(String path);
-    Bitmap getBitmapByTag(String tagString);
+
+    Bitmap getBitmapByTag(String tagString, int textColor, int backgroundColor);
 }
