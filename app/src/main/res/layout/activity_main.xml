@@ -10,8 +10,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.pxh.richedittext.MainActivity">
 
-    <TextView
+    <com.pxh.richedittext.RichEditText
+        android:id="@+id/rich_edit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+        />
 </RelativeLayout>

@@ -17,10 +17,12 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
@@ -78,6 +80,57 @@ public class RichEditText extends AppCompatEditText
         wm.getDefaultDisplay().getMetrics(metric);
         screenWidth = (int) ((metric.widthPixels) - getPaddingRight() - getPaddingLeft() / 1.1);
         bitmapCreator = new InsertBitmapCreator(screenWidth);
+        this.addTextChangedListener(new TextWatcher()
+        {
+            boolean isNeedRefresh = true;
+            int preLength = 0;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                if (!isNeedRefresh)
+                    return;
+                if (s.length() > preLength) {
+                    char input = s.charAt(start);
+                    if (input == ',' || input == '，') {
+                        int curr = getSelectionStart() - 1;
+                        int pre = getNearestPosition(s.toString(), curr);
+                        String tag = s.subSequence(pre, curr).toString();
+                        isNeedRefresh = false;
+                        insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByTag(tag,0xff000000,0xffffffff));
+                        isNeedRefresh = true;
+                    }
+                    preLength = s.length();
+                } else {
+                    preLength = s.length();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+
+            }
+        });
+    }
+
+    int getNearestPosition(String s, int position)
+    {
+        int p = 0;
+        int start = -1;
+        do {
+            start = s.indexOf(',', start + 1);
+            if (start < position)
+                p = start + 1;
+            else
+                break;
+        } while (start != -1);
+        return p;
     }
 
     public void insertImage(Uri uri)
