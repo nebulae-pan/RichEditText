@@ -53,7 +53,7 @@ public class InsertBitmapCreator implements BitmapCreator
     }
 
     @Override
-    public Bitmap getBitmapByTag(String tagString, int textColor, int backgroundColor)
+    public Bitmap getBitmapByString(String tagString, int textColor, int backgroundColor)
     {
         Paint p = new Paint();
         p.setTextSize(35);

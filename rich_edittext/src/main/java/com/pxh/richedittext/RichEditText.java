@@ -1,18 +1,8 @@
 package com.pxh.richedittext;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Spannable;
@@ -22,7 +12,6 @@ import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
@@ -102,7 +91,7 @@ public class RichEditText extends AppCompatEditText
                         int pre = getNearestPosition(s.toString(), curr);
                         String tag = s.subSequence(pre, curr).toString();
                         isNeedRefresh = false;
-                        insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByTag(tag,0xff000000,0xffffffff));
+                        insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByString(tag,0xff000000,0xffffffff));
                         isNeedRefresh = true;
                     }
                     preLength = s.length();

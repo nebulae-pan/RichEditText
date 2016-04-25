@@ -9,5 +9,5 @@ public interface BitmapCreator
 {
     Bitmap getBitmapByDiskPath(String path);
 
-    Bitmap getBitmapByTag(String tagString, int textColor, int backgroundColor);
+    Bitmap getBitmapByString(String tagString, int textColor, int backgroundColor);
 }
