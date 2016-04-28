@@ -104,6 +104,7 @@ public class RichEditText extends AppCompatEditText
             public void afterTextChanged(Editable s)
             {
 
+
             }
         });
     }
