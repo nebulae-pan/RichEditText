@@ -5,15 +5,25 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
+import android.text.Html;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.AlignmentSpan;
+import android.text.style.BulletSpan;
 import android.text.style.ImageSpan;
+import android.text.style.LeadingMarginSpan;
+import android.text.style.TypefaceSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+
+import org.xml.sax.XMLReader;
+
+import java.util.Vector;
 
 public class RichEditText extends AppCompatEditText
 {
@@ -234,5 +244,21 @@ public class RichEditText extends AppCompatEditText
     public SparseArray<ImageSite> getImageSite()
     {
         return imgArray;
+    }
+
+    public void setHtml(String html)
+    {
+        Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
+
+        // this uses Android's Html class for basic parsing, and HtmlTagHandler
+        setText(Html.fromHtml(html, imgGetter, new Html.TagHandler()
+        {
+            @Override
+            public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader)
+            {
+
+            }
+        }));
+
     }
 }
