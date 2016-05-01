@@ -47,8 +47,7 @@ public class RichEditorImageGetter implements Html.ImageGetter
                                 loadedImage.getWidth(), loadedImage.getHeight(),
                                 matrix, true);
                         drawable.bitmap = loadedImage;
-                        drawable.setBounds(0, 0, loadedImage.getWidth(),
-                                loadedImage.getHeight());
+                        drawable.setBounds(0, 0, loadedImage.getWidth(),loadedImage.getHeight());
                         editor.invalidate();
                         editor.setText(editor.getText());
                     }

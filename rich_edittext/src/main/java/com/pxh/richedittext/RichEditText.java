@@ -17,12 +17,18 @@ import android.text.style.LeadingMarginSpan;
 import android.text.style.TypefaceSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
+import java.lang.reflect.Field;
 import java.util.Vector;
 
 public class RichEditText extends AppCompatEditText
@@ -83,6 +89,7 @@ public class RichEditText extends AppCompatEditText
         {
             boolean isNeedRefresh = true;
             int preLength = 0;
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after)
             {
@@ -101,7 +108,8 @@ public class RichEditText extends AppCompatEditText
                         int pre = getNearestPosition(s.toString(), curr);
                         String tag = s.subSequence(pre, curr).toString();
                         isNeedRefresh = false;
-                        insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByString(tag,0xff000000,0xffffffff));
+                        insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByString(tag,
+                                0xff000000, 0xffffffff));
                         isNeedRefresh = true;
                     }
                     preLength = s.length();
@@ -153,9 +161,10 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * replace a string start to end with s, and s replaced by image
-     * @param s the string to be replaced by image
-     * @param start start
-     * @param end end
+     *
+     * @param s      the string to be replaced by image
+     * @param start  start
+     * @param end    end
      * @param bitmap insert bitmap
      */
     public void insertImageByReplace(String s, int start, int end, Bitmap bitmap)
@@ -195,6 +204,7 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * delete all string that replaced by image
+     *
      * @return if true , delete success, else delete failure
      */
     public boolean deleteImg()
@@ -246,19 +256,54 @@ public class RichEditText extends AppCompatEditText
         return imgArray;
     }
 
-    public void setHtml(String html)
+    public void setHtml(final String html)
     {
-        Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
+        final Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
 
         // this uses Android's Html class for basic parsing, and HtmlTagHandler
         setText(Html.fromHtml(html, imgGetter, new Html.TagHandler()
         {
+            ContentHandler handler;
             @Override
             public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader)
             {
-
+                if (tag.equals("img")) {
+                    Field[] fs = xmlReader.getClass().getDeclaredFields ();
+                    for ( int i = 0 ; i < fs. length ; i++){
+                        Field f = fs[i];
+                        f.setAccessible( true ); // 设置些属性是可以访问的
+                        Object val = null; // 得到此属性的值
+                        try {
+                            val = f.get(xmlReader);
+                            System. out .println( "name:" +f.getName()+ "/t value = " +val);
+//                            String type = f.getType().toString(); // 得到此属性的类型
+//                            if (type.endsWith( "String" )) {
+//                                System. out .println(f.getType()+ "/t 是 String" );
+//                                f.set(xmlReader, "12" ) ;        // 给属性设值
+//                            } else if (type.endsWith( "int" ) || type.endsWith( "Integer" )){
+//                                System. out .println(f.getType()+ "/t 是 int" );
+//                                f.set(xmlReader,12) ;       // 给属性设值
+//                            } else {
+//                                System. out .println(f.getType()+ "/t" );
+//                            }
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
         }));
 
+    }
+
+    public static class ImgTagHandler extends DefaultHandler
+    {
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
+        {
+            Log.v("qName", localName);
+            Log.v("src", attributes.getValue("", "src"));
+            super.startElement(uri, localName, qName, attributes);
+        }
     }
 }
