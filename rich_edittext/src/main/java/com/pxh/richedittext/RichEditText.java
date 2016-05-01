@@ -6,30 +6,15 @@ import android.net.Uri;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Html;
-import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.style.AlignmentSpan;
-import android.text.style.BulletSpan;
 import android.text.style.ImageSpan;
-import android.text.style.LeadingMarginSpan;
-import android.text.style.TypefaceSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-
-import java.lang.reflect.Field;
-import java.util.Vector;
 
 public class RichEditText extends AppCompatEditText
 {
@@ -259,51 +244,6 @@ public class RichEditText extends AppCompatEditText
     public void setHtml(final String html)
     {
         final Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
-
-        // this uses Android's Html class for basic parsing, and HtmlTagHandler
-        setText(Html.fromHtml(html, imgGetter, new Html.TagHandler()
-        {
-            ContentHandler handler;
-            @Override
-            public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader)
-            {
-                if (tag.equals("img")) {
-                    Field[] fs = xmlReader.getClass().getDeclaredFields ();
-                    for ( int i = 0 ; i < fs. length ; i++){
-                        Field f = fs[i];
-                        f.setAccessible( true ); // 设置些属性是可以访问的
-                        Object val = null; // 得到此属性的值
-                        try {
-                            val = f.get(xmlReader);
-                            System. out .println( "name:" +f.getName()+ "/t value = " +val);
-//                            String type = f.getType().toString(); // 得到此属性的类型
-//                            if (type.endsWith( "String" )) {
-//                                System. out .println(f.getType()+ "/t 是 String" );
-//                                f.set(xmlReader, "12" ) ;        // 给属性设值
-//                            } else if (type.endsWith( "int" ) || type.endsWith( "Integer" )){
-//                                System. out .println(f.getType()+ "/t 是 int" );
-//                                f.set(xmlReader,12) ;       // 给属性设值
-//                            } else {
-//                                System. out .println(f.getType()+ "/t" );
-//                            }
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }));
-
-    }
-
-    public static class ImgTagHandler extends DefaultHandler
-    {
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
-        {
-            Log.v("qName", localName);
-            Log.v("src", attributes.getValue("", "src"));
-            super.startElement(uri, localName, qName, attributes);
-        }
+        setText(Html.fromHtml(html, imgGetter, null));
     }
 }

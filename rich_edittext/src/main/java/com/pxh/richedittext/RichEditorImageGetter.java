@@ -7,7 +7,6 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
@@ -32,7 +31,7 @@ public class RichEditorImageGetter implements Html.ImageGetter
     @Override
     public Drawable getDrawable(String source)
     {
-        final RichEditorDrawable drawable = new RichEditorDrawable();
+        final RichEditorDrawable drawable = new RichEditorDrawable(width);
         ImageLoader.getInstance().loadImage(source,
                 new SimpleImageLoadingListener()
                 {
@@ -40,7 +39,6 @@ public class RichEditorImageGetter implements Html.ImageGetter
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage)
                     {
                         float scaleWidth = ((float) width) / loadedImage.getWidth();
-                        Log.v("1", width + "");
                         Matrix matrix = new Matrix();
                         matrix.postScale(scaleWidth, scaleWidth);
                         loadedImage = Bitmap.createBitmap(loadedImage, 0, 0,
