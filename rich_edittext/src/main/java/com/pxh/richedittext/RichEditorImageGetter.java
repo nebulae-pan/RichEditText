@@ -2,9 +2,9 @@ package com.pxh.richedittext;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -38,18 +38,26 @@ public class RichEditorImageGetter implements Html.ImageGetter
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage)
                     {
-                        float scaleWidth = ((float) width) / loadedImage.getWidth();
-                        Matrix matrix = new Matrix();
-                        matrix.postScale(scaleWidth, scaleWidth);
-                        loadedImage = Bitmap.createBitmap(loadedImage, 0, 0,
-                                loadedImage.getWidth(), loadedImage.getHeight(),
-                                matrix, true);
+//                        float scaleWidth = ((float) width) / loadedImage.getWidth();
+//                        Matrix matrix = new Matrix();
+//                        matrix.postScale(scaleWidth, scaleWidth);
+//
+//                        loadedImage = Bitmap.createBitmap(loadedImage, 0, 0, loadedImage.getWidth(), loadedImage
+//                                .getHeight(), matrix, true);
                         drawable.bitmap = loadedImage;
-                        drawable.setBounds(0, 0, loadedImage.getWidth(),loadedImage.getHeight());
+                        drawable.setBounds(0, 0, loadedImage.getWidth(), loadedImage.getHeight());
                         editor.invalidate();
                         editor.setText(editor.getText());
                     }
                 });
+        BitmapDrawable bd = (BitmapDrawable) editor.getContext().getResources().getDrawable(R.drawable.holder);
+        Bitmap holder = bd.getBitmap();
+        float scaleWidth = ((float) width) / holder.getWidth();
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleWidth);
+        holder = Bitmap.createBitmap(holder, 0, 0, holder.getWidth(), holder.getHeight(), matrix, true);
+        drawable.bitmap = holder;
+        drawable.setBounds(0, 0, holder.getWidth(), holder.getHeight());
         return drawable;
     }
 }

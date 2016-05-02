@@ -245,5 +245,6 @@ public class RichEditText extends AppCompatEditText
     {
         final Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
         setText(Html.fromHtml(html, imgGetter, null));
+        invalidate();
     }
 }

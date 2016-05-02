@@ -19,9 +19,9 @@ public class MainActivity extends AppCompatActivity
 
     String html = "下面是图片了 " +
             "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\" height=\"50\"/>" +
-            "这也是图片" +
+            "<br>这也是图片<br>" +
             "<img src='http://h.hiphotos.baidu.com/image/pic/item/d000baa1cd11728b2027e428cafcc3cec3fd2cb5.jpg'/>" +
-            "还有一张" +
+            "<br>还有一张<br>" +
             "<img src='http://img.61gequ.com/allimg/2011-4/201142614314278502.jpg' />";
 
     @Override

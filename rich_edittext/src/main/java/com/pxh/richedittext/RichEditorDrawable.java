@@ -3,12 +3,8 @@ package com.pxh.richedittext;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.Log;
 
 /**
  * Created by pxh on 2016/4/30.
@@ -24,7 +20,7 @@ public class RichEditorDrawable extends BitmapDrawable
     public RichEditorDrawable(int width)
     {
         rect = new Rect(0, 0, width, 500);
-        paint.setColor(0xff000000);
+        paint.setColor(0xff000100);
         paint.setAntiAlias(true);
     }
 
@@ -33,10 +29,6 @@ public class RichEditorDrawable extends BitmapDrawable
     {
         if (bitmap != null) {
             canvas.drawBitmap(bitmap, 0, 0, getPaint());
-        } else {
-            Log.v("tag", "bitmap = null");
-            canvas.drawRect(rect, paint);
-            setBounds(rect);
         }
     }
 }
