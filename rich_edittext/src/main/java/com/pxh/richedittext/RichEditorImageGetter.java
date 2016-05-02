@@ -31,7 +31,7 @@ public class RichEditorImageGetter implements Html.ImageGetter
     @Override
     public Drawable getDrawable(String source)
     {
-        final RichEditorDrawable drawable = new RichEditorDrawable(width);
+        final RichEditorDrawable drawable = new RichEditorDrawable();
         ImageLoader.getInstance().loadImage(source,
                 new SimpleImageLoadingListener()
                 {

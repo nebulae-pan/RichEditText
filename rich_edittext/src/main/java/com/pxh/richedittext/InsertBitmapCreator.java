@@ -16,6 +16,7 @@ import android.graphics.RectF;
 public class InsertBitmapCreator implements BitmapCreator
 {
     private int screenWidth;
+    private int screenHeight;
 
     public InsertBitmapCreator(int screenWidth)
     {
@@ -27,7 +28,7 @@ public class InsertBitmapCreator implements BitmapCreator
     {
         BitmapFactory.Options option = new BitmapFactory.Options();
         option.inJustDecodeBounds = true;
-        Bitmap bmp = BitmapFactory.decodeFile(path, option);
+        BitmapFactory.decodeFile(path, option);
         int bmpWidth = option.outWidth;
         int bmpHeight = option.outHeight;
         if (200 < bmpHeight) {
@@ -45,7 +46,7 @@ public class InsertBitmapCreator implements BitmapCreator
         bgm.eraseColor(Color.argb(0, 0, 0, 0)); // 透明位图
         Canvas canvas = new Canvas(bgm);
         option.inJustDecodeBounds = false;
-        bmp = BitmapFactory.decodeFile(path, option);
+        Bitmap bmp = BitmapFactory.decodeFile(path, option);
         canvas.drawBitmap(bmp, (screenWidth - option.outWidth) / 2, 0l, null);
         bmp.recycle();
         canvas.save();
