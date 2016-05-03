@@ -1,11 +1,14 @@
 package com.pxh.richedittext;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -38,14 +41,14 @@ public class RichEditorImageGetter implements Html.ImageGetter
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage)
                     {
-//                        float scaleWidth = ((float) width) / loadedImage.getWidth();
-//                        Matrix matrix = new Matrix();
-//                        matrix.postScale(scaleWidth, scaleWidth);
-//
-//                        loadedImage = Bitmap.createBitmap(loadedImage, 0, 0, loadedImage.getWidth(), loadedImage
-//                                .getHeight(), matrix, true);
-                        drawable.bitmap = loadedImage;
-                        drawable.setBounds(0, 0, loadedImage.getWidth(), loadedImage.getHeight());
+                        DisplayMetrics metric = new DisplayMetrics();
+                        WindowManager wm = (WindowManager) editor.getContext().getSystemService(Context.WINDOW_SERVICE);
+                        wm.getDefaultDisplay().getMetrics(metric);
+                        int maxWidth = width;
+                        int maxHeight = metric.heightPixels;
+                        BitmapCreator bitmapCreator = new InsertBitmapCreator(maxWidth, maxHeight);
+                        drawable.bitmap = bitmapCreator.getBitmapByBitmap(loadedImage);
+                        drawable.setBounds(0, 0, drawable.bitmap.getWidth(), drawable.bitmap.getHeight());
                         editor.invalidate();
                         editor.setText(editor.getText());
                     }

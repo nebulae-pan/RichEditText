@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -12,15 +13,17 @@ import android.graphics.RectF;
 
 /**
  * Created by pxh on 2016/4/13.
+ * get bitmap displayed in TextView or EditText
  */
 public class InsertBitmapCreator implements BitmapCreator
 {
-    private int screenWidth;
-    private int screenHeight;
+    private float maxWidth;
+    private float maxHeight;
 
-    public InsertBitmapCreator(int screenWidth)
+    public InsertBitmapCreator(int maxWidth, int maxHeight)
     {
-        this.screenWidth = screenWidth;
+        this.maxHeight = maxHeight;
+        this.maxWidth = maxWidth;
     }
 
     @Override
@@ -31,24 +34,47 @@ public class InsertBitmapCreator implements BitmapCreator
         BitmapFactory.decodeFile(path, option);
         int bmpWidth = option.outWidth;
         int bmpHeight = option.outHeight;
-        if (200 < bmpHeight) {
-            int scale = bmpHeight / (200);
-            option.outWidth = bmpWidth / scale;
-            option.outHeight = 200;
-            option.inSampleSize = scale;
-        } else if (screenWidth < bmpWidth) {
-            float scale = bmpWidth / (float) screenWidth;
-            option.outWidth = screenWidth;
-            option.outHeight = (int) (bmpHeight / scale);
-            option.inSampleSize = (int) scale;
+        float scale = 1;
+        if (maxHeight < bmpHeight) {
+            scale = bmpHeight / maxHeight;
+        } else if (maxWidth < bmpWidth) {
+            scale = bmpWidth / maxWidth;
         }
-        Bitmap bgm = Bitmap.createBitmap(screenWidth, option.outHeight, Bitmap.Config.ARGB_8888);
+        option.outWidth = (int) (bmpWidth / scale);
+        option.outHeight = (int) (bmpHeight / scale);
+        option.inSampleSize = (int) scale;
+        Bitmap bgm = Bitmap.createBitmap((int) maxWidth, option.outHeight, Bitmap.Config.ARGB_8888);
         bgm.eraseColor(Color.argb(0, 0, 0, 0)); // 透明位图
         Canvas canvas = new Canvas(bgm);
         option.inJustDecodeBounds = false;
         Bitmap bmp = BitmapFactory.decodeFile(path, option);
-        canvas.drawBitmap(bmp, (screenWidth - option.outWidth) / 2, 0l, null);
+        canvas.drawBitmap(bmp, (maxWidth - option.outWidth) / 2, 0, null);
         bmp.recycle();
+        canvas.save();
+        return bgm;
+    }
+
+    @Override
+    public Bitmap getBitmapByBitmap(Bitmap bitmap)
+    {
+        //scale bitmap
+        Matrix matrix = new Matrix();
+        float scale = 1;
+        if (maxHeight < bitmap.getHeight()) {
+            scale = maxHeight / bitmap.getHeight();
+
+        } else if (maxWidth < bitmap.getWidth()) {
+            scale = maxWidth / bitmap.getWidth();
+        }
+        matrix.postScale(scale, scale);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        Bitmap bgm = Bitmap.createBitmap((int) maxWidth, bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        bgm.eraseColor(Color.argb(0, 0, 0, 0)); //transparent bitmap
+        Canvas canvas = new Canvas(bgm);
+        canvas.drawBitmap(bitmap, (maxWidth - bitmap.getWidth()) / 2, 0, null);//draw bitmap in centre horizontal
+
+        bitmap.recycle();
         canvas.save();
         return bgm;
     }

@@ -12,8 +12,8 @@ import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.WindowManager;
 
 public class RichEditText extends AppCompatEditText
@@ -23,7 +23,6 @@ public class RichEditText extends AppCompatEditText
     private BitmapCreator bitmapCreator;
 
     SparseArray<ImageSite> imgArray = new SparseArray<>();
-    private int screenWidth;
 
     /**
      * Description:用于存储插入editText的图片信息:起止位置，路径信息 <br/>
@@ -61,15 +60,25 @@ public class RichEditText extends AppCompatEditText
         this(context, null);
     }
 
-    public RichEditText(Context context, AttributeSet attrs)
+    public RichEditText(final Context context, AttributeSet attrs)
     {
         super(context, attrs);
         this.context = context;
-        DisplayMetrics metric = new DisplayMetrics();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(metric);
-        screenWidth = (int) ((metric.widthPixels) - getPaddingRight() - getPaddingLeft() / 1.1);
-        bitmapCreator = new InsertBitmapCreator(screenWidth);
+
+        post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                DisplayMetrics metric = new DisplayMetrics();
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                wm.getDefaultDisplay().getMetrics(metric);
+                int maxWidth = RichEditText.this.getMeasuredWidth() - 2;
+                int maxHeight = metric.heightPixels;
+                bitmapCreator = new InsertBitmapCreator(maxWidth, maxHeight);
+            }
+        });
+
         this.addTextChangedListener(new TextWatcher()
         {
             boolean isNeedRefresh = true;
@@ -166,44 +175,26 @@ public class RichEditText extends AppCompatEditText
         setSelection(start + ss.length());// 设置EditText中光标在最后面显示
     }
 
-    public void insertImage(String s, Bitmap bitmap)
-    {
-        SpannableString ss = getSpannableString(s, bitmap);
+//    public void insertImage(String s, Bitmap bitmap)
+//    {
+//        SpannableString ss = getSpannableString(s, bitmap);
+//
+//        int start = getSelectionStart();
+//        imgArray.put(start + ss.length(), new ImageSite(start, start + ss.length(), ss.toString()));
+//        Editable et = getEditableText();// 先获取EditText中的内容
+//        et.insert(start, ss);// 设置ss要添加的位置
+//        setText(et);// 把et添加到EditText中
+//        setSelection(start + ss.length());// 设置EditText中光标在最后面显示
+//    }
 
-        int start = getSelectionStart();
-        imgArray.put(start + ss.length(), new ImageSite(start, start + ss.length(), ss.toString()));
-        Editable et = getEditableText();// 先获取EditText中的内容
-        et.insert(start, ss);// 设置ss要添加的位置
-        setText(et);// 把et添加到EditText中
-        setSelection(start + ss.length());// 设置EditText中光标在最后面显示
-    }
-
-    private SpannableString getSpannableString(String s, Bitmap bitmap)
-    {
-        SpannableString ss = new SpannableString(s);
-
-        ImageSpan span = new ImageSpan(context, bitmap);
-        ss.setSpan(span, 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        return ss;
-    }
-
-    /**
-     * delete all string that replaced by image
-     *
-     * @return if true , delete success, else delete failure
-     */
-    public boolean deleteImg()
-    {
-        int pos = this.getSelectionStart();
-        ImageSite info = imgArray.get(pos);
-        if (info == null)
-            return false;
-        Editable et = this.getText();
-        et.delete(info.start, info.end);
-        this.setText(et);
-        this.setSelection(info.start);
-        return true;
-    }
+//    private SpannableString getSpannableString(String s, Bitmap bitmap)
+//    {
+//        SpannableString ss = new SpannableString(s);
+//
+//        ImageSpan span = new ImageSpan(context, bitmap);
+//        ss.setSpan(span, 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        return ss;
+//    }
 
 //    /**
 //     * if use this method , it will occur a bug that can't delete a inserted image with press delete key only once
@@ -214,37 +205,10 @@ public class RichEditText extends AppCompatEditText
 //        super.setOnKeyListener(l);
 //    }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event)
-    {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_DEL && event.getAction() != KeyEvent.ACTION_UP) {
-            if (!deleteImg()) {
-                return super.dispatchKeyEvent(event);
-            }
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
-    }
-
-    public void setBitmapCreator(BitmapCreator bitmapCreator)
-    {
-        this.bitmapCreator = bitmapCreator;
-    }
-
-    public String getContent()
-    {
-        return this.getText().toString();
-    }
-
-    public SparseArray<ImageSite> getImageSite()
-    {
-        return imgArray;
-    }
 
     public void setHtml(final String html)
     {
         final Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
         setText(Html.fromHtml(html, imgGetter, null));
-        invalidate();
     }
 }
