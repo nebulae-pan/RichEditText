@@ -47,14 +47,14 @@ public class MainActivity extends AppCompatActivity
     {
         switch (item.getItemId()) {
             case R.id.insert_image:
-//                Intent intent = new Intent();
-//                intent.setType("image/*");
-//                intent.setAction(Intent.ACTION_GET_CONTENT);
-//                startActivityForResult(intent, 0);
-                richEditText.setHtml(html);
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, 0);
+//                richEditText.setHtml(html);
                 break;
             case R.id.post:
-                Log.v("html", Html.toHtml(richEditText.getText()));
+                Log.v("html", richEditText.getHtml());
                 break;
         }
         return super.onOptionsItemSelected(item);

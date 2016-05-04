@@ -30,6 +30,7 @@ public class InsertBitmapCreator implements BitmapCreator
     public Bitmap getBitmapByDiskPath(String path)
     {
         BitmapFactory.Options option = new BitmapFactory.Options();
+        //just decodeBounds and resize the width and height of bitmap
         option.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, option);
         int bmpWidth = option.outWidth;
@@ -42,16 +43,12 @@ public class InsertBitmapCreator implements BitmapCreator
         }
         option.outWidth = (int) (bmpWidth / scale);
         option.outHeight = (int) (bmpHeight / scale);
-        option.inSampleSize = (int) scale;
-        Bitmap bgm = Bitmap.createBitmap((int) maxWidth, option.outHeight, Bitmap.Config.ARGB_8888);
-        bgm.eraseColor(Color.argb(0, 0, 0, 0)); // 透明位图
-        Canvas canvas = new Canvas(bgm);
         option.inJustDecodeBounds = false;
+        option.inSampleSize = (int) scale;
+
         Bitmap bmp = BitmapFactory.decodeFile(path, option);
-        canvas.drawBitmap(bmp, (maxWidth - option.outWidth) / 2, 0, null);
-        bmp.recycle();
-        canvas.save();
-        return bgm;
+
+        return getPlaceCenterBitmap(bmp);
     }
 
     @Override
@@ -69,6 +66,12 @@ public class InsertBitmapCreator implements BitmapCreator
         matrix.postScale(scale, scale);
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
+
+        return getPlaceCenterBitmap(bitmap);
+    }
+
+    private Bitmap getPlaceCenterBitmap(Bitmap bitmap)
+    {
         Bitmap bgm = Bitmap.createBitmap((int) maxWidth, bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         bgm.eraseColor(Color.argb(0, 0, 0, 0)); //transparent bitmap
         Canvas canvas = new Canvas(bgm);
