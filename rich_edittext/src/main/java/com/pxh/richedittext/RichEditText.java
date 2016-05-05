@@ -42,38 +42,6 @@ public class RichEditText extends AppCompatEditText
 
     private BitmapCreator bitmapCreator;
 
-    SparseArray<ImageSite> imgArray = new SparseArray<>();
-
-    /**
-     * Description:用于存储插入editText的图片信息:起止位置，路径信息 <br/>
-     * <p/>
-     * CodeTime:2015年9月20日下午7:31:39
-     *
-     * @author pxh
-     */
-    public static class ImageSite
-    {
-        public int start;
-        public int end;
-        public String path;
-
-        public ImageSite(int start, int end, String path)
-        {
-            this.start = start;
-            this.end = end;
-            this.path = path;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "ImageSite{" +
-                    "start=" + start +
-                    ", end=" + end +
-                    ", path='" + path + '\'' +
-                    '}';
-        }
-    }
 
     public RichEditText(Context context)
     {
@@ -144,27 +112,27 @@ public class RichEditText extends AppCompatEditText
 //        setSelection(start + ss.length());// 设置EditText中光标在最后面显示
 //    }
 
-    /**
-     * replace a string start to end with s, and s replaced by image
-     *
-     * @param s      the string to be replaced by image
-     * @param start  start
-     * @param end    end
-     * @param bitmap insert bitmap
-     */
-    public void insertImageByReplace(String s, int start, int end, Bitmap bitmap)
-    {
-        SpannableString ss = new SpannableString(s);
-
-        ImageSpan span = new ImageSpan(context, bitmap);
-        ss.setSpan(span, 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        imgArray.put(end, new ImageSite(start, end, ss.toString()));
-        Editable et = getEditableText();// 先获取EditText中的内容
-        et.replace(start, end, ss);// 设置ss要添加的位置
-        setText(et);// 把et添加到EditText中
-        setSelection(start + ss.length());// 设置EditText中光标在最后面显示
-    }
+//    /**
+//     * replace a string start to end with s, and s replaced by image
+//     *
+//     * @param s      the string to be replaced by image
+//     * @param start  start
+//     * @param end    end
+//     * @param bitmap insert bitmap
+//     */
+//    public void insertImageByReplace(String s, int start, int end, Bitmap bitmap)
+//    {
+//        SpannableString ss = new SpannableString(s);
+//
+//        ImageSpan span = new ImageSpan(context, bitmap);
+//        ss.setSpan(span, 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//        imgArray.put(end, new ImageSite(start, end, ss.toString()));
+//        Editable et = getEditableText();// 先获取EditText中的内容
+//        et.replace(start, end, ss);// 设置ss要添加的位置
+//        setText(et);// 把et添加到EditText中
+//        setSelection(start + ss.length());// 设置EditText中光标在最后面显示
+//    }
 
 
     public void setHtml(final String html)
@@ -276,12 +244,11 @@ public class RichEditText extends AppCompatEditText
     }
 
     /* Returns true if the caller should close and reopen the paragraph. */
-    private static boolean withinParagraph(StringBuilder out, Spanned text,
-                                           int start, int end, int nl,
-                                           boolean last)
+    private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end, int nl, boolean last)
     {
         int next;
-        Log.d("with", "withinParagraph() called with: " + "start = [" + start + "], end = [" + end + "], nl = [" + nl + "], last = [" + last + "]");
+        Log.d("with", "withinParagraph() called with: " + "start = [" + start + "], end = [" + end + "], nl = [" + nl
+                + "], last = [" + last + "]");
         for (int i = start; i < end; i = next) {
             next = text.nextSpanTransition(i, end, CharacterStyle.class);
             Log.v("next", next + "");
@@ -464,8 +431,8 @@ public class RichEditText extends AppCompatEditText
                     int pre = getNearestPosition(s.toString(), curr);
                     String tag = s.subSequence(pre, curr).toString();
                     isNeedRefresh = false;
-                    insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByString(tag,
-                            0xff000000, 0xffffffff));
+//                    insertImageByReplace(tag + ",", pre, curr + 1, bitmapCreator.getBitmapByString(tag,
+//                            0xff000000, 0xffffffff));
                     isNeedRefresh = true;
                 }
                 preLength = s.length();
