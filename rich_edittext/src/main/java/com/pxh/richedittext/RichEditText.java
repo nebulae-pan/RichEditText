@@ -148,7 +148,9 @@ public class RichEditText extends AppCompatEditText
         StringBuilder out = new StringBuilder();
         withinHtml(out, getText());
 //        Log.v("tag",out.toString());
-        return out.toString();
+        Log.v("tag", getText().getSpanStart("<img")+"");
+
+        return "";
 //        return Html.toHtml(getText());
     }
 
