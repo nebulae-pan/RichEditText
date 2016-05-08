@@ -79,8 +79,9 @@ public class MainActivity extends AppCompatActivity
 
         final EditText description = (EditText) v.findViewById(R.id.description);
         final EditText url = (EditText) v.findViewById(R.id.input);
-
+        
         builder.setView(v);
+        builder.setTitle("input url");
         builder.setPositiveButton("confirm", new DialogInterface.OnClickListener()
         {
             @Override
