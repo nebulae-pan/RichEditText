@@ -9,8 +9,10 @@ import android.support.v7.widget.AppCompatEditText;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -67,6 +69,13 @@ public class RichEditText extends AppCompatEditText
 
         getEditableText().insert(start, ss);//insert imageSpan
         setSelection(start + ss.length());// 设置EditText中光标在最后面显示
+    }
+
+    public void insertUrl(String describe, String url)
+    {
+        SpannableString ss = new SpannableString(describe);
+        ss.setSpan(new URLSpan(url), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        getEditableText().insert(getSelectionStart(), ss);
     }
 
     public void setHtml(final String html)
