@@ -11,6 +11,7 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.DynamicDrawableSpan;
@@ -116,30 +117,31 @@ public class RichEditText extends AppCompatEditText
 
     private void setTextSpan(int start, int lengthBefore, int lengthAfter)
     {
-        if (isBold) {
-            if (start == 0) {
-                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-            if (start > 1) {
-                if (!hasSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
-                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_INCLUSIVE);
-                }
-            }
-        } else {
-            if (start == 0) {
-                getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_INCLUSIVE);
-            }
-            if (start > 0) {
-                if (!hasSpan(Typeface.NORMAL, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
-                    getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_INCLUSIVE);
-                }
-            }
-        }
-    }
+//        if (isBold) {
+//            if (start == 0) {
+//                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+//                        .SPAN_EXCLUSIVE_INCLUSIVE);
+//            }
+//            if (start > 1) {
+//                if (!hasSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
+//                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+//                            .SPAN_EXCLUSIVE_INCLUSIVE);
+//                }
+//            }
+//        } else {
+//            if (start == 0) {
+//                getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
+//                        .SPAN_EXCLUSIVE_INCLUSIVE);
+//            }
+//            if (start > 0) {
+//                if (!hasSpan(Typeface.NORMAL, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
+//                    getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
+//                            .SPAN_EXCLUSIVE_INCLUSIVE);
+//                }
+//            }
+//        }
+//
+     }
 
     protected boolean hasSpan(int style, StyleSpan[] spans)
     {
