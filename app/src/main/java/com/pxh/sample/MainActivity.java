@@ -19,10 +19,14 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.richedittext.RichEditText;
 
+import org.w3c.dom.Text;
+
 public class MainActivity extends AppCompatActivity
 {
 
     private RichEditText richEditText;
+
+    boolean isBold = false;
 
     private TextView content;
 
@@ -109,6 +113,18 @@ public class MainActivity extends AppCompatActivity
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(intent, 0);
+    }
+
+    public void boldClick(View view)
+    {
+        if (isBold) {
+            ((TextView) view).setTextColor(0x88000000);
+
+        } else {
+            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
+        }
+        isBold = !isBold;
+        richEditText.setBold(isBold);
     }
 
     @Override
