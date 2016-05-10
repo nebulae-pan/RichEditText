@@ -117,6 +117,10 @@ public class RichEditText extends AppCompatEditText
 
     private void setTextSpan(int start, int lengthBefore, int lengthAfter)
     {
+        if (isBold) {
+            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+                    .SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
 //        if (isBold) {
 //            if (start == 0) {
 //                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
@@ -141,7 +145,7 @@ public class RichEditText extends AppCompatEditText
 //            }
 //        }
 //
-     }
+    }
 
     protected boolean hasSpan(int style, StyleSpan[] spans)
     {
