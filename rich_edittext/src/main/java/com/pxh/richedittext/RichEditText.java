@@ -94,15 +94,15 @@ public class RichEditText extends AppCompatEditText
     {
         isBold = isValid;
         if (isBold) {
-            int startSelection = getSelectionStart();
-            int endSelection = getSelectionEnd();
-            if (startSelection > endSelection) {
-                startSelection = getSelectionEnd();
-                endSelection = getSelectionStart();
-            }
-            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection, Spanned
-                    .SPAN_EXCLUSIVE_INCLUSIVE);
-            setSelection(startSelection, endSelection);
+//            int startSelection = getSelectionStart();
+//            int endSelection = getSelectionEnd();
+//            if (startSelection > endSelection) {
+//                startSelection = getSelectionEnd();
+//                endSelection = getSelectionStart();
+//            }
+//            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection, Spanned
+//                    .SPAN_EXCLUSIVE_INCLUSIVE);
+//            setSelection(startSelection, endSelection);
         } else {
             int startSelection = getSelectionStart();
             int endSelection = getSelectionEnd();
@@ -144,20 +144,21 @@ public class RichEditText extends AppCompatEditText
     {
 //        if (isBold) {
 //            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-//                    .SPAN_EXCLUSIVE_EXCLUSIVE);
+//                    .SPAN_EXCLUSIVE_INCLUSIVE);
 //        }
-//        if (isBold) {
-//            if (start == 0) {
-//                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-//                        .SPAN_EXCLUSIVE_INCLUSIVE);
-//            }
-//            if (start > 1) {
-//                if (!hasSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
-//                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-//                            .SPAN_EXCLUSIVE_INCLUSIVE);
-//                }
-//            }
-//        } else {
+        if (isBold) {
+            if (start == 0) {
+                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+                        .SPAN_EXCLUSIVE_INCLUSIVE);
+            }
+            if (start > 1) {
+                if (!hasSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
+                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+                            .SPAN_EXCLUSIVE_INCLUSIVE);
+                }
+            }
+        }
+//        else {
 //            if (start == 0) {
 //                getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
 //                        .SPAN_EXCLUSIVE_INCLUSIVE);
