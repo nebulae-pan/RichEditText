@@ -34,8 +34,6 @@ public class RichEditText extends AppCompatEditText
 
     boolean isBold = false;
 
-    StyleSpan boldSpan;
-
     public RichEditText(Context context)
     {
         this(context, null);
@@ -158,19 +156,6 @@ public class RichEditText extends AppCompatEditText
                 }
             }
         }
-//        else {
-//            if (start == 0) {
-//                getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
-//                        .SPAN_EXCLUSIVE_INCLUSIVE);
-//            }
-//            if (start > 0) {
-//                if (!hasSpan(Typeface.NORMAL, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
-//                    getEditableText().setSpan(new StyleSpan(Typeface.NORMAL), start, start + lengthAfter, Spanned
-//                            .SPAN_EXCLUSIVE_INCLUSIVE);
-//                }
-//            }
-//        }
-//
     }
 
     protected boolean hasSpan(int style, StyleSpan[] spans)
