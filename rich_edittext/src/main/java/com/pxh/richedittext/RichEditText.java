@@ -92,15 +92,15 @@ public class RichEditText extends AppCompatEditText
     {
         isBold = isValid;
         if (isBold) {
-//            int startSelection = getSelectionStart();
-//            int endSelection = getSelectionEnd();
-//            if (startSelection > endSelection) {
-//                startSelection = getSelectionEnd();
-//                endSelection = getSelectionStart();
-//            }
-//            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection, Spanned
-//                    .SPAN_EXCLUSIVE_INCLUSIVE);
-//            setSelection(startSelection, endSelection);
+            int startSelection = getSelectionStart();
+            int endSelection = getSelectionEnd();
+            if (startSelection > endSelection) {
+                startSelection = getSelectionEnd();
+                endSelection = getSelectionStart();
+            }
+            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection,
+                    0);
+            setSelection(startSelection, endSelection);
         } else {
             int startSelection = getSelectionStart();
             int endSelection = getSelectionEnd();
