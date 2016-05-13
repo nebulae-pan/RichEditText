@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Parcel;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Html;
@@ -13,6 +14,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.TextWatcher;
 import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
@@ -24,6 +26,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +37,7 @@ public class RichEditText extends AppCompatEditText
 
     private BitmapCreator bitmapCreator;
 
-    CharacterStyle styleSpan = null;
+    StyleSpan styleSpan = null;
 
     boolean isBold = false;
 
@@ -132,7 +135,36 @@ public class RichEditText extends AppCompatEditText
 
     public String getHtml()
     {
+        for (int i = 0; i < getText().length() - 1; i++) {
+            for (StyleSpan styleSpan : getEditableText().getSpans(i, i + 1, StyleSpan.class)) {
+                Log.v("html" + i + "-" + (i + 1), styleSpan.toString());
+            }
+
+        }
         return Html.toHtml(getText());
+    }
+
+    private static class PassThrough extends StyleSpan
+    {
+        StyleSpan mSpan;
+
+        public PassThrough(StyleSpan styleSpan)
+        {
+            super(styleSpan.getStyle());
+            mSpan = styleSpan;
+        }
+
+        public PassThrough(Parcel src)
+        {
+            super(src);
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds)
+        {
+            ds.setARGB(255, 255, 255, 255);
+            mSpan.updateDrawState(ds);
+        }
     }
 
     @Override
@@ -149,9 +181,10 @@ public class RichEditText extends AppCompatEditText
                 getEditableText().setSpan(styleSpan, start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                getEditableText().setSpan(CharacterStyle.wrap(styleSpan), start, start + lengthAfter, Spanned
+                getEditableText().setSpan(new PassThrough(styleSpan), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+            ChangeEnd(styleSpan, getEditableText());
 
 //            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
 //                    .SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -172,6 +205,32 @@ public class RichEditText extends AppCompatEditText
 //                }
 //            }
 //        }
+    }
+
+    private static void ChangeEnd(StyleSpan styleSpan, Editable ss)
+    {
+        //创建一个类的对象
+        //获取对象的Class
+        try {
+            Log.v("start", ss.getSpanStart(styleSpan) + ":" + ss.getSpanEnd(styleSpan));
+
+
+            Class<?> classType = ss.getClass();
+            //获取指定名字的私有域
+            Field field = classType.getDeclaredField("mSpanEnds");
+
+            //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
+            field.setAccessible(true);
+            for (int i : (int[]) field.get(ss)) {
+                System.out.println(i);
+            }
+            System.out.println();
+//        //设置私有域的值
+//        field.set(obj, 1);
+//        System.out.println(field.get(obj));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected StyleSpan getSpan(int style, StyleSpan[] spans)
