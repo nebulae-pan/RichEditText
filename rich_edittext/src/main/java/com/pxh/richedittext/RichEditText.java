@@ -14,6 +14,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
@@ -23,6 +24,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,8 @@ public class RichEditText extends AppCompatEditText
     private Context context;
 
     private BitmapCreator bitmapCreator;
+
+    CharacterStyle styleSpan = null;
 
     boolean isBold = false;
 
@@ -91,34 +95,33 @@ public class RichEditText extends AppCompatEditText
     public void setBold(boolean isValid)
     {
         isBold = isValid;
-        if (isBold) {
-            int startSelection = getSelectionStart();
-            int endSelection = getSelectionEnd();
-            if (startSelection > endSelection) {
-                startSelection = getSelectionEnd();
-                endSelection = getSelectionStart();
-            }
-            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection,
-                    0);
-            setSelection(startSelection, endSelection);
-        } else {
-            int startSelection = getSelectionStart();
-            int endSelection = getSelectionEnd();
-            if (startSelection > endSelection) {
-                startSelection = getSelectionEnd();
-                endSelection = getSelectionStart();
-            }
-            Spannable str = getText();
-            StyleSpan[] ss = str.getSpans(startSelection, endSelection, StyleSpan.class);
-            for (int i = 0; i < ss.length; i++) {
-                if (ss[i].getStyle() == android.graphics.Typeface.BOLD) {
-                    str.removeSpan(ss[i]);
-                }
-                if (ss[i].getStyle() == android.graphics.Typeface.ITALIC) {
-                    str.removeSpan(ss[i]);
-                }
-            }
-        }
+//        if (isBold) {
+//            int startSelection = getSelectionStart();
+//            int endSelection = getSelectionEnd();
+//            if (startSelection > endSelection) {
+//                startSelection = getSelectionEnd();
+//                endSelection = getSelectionStart();
+//            }
+//            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection, 0);
+//            setSelection(startSelection, endSelection);
+//        } else {
+//            int startSelection = getSelectionStart();
+//            int endSelection = getSelectionEnd();
+//            if (startSelection > endSelection) {
+//                startSelection = getSelectionEnd();
+//                endSelection = getSelectionStart();
+//            }
+//            Spannable str = getText();
+//            StyleSpan[] ss = str.getSpans(startSelection, endSelection, StyleSpan.class);
+//            for (int i = 0; i < ss.length; i++) {
+//                if (ss[i].getStyle() == android.graphics.Typeface.BOLD) {
+//                    str.removeSpan(ss[i]);
+//                }
+//                if (ss[i].getStyle() == android.graphics.Typeface.ITALIC) {
+//                    str.removeSpan(ss[i]);
+//                }
+//            }
+//        }
     }
 
     public void setHtml(final String html)
@@ -140,33 +143,46 @@ public class RichEditText extends AppCompatEditText
 
     private void setTextSpan(int start, int lengthBefore, int lengthAfter)
     {
-//        if (isBold) {
-//            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-//                    .SPAN_EXCLUSIVE_INCLUSIVE);
-//        }
         if (isBold) {
-            if (start == 0) {
-                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_INCLUSIVE);
+            if (styleSpan == null) {
+                styleSpan = new StyleSpan(Typeface.BOLD);
+                getEditableText().setSpan(styleSpan, start, start + lengthAfter, Spanned
+                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                getEditableText().setSpan(CharacterStyle.wrap(styleSpan), start, start + lengthAfter, Spanned
+                        .SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            if (start > 1) {
-                if (!hasSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan.class))) {
-                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_INCLUSIVE);
-                }
-            }
+
+//            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+//                    .SPAN_EXCLUSIVE_EXCLUSIVE);
         }
+//        if (isBold) {
+//            if (start == 0) {
+//                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+//                        .SPAN_EXCLUSIVE_INCLUSIVE);
+//            }
+//            if (start > 1) {
+//                StyleSpan styleSpan = getSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan
+//                        .class));
+//                if (styleSpan != null) {
+//                    StyleSpan sp = new StyleSpan(Typeface.BOLD);
+//                    getEditableText().setSpan(sp, start, start + lengthAfter, Spanned
+//                            .SPAN_EXCLUSIVE_INCLUSIVE);
+//                    styleSpan.wrap(sp);
+//                }
+//            }
+//        }
     }
 
-    protected boolean hasSpan(int style, StyleSpan[] spans)
+    protected StyleSpan getSpan(int style, StyleSpan[] spans)
     {
         for (StyleSpan span : spans) {
             if (span.getStyle() == style) {
                 Log.v("hasSpan", style + "true");
-                return true;
+                return span;
             }
         }
         Log.v("hasSpan", style + "false");
-        return false;
+        return null;
     }
 }
