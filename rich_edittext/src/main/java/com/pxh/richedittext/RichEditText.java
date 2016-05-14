@@ -29,6 +29,7 @@ import android.view.WindowManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 public class RichEditText extends AppCompatEditText
@@ -221,10 +222,34 @@ public class RichEditText extends AppCompatEditText
 
             //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
             field.setAccessible(true);
+
+            Field field1 = classType.getDeclaredField("mGapStart");
+            Field field2 = classType.getDeclaredField("mGapLength");
+            field1.setAccessible(true);
+            field2.setAccessible(true);
+
             for (int i : (int[]) field.get(ss)) {
-                System.out.println(i);
+                System.out.print(i);
+                System.out.print(",");
             }
             System.out.println();
+            Log.v("GapStart", String.valueOf(field1.get(ss)));
+            Log.v("GapLength", String.valueOf(field2.get(ss)));
+
+            Field[] fields = classType.getDeclaredFields();
+
+            for (Field field3 : fields) {
+                field3.setAccessible(true);
+                System.out.println(field3);
+
+                System.out.println(field3.getName());
+
+            }
+            Class<?> classType1 = Class.forName("android.text.SpannableStringBuilder");
+            Field mIndexOfSpan = classType1.getDeclaredField("mLowWaterMark");
+            mIndexOfSpan.setAccessible(true);
+            IdentityHashMap<Object, Integer> index = (IdentityHashMap<Object, Integer>) mIndexOfSpan.get(ss);
+            Log.v("index", String.valueOf(index.get(styleSpan)));
 //        //设置私有域的值
 //        field.set(obj, 1);
 //        System.out.println(field.get(obj));
