@@ -26,6 +26,11 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -136,12 +141,12 @@ public class RichEditText extends AppCompatEditText
 
     public String getHtml()
     {
-        for (int i = 0; i < getText().length() - 1; i++) {
-            for (StyleSpan styleSpan : getEditableText().getSpans(i, i + 1, StyleSpan.class)) {
-                Log.v("html" + i + "-" + (i + 1), styleSpan.toString());
-            }
-
-        }
+//        for (int i = 0; i < getText().length() - 1; i++) {
+//            for (StyleSpan styleSpan : getEditableText().getSpans(i, i + 1, StyleSpan.class)) {
+//                Log.v("html" + i + "-" + (i + 1), styleSpan.toString());
+//            }
+//
+//        }
         return Html.toHtml(getText());
     }
 
@@ -208,54 +213,82 @@ public class RichEditText extends AppCompatEditText
 //        }
     }
 
-    private static void ChangeEnd(StyleSpan styleSpan, Editable ss)
+    private void ChangeEnd(StyleSpan styleSpan, Editable ss)
     {
         //创建一个类的对象
         //获取对象的Class
         try {
             Log.v("start", ss.getSpanStart(styleSpan) + ":" + ss.getSpanEnd(styleSpan));
 
-
             Class<?> classType = ss.getClass();
             //获取指定名字的私有域
-            Field field = classType.getDeclaredField("mSpanEnds");
+            Field starts = classType.getDeclaredField("mSpanStarts");
 
             //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
-            field.setAccessible(true);
+            starts.setAccessible(true);
+            int[] mSpanStarts = (int[]) starts.get(ss);
+
+            for (int i : mSpanStarts) {
+                System.out.print(i);
+                System.out.print(",");
+            }
+            Field ends = classType.getDeclaredField("mSpanEnds");
+            System.out.println();
+            ends.setAccessible(true);
+            int[] mSpanEnds = (int[]) ends.get(ss);
+            for (int i : mSpanEnds) {
+                System.out.print(i);
+                System.out.print(",");
+            }
+            System.out.println();
 
             Field field1 = classType.getDeclaredField("mGapStart");
             Field field2 = classType.getDeclaredField("mGapLength");
             field1.setAccessible(true);
             field2.setAccessible(true);
+            int mGapStart = (int) field1.get(ss);
+            Log.v("GapStart", String.valueOf(mGapStart));
+            int mGapLength = (int) field2.get(ss);
+            Log.v("GapLength", String.valueOf(mGapLength));
 
-            for (int i : (int[]) field.get(ss)) {
-                System.out.print(i);
-                System.out.print(",");
-            }
-            System.out.println();
-            Log.v("GapStart", String.valueOf(field1.get(ss)));
-            Log.v("GapLength", String.valueOf(field2.get(ss)));
+            Field count = classType.getDeclaredField("mSpanCount");
 
-            Field[] fields = classType.getDeclaredFields();
+            //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
+            count.setAccessible(true);
+            int mSpanCount = (int) count.get(ss);
 
-            for (Field field3 : fields) {
-                field3.setAccessible(true);
-                System.out.println(field3);
+            Field spans = classType.getDeclaredField("mSpans");
 
-                System.out.println(field3.getName());
+            //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
+            spans.setAccessible(true);
+            Object[] mSpans = (Object[]) spans.get(ss);
 
-            }
-            Class<?> classType1 = Class.forName("android.text.SpannableStringBuilder");
-            Field mIndexOfSpan = classType1.getDeclaredField("mLowWaterMark");
-            mIndexOfSpan.setAccessible(true);
-            IdentityHashMap<Object, Integer> index = (IdentityHashMap<Object, Integer>) mIndexOfSpan.get(ss);
-            Log.v("index", String.valueOf(index.get(styleSpan)));
-//        //设置私有域的值
-//        field.set(obj, 1);
-//        System.out.println(field.get(obj));
+            Log.v("getGet", String.valueOf(getSpanStart(styleSpan, mSpanCount, mSpans, mSpanStarts, mGapStart, mGapLength)));
+
+//            Field mIndexOfSpan = classType.getDeclaredField("mLowWaterMark");
+//            mIndexOfSpan.setAccessible(true);
+//            IdentityHashMap<Object, Integer> index = (IdentityHashMap<Object, Integer>) mIndexOfSpan.get(ss);
+//            Log.v("index", String.valueOf(index.get(styleSpan)));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public int getSpanStart(Object what,int mSpanCount,Object[] mSpans,int[] mSpanStarts,int mGapStart,int mGapLength) {
+        int count = mSpanCount;
+        Object[] spans = mSpans;
+
+        for (int i = count - 1; i >= 0; i--) {
+            if (spans[i] == what) {
+                int where = mSpanStarts[i];
+                Log.v("where", "i:"+i+","+where);
+                if (where > mGapStart)
+                    where -= mGapLength;
+
+                return where;
+            }
+        }
+        return -1;
     }
 
     protected StyleSpan getSpan(int style, StyleSpan[] spans)
