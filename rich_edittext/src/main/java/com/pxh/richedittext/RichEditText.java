@@ -12,11 +12,8 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
-import android.text.TextWatcher;
-import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
@@ -26,16 +23,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.List;
 
 public class RichEditText extends AppCompatEditText
 {
@@ -141,37 +129,31 @@ public class RichEditText extends AppCompatEditText
 
     public String getHtml()
     {
-//        for (int i = 0; i < getText().length() - 1; i++) {
-//            for (StyleSpan styleSpan : getEditableText().getSpans(i, i + 1, StyleSpan.class)) {
-//                Log.v("html" + i + "-" + (i + 1), styleSpan.toString());
-//            }
-//
-//        }
         return Html.toHtml(getText());
     }
 
-    private static class PassThrough extends StyleSpan
-    {
-        StyleSpan mSpan;
-
-        public PassThrough(StyleSpan styleSpan)
-        {
-            super(styleSpan.getStyle());
-            mSpan = styleSpan;
-        }
-
-        public PassThrough(Parcel src)
-        {
-            super(src);
-        }
-
-        @Override
-        public void updateDrawState(TextPaint ds)
-        {
-            ds.setARGB(255, 255, 255, 255);
-            mSpan.updateDrawState(ds);
-        }
-    }
+//    private static class PassThrough extends StyleSpan
+//    {
+//        StyleSpan mSpan;
+//
+//        public PassThrough(StyleSpan styleSpan)
+//        {
+//            super(styleSpan.getStyle());
+//            mSpan = styleSpan;
+//        }
+//
+//        public PassThrough(Parcel src)
+//        {
+//            super(src);
+//        }
+//
+//        @Override
+//        public void updateDrawState(TextPaint ds)
+//        {
+//            ds.setARGB(255, 255, 255, 255);
+//            mSpan.updateDrawState(ds);
+//        }
+//    }
 
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
@@ -186,84 +168,55 @@ public class RichEditText extends AppCompatEditText
                 styleSpan = new StyleSpan(Typeface.BOLD);
                 getEditableText().setSpan(styleSpan, start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
-            } else {
-                getEditableText().setSpan(new PassThrough(styleSpan), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            ChangeEnd(styleSpan, getEditableText());
+            ChangeEnd(styleSpan, getEditableText(), lengthAfter);
 
-//            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-//                    .SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-//        if (isBold) {
-//            if (start == 0) {
-//                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-//                        .SPAN_EXCLUSIVE_INCLUSIVE);
-//            }
-//            if (start > 1) {
-//                StyleSpan styleSpan = getSpan(Typeface.BOLD, getEditableText().getSpans(start - 1, start, StyleSpan
-//                        .class));
-//                if (styleSpan != null) {
-//                    StyleSpan sp = new StyleSpan(Typeface.BOLD);
-//                    getEditableText().setSpan(sp, start, start + lengthAfter, Spanned
-//                            .SPAN_EXCLUSIVE_INCLUSIVE);
-//                    styleSpan.wrap(sp);
-//                }
-//            }
-//        }
     }
 
-    private void ChangeEnd(StyleSpan styleSpan, Editable ss)
+    private void ChangeEnd(StyleSpan styleSpan, Editable ss, int lengthAfter)
     {
-        //创建一个类的对象
-        //获取对象的Class
         try {
-            Log.v("start", ss.getSpanStart(styleSpan) + ":" + ss.getSpanEnd(styleSpan));
-
+//            Log.v("start", ss.getSpanStart(styleSpan) + ":" + ss.getSpanEnd(styleSpan));
             Class<?> classType = ss.getClass();
-            //获取指定名字的私有域
-            Field starts = classType.getDeclaredField("mSpanStarts");
-
-            //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
-            starts.setAccessible(true);
-            int[] mSpanStarts = (int[]) starts.get(ss);
-
-            for (int i : mSpanStarts) {
-                System.out.print(i);
-                System.out.print(",");
-            }
-            Field ends = classType.getDeclaredField("mSpanEnds");
-            System.out.println();
-            ends.setAccessible(true);
-            int[] mSpanEnds = (int[]) ends.get(ss);
-            for (int i : mSpanEnds) {
-                System.out.print(i);
-                System.out.print(",");
-            }
-            System.out.println();
-
-            Field field1 = classType.getDeclaredField("mGapStart");
-            Field field2 = classType.getDeclaredField("mGapLength");
-            field1.setAccessible(true);
-            field2.setAccessible(true);
-            int mGapStart = (int) field1.get(ss);
-            Log.v("GapStart", String.valueOf(mGapStart));
-            int mGapLength = (int) field2.get(ss);
-            Log.v("GapLength", String.valueOf(mGapLength));
-
+//            Field starts = classType.getDeclaredField("mSpanStarts");
+//
+//            starts.setAccessible(true);
+//            int[] mSpanStarts = (int[]) starts.get(ss);
             Field count = classType.getDeclaredField("mSpanCount");
-
-            //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
-            count.setAccessible(true);
-            int mSpanCount = (int) count.get(ss);
-
             Field spans = classType.getDeclaredField("mSpans");
+            Field ends = classType.getDeclaredField("mSpanEnds");
 
-            //设置压制访问类型检查，只有这样，才能获取和设置某个具体类的Field对应的值。
+            count.setAccessible(true);
             spans.setAccessible(true);
-            Object[] mSpans = (Object[]) spans.get(ss);
+            ends.setAccessible(true);
 
-            Log.v("getGet", String.valueOf(getSpanStart(styleSpan, mSpanCount, mSpans, mSpanStarts, mGapStart, mGapLength)));
+            int mSpanCount = (int) count.get(ss);
+            Object[] mSpans = (Object[]) spans.get(ss);
+            int[] mSpanEnds = (int[]) ends.get(ss);
+
+
+            for (int i = mSpanCount - 1; i >= 0; i--) {
+                if (mSpans[i] == styleSpan) {
+                    mSpanEnds[i] += lengthAfter;
+                }
+            }
+
+            ends.set(ss,mSpanEnds);
+
+
+//            Field field1 = classType.getDeclaredField("mGapStart");
+//            Field field2 = classType.getDeclaredField("mGapLength");
+//            field1.setAccessible(true);
+//            field2.setAccessible(true);
+//            int mGapStart = (int) field1.get(ss);
+//            Log.v("GapStart", String.valueOf(mGapStart));
+//            int mGapLength = (int) field2.get(ss);
+//            Log.v("GapLength", String.valueOf(mGapLength));
+//
+
+//            Log.v("getGet", String.valueOf(getSpanStart(styleSpan, mSpanCount, mSpans, mSpanStarts, mGapStart,
+// mGapLength)));
 
 //            Field mIndexOfSpan = classType.getDeclaredField("mLowWaterMark");
 //            mIndexOfSpan.setAccessible(true);
@@ -274,22 +227,24 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    public int getSpanStart(Object what,int mSpanCount,Object[] mSpans,int[] mSpanStarts,int mGapStart,int mGapLength) {
-        int count = mSpanCount;
-        Object[] spans = mSpans;
-
-        for (int i = count - 1; i >= 0; i--) {
-            if (spans[i] == what) {
-                int where = mSpanStarts[i];
-                Log.v("where", "i:"+i+","+where);
-                if (where > mGapStart)
-                    where -= mGapLength;
-
-                return where;
-            }
-        }
-        return -1;
-    }
+//    public int getSpanStart(Object what, int mSpanCount, Object[] mSpans, int[] mSpanStarts, int mGapStart, int
+//            mGapLength)
+//    {
+//        int count = mSpanCount;
+//        Object[] spans = mSpans;
+//
+//        for (int i = count - 1; i >= 0; i--) {
+//            if (spans[i] == what) {
+//                int where = mSpanStarts[i];
+//                Log.v("where", "i:" + i + "," + where);
+//                if (where > mGapStart)
+//                    where -= mGapLength;
+//
+//                return where;
+//            }
+//        }
+//        return -1;
+//    }
 
     protected StyleSpan getSpan(int style, StyleSpan[] spans)
     {
