@@ -6,14 +6,13 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Parcel;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextPaint;
+import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
@@ -30,8 +29,6 @@ public class RichEditText extends AppCompatEditText
     private Context context;
 
     private BitmapCreator bitmapCreator;
-
-    StyleSpan styleSpan = null;
 
     boolean isBold = false;
 
@@ -79,7 +76,7 @@ public class RichEditText extends AppCompatEditText
         int start = this.getSelectionStart();
 
         getEditableText().insert(start, ss);//insert imageSpan
-        setSelection(start + ss.length());// 设置EditText中光标在最后面显示
+        setSelection(start + ss.length());// set selection start position
     }
 
     public void insertUrl(String describe, String url)
@@ -92,33 +89,6 @@ public class RichEditText extends AppCompatEditText
     public void setBold(boolean isValid)
     {
         isBold = isValid;
-//        if (isBold) {
-//            int startSelection = getSelectionStart();
-//            int endSelection = getSelectionEnd();
-//            if (startSelection > endSelection) {
-//                startSelection = getSelectionEnd();
-//                endSelection = getSelectionStart();
-//            }
-//            getEditableText().setSpan(new StyleSpan(android.graphics.Typeface.BOLD), startSelection, endSelection, 0);
-//            setSelection(startSelection, endSelection);
-//        } else {
-//            int startSelection = getSelectionStart();
-//            int endSelection = getSelectionEnd();
-//            if (startSelection > endSelection) {
-//                startSelection = getSelectionEnd();
-//                endSelection = getSelectionStart();
-//            }
-//            Spannable str = getText();
-//            StyleSpan[] ss = str.getSpans(startSelection, endSelection, StyleSpan.class);
-//            for (int i = 0; i < ss.length; i++) {
-//                if (ss[i].getStyle() == android.graphics.Typeface.BOLD) {
-//                    str.removeSpan(ss[i]);
-//                }
-//                if (ss[i].getStyle() == android.graphics.Typeface.ITALIC) {
-//                    str.removeSpan(ss[i]);
-//                }
-//            }
-//        }
     }
 
     public void setHtml(final String html)
@@ -129,31 +99,15 @@ public class RichEditText extends AppCompatEditText
 
     public String getHtml()
     {
+        StyleSpan[] spans = getEditableText().getSpans(0, getEditableText().length(), StyleSpan.class);
+        for (StyleSpan span : spans) {
+            if (span.getStyle() == Typeface.BOLD) {
+                Log.v("position", "start:" + getEditableText().getSpanStart(span) + ",," + "end:" + getEditableText()
+                        .getSpanEnd(span));
+            }
+        }
         return Html.toHtml(getText());
     }
-
-//    private static class PassThrough extends StyleSpan
-//    {
-//        StyleSpan mSpan;
-//
-//        public PassThrough(StyleSpan styleSpan)
-//        {
-//            super(styleSpan.getStyle());
-//            mSpan = styleSpan;
-//        }
-//
-//        public PassThrough(Parcel src)
-//        {
-//            super(src);
-//        }
-//
-//        @Override
-//        public void updateDrawState(TextPaint ds)
-//        {
-//            ds.setARGB(255, 255, 255, 255);
-//            mSpan.updateDrawState(ds);
-//        }
-//    }
 
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
@@ -164,17 +118,23 @@ public class RichEditText extends AppCompatEditText
     private void setTextSpan(int start, int lengthBefore, int lengthAfter)
     {
         if (isBold) {
-            if (styleSpan == null) {
-                styleSpan = new StyleSpan(Typeface.BOLD);
-                getEditableText().setSpan(styleSpan, start, start + lengthAfter, Spanned
+            if (start == 0) {
+                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            ChangeEnd(styleSpan, getEditableText(), lengthAfter);
+            } else {
+                StyleSpan boldSpan = getSpan(Typeface.BOLD, getEditableText(), start - 1, start);
+                if (boldSpan == null) {
+                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
+                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    ChangeEnd(start, lengthAfter, getEditableText());
+                }
 
+            }
         }
     }
 
-    private void ChangeEnd(StyleSpan styleSpan, Editable ss, int lengthAfter)
+    private void ChangeEnd(int start, int lengthAfter, Editable ss)
     {
         try {
 //            Log.v("start", ss.getSpanStart(styleSpan) + ":" + ss.getSpanEnd(styleSpan));
@@ -195,15 +155,15 @@ public class RichEditText extends AppCompatEditText
             Object[] mSpans = (Object[]) spans.get(ss);
             int[] mSpanEnds = (int[]) ends.get(ss);
 
+            StyleSpan boldSpan = getSpan(Typeface.BOLD, ss, start - 1, start);
 
             for (int i = mSpanCount - 1; i >= 0; i--) {
-                if (mSpans[i] == styleSpan) {
+                if (mSpans[i] == boldSpan) {
                     mSpanEnds[i] += lengthAfter;
                 }
             }
 
-            ends.set(ss,mSpanEnds);
-
+            ends.set(ss, mSpanEnds);
 
 //            Field field1 = classType.getDeclaredField("mGapStart");
 //            Field field2 = classType.getDeclaredField("mGapLength");
@@ -246,8 +206,9 @@ public class RichEditText extends AppCompatEditText
 //        return -1;
 //    }
 
-    protected StyleSpan getSpan(int style, StyleSpan[] spans)
+    protected StyleSpan getSpan(int style, Editable editable, int start, int end)
     {
+        StyleSpan[] spans = editable.getSpans(start, end, StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == style) {
                 Log.v("hasSpan", style + "true");
