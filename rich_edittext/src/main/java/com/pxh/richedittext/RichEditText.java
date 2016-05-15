@@ -12,7 +12,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
@@ -99,23 +98,16 @@ public class RichEditText extends AppCompatEditText
 
     public String getHtml()
     {
-        StyleSpan[] spans = getEditableText().getSpans(0, getEditableText().length(), StyleSpan.class);
-        for (StyleSpan span : spans) {
-            if (span.getStyle() == Typeface.BOLD) {
-                Log.v("position", "start:" + getEditableText().getSpanStart(span) + ",," + "end:" + getEditableText()
-                        .getSpanEnd(span));
-            }
-        }
         return Html.toHtml(getText());
     }
 
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
     {
-        setTextSpan(start, lengthBefore, lengthAfter);
+        setTextSpan(start,lengthAfter);
     }
 
-    private void setTextSpan(int start, int lengthBefore, int lengthAfter)
+    private void setTextSpan(int start, int lengthAfter)
     {
         if (isBold) {
             if (start == 0) {
@@ -134,15 +126,17 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
+    /**
+     * use reflection to change span effect scope
+     * @param start the input characters' start
+     * @param lengthAfter the input character's end
+     * @param ss use method EditText.getEditableText()
+     */
     private void ChangeEnd(int start, int lengthAfter, Editable ss)
     {
         try {
-//            Log.v("start", ss.getSpanStart(styleSpan) + ":" + ss.getSpanEnd(styleSpan));
             Class<?> classType = ss.getClass();
-//            Field starts = classType.getDeclaredField("mSpanStarts");
-//
-//            starts.setAccessible(true);
-//            int[] mSpanStarts = (int[]) starts.get(ss);
+
             Field count = classType.getDeclaredField("mSpanCount");
             Field spans = classType.getDeclaredField("mSpans");
             Field ends = classType.getDeclaredField("mSpanEnds");
@@ -160,51 +154,14 @@ public class RichEditText extends AppCompatEditText
             for (int i = mSpanCount - 1; i >= 0; i--) {
                 if (mSpans[i] == boldSpan) {
                     mSpanEnds[i] += lengthAfter;
+                    break;
                 }
             }
-
             ends.set(ss, mSpanEnds);
-
-//            Field field1 = classType.getDeclaredField("mGapStart");
-//            Field field2 = classType.getDeclaredField("mGapLength");
-//            field1.setAccessible(true);
-//            field2.setAccessible(true);
-//            int mGapStart = (int) field1.get(ss);
-//            Log.v("GapStart", String.valueOf(mGapStart));
-//            int mGapLength = (int) field2.get(ss);
-//            Log.v("GapLength", String.valueOf(mGapLength));
-//
-
-//            Log.v("getGet", String.valueOf(getSpanStart(styleSpan, mSpanCount, mSpans, mSpanStarts, mGapStart,
-// mGapLength)));
-
-//            Field mIndexOfSpan = classType.getDeclaredField("mLowWaterMark");
-//            mIndexOfSpan.setAccessible(true);
-//            IdentityHashMap<Object, Integer> index = (IdentityHashMap<Object, Integer>) mIndexOfSpan.get(ss);
-//            Log.v("index", String.valueOf(index.get(styleSpan)));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-//    public int getSpanStart(Object what, int mSpanCount, Object[] mSpans, int[] mSpanStarts, int mGapStart, int
-//            mGapLength)
-//    {
-//        int count = mSpanCount;
-//        Object[] spans = mSpans;
-//
-//        for (int i = count - 1; i >= 0; i--) {
-//            if (spans[i] == what) {
-//                int where = mSpanStarts[i];
-//                Log.v("where", "i:" + i + "," + where);
-//                if (where > mGapStart)
-//                    where -= mGapLength;
-//
-//                return where;
-//            }
-//        }
-//        return -1;
-//    }
 
     protected StyleSpan getSpan(int style, Editable editable, int start, int end)
     {
