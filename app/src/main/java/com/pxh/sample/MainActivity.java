@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     public void linkClick(View view)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
