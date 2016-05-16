@@ -31,6 +31,8 @@ public class RichEditText extends AppCompatEditText
 
     boolean isBold = false;
 
+    boolean isItalic = false;
+
     public RichEditText(Context context)
     {
         this(context, null);
@@ -85,9 +87,14 @@ public class RichEditText extends AppCompatEditText
         getEditableText().insert(getSelectionStart(), ss);
     }
 
-    public void setBold(boolean isValid)
+    public void enableBold(boolean isValid)
     {
         isBold = isValid;
+    }
+
+    public void enableItalic(boolean isValid)
+    {
+        isItalic = isValid;
     }
 
     public void setHtml(final String html)
@@ -102,6 +109,12 @@ public class RichEditText extends AppCompatEditText
     }
 
     @Override
+    protected void onSelectionChanged(int selStart, int selEnd)
+    {
+        super.onSelectionChanged(selStart, selEnd);
+    }
+
+    @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
     {
         setTextSpan(start,lengthAfter);
@@ -111,17 +124,19 @@ public class RichEditText extends AppCompatEditText
     {
         if (isBold) {
             if (start == 0) {
+                //if start=0, text must doesn't have spans, use new StyleSpan
                 getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
+                //estimate the character what in front of input whether have span
                 StyleSpan boldSpan = getSpan(Typeface.BOLD, getEditableText(), start - 1, start);
                 if (boldSpan == null) {
                     getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
                             .SPAN_EXCLUSIVE_EXCLUSIVE);
                 } else {
+                    //if have span , change the span's effect scope
                     ChangeEnd(start, lengthAfter, getEditableText());
                 }
-
             }
         }
     }
@@ -168,11 +183,9 @@ public class RichEditText extends AppCompatEditText
         StyleSpan[] spans = editable.getSpans(start, end, StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == style) {
-                Log.v("hasSpan", style + "true");
                 return span;
             }
         }
-        Log.v("hasSpan", style + "false");
         return null;
     }
 }

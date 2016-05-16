@@ -3,13 +3,10 @@ package com.pxh.sample;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,14 +18,13 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.richedittext.RichEditText;
 
-import org.w3c.dom.Text;
-
 public class MainActivity extends AppCompatActivity
 {
 
     private RichEditText richEditText;
 
     boolean isBold = false;
+    boolean isItalic = false;
 
     private TextView content;
 
@@ -125,9 +121,23 @@ public class MainActivity extends AppCompatActivity
         } else {
             ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
         }
-        isBold = !isBold;
-        richEditText.setBold(isBold);
+        isItalic = !isItalic;
+        richEditText.enableBold(isItalic);
     }
+
+    public void italicClick(View view)
+    {
+        if (isBold) {
+            ((TextView) view).setTextColor(0x88000000);
+
+        } else {
+            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
+        }
+        isBold = !isBold;
+        richEditText.enableItalic(isBold);
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
