@@ -142,7 +142,7 @@ public class RichEditText extends AppCompatEditText
                             .SPAN_EXCLUSIVE_EXCLUSIVE);
                 } else {
                     //if have span , change the span's effect scope
-                    changeStyleSpanEnd(Typeface.BOLD, start, lengthAfter, getEditableText());
+                    changeCharacterStyleEnd(boldSpan, lengthAfter, getEditableText());
                 }
             }
         }
@@ -151,12 +151,12 @@ public class RichEditText extends AppCompatEditText
                 getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                StyleSpan boldSpan = getStyleSpan(Typeface.ITALIC, getEditableText(), start - 1, start);
-                if (boldSpan == null) {
+                StyleSpan italicSpan = getStyleSpan(Typeface.ITALIC, getEditableText(), start - 1, start);
+                if (italicSpan == null) {
                     getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
                             .SPAN_EXCLUSIVE_EXCLUSIVE);
                 } else {
-                    changeStyleSpanEnd(Typeface.ITALIC, start, lengthAfter, getEditableText());
+                    changeCharacterStyleEnd(italicSpan, lengthAfter, getEditableText());
                 }
             }
         }
@@ -165,13 +165,14 @@ public class RichEditText extends AppCompatEditText
                 getEditableText().setSpan(new UnderlineSpan(), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-//                UnderlineSpan boldSpan = getCharacterStyleSpan(Typeface.ITALIC, getEditableText(), start - 1, start);
-//                if (boldSpan == null) {
-//                    getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
-//                            .SPAN_EXCLUSIVE_EXCLUSIVE);
-//                } else {
-//                    changeStyleSpanEnd(Typeface.ITALIC, start, lengthAfter, getEditableText());
-//                }
+                CharacterStyle underLineSpan = getCharacterStyleSpan(UnderlineSpan.class, getEditableText(), start - 1,
+                        start);
+                if (underLineSpan == null) {
+                    getEditableText().setSpan(new UnderlineSpan(), start, start + lengthAfter, Spanned
+                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    changeCharacterStyleEnd(underLineSpan, lengthAfter, getEditableText());
+                }
             }
         }
     }
@@ -179,17 +180,17 @@ public class RichEditText extends AppCompatEditText
 
     private void changeStyleSpanEnd(int style, int start, int lengthAfter, Editable ss)
     {
-        changeCharacterStyleEnd(getStyleSpan(style, ss, start, lengthAfter),lengthAfter, ss);
+        changeCharacterStyleEnd(getStyleSpan(style, ss, start, lengthAfter), lengthAfter, ss);
     }
 
     /**
      * use reflection to change span effect scope
      *
-     * @param span        the span what extend CharacterStyle
+     * @param span        the span what is extend CharacterStyle
      * @param lengthAfter the input character's increment
      * @param ss          use method EditText.getEditableText()
      */
-    private void changeCharacterStyleEnd(CharacterStyle span,int lengthAfter, Editable ss)
+    private void changeCharacterStyleEnd(CharacterStyle span, int lengthAfter, Editable ss)
     {
         if (lengthAfter == 0)
             return;
@@ -199,7 +200,6 @@ public class RichEditText extends AppCompatEditText
             Field count = classType.getDeclaredField("mSpanCount");
             Field spans = classType.getDeclaredField("mSpans");
             Field ends = classType.getDeclaredField("mSpanEnds");
-
             count.setAccessible(true);
             spans.setAccessible(true);
             ends.setAccessible(true);
