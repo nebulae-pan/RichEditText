@@ -2,6 +2,7 @@ package com.pxh.sample;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -122,8 +123,8 @@ public class MainActivity extends AppCompatActivity
         } else {
             ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
         }
-        isItalic = !isItalic;
-        richEditText.enableBold(isItalic);
+        isBold = !isBold;
+        richEditText.enableBold(isBold);
     }
 
     public void italicClick(View view)
@@ -134,8 +135,8 @@ public class MainActivity extends AppCompatActivity
         } else {
             ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
         }
-        isBold = !isBold;
-        richEditText.enableItalic(isBold);
+        isItalic = !isItalic;
+        richEditText.enableItalic(isItalic);
     }
 
 

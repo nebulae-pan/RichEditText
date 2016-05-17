@@ -18,7 +18,6 @@ import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
 import java.lang.reflect.Field;
@@ -30,7 +29,6 @@ public class RichEditText extends AppCompatEditText
     private BitmapCreator bitmapCreator;
 
     boolean isBold = false;
-
     boolean isItalic = false;
 
     public RichEditText(Context context)
@@ -117,7 +115,7 @@ public class RichEditText extends AppCompatEditText
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
     {
-        setTextSpan(start,lengthAfter);
+        setTextSpan(start, lengthAfter);
     }
 
     private void setTextSpan(int start, int lengthAfter)
@@ -135,7 +133,21 @@ public class RichEditText extends AppCompatEditText
                             .SPAN_EXCLUSIVE_EXCLUSIVE);
                 } else {
                     //if have span , change the span's effect scope
-                    ChangeEnd(start, lengthAfter, getEditableText());
+                    changeStyleSpanEnd(Typeface.BOLD, start, lengthAfter, getEditableText());
+                }
+            }
+        }
+        if (isItalic) {
+            if (start == 0) {
+                getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
+                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                StyleSpan boldSpan = getSpan(Typeface.ITALIC, getEditableText(), start - 1, start);
+                if (boldSpan == null) {
+                    getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
+                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    changeStyleSpanEnd(Typeface.ITALIC, start, lengthAfter, getEditableText());
                 }
             }
         }
@@ -143,11 +155,12 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * use reflection to change span effect scope
-     * @param start the input characters' start
+     *
+     * @param start       the input characters' start
      * @param lengthAfter the input character's end
-     * @param ss use method EditText.getEditableText()
+     * @param ss          use method EditText.getEditableText()
      */
-    private void ChangeEnd(int start, int lengthAfter, Editable ss)
+    private void changeStyleSpanEnd(int style, int start, int lengthAfter, Editable ss)
     {
         try {
             Class<?> classType = ss.getClass();
@@ -164,7 +177,7 @@ public class RichEditText extends AppCompatEditText
             Object[] mSpans = (Object[]) spans.get(ss);
             int[] mSpanEnds = (int[]) ends.get(ss);
 
-            StyleSpan boldSpan = getSpan(Typeface.BOLD, ss, start - 1, start);
+            StyleSpan boldSpan = getSpan(style, ss, start - 1, start);
 
             for (int i = mSpanCount - 1; i >= 0; i--) {
                 if (mSpans[i] == boldSpan) {
