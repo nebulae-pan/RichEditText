@@ -15,7 +15,6 @@ import android.text.Spanned;
 import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
-import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
@@ -178,11 +177,6 @@ public class RichEditText extends AppCompatEditText
     }
 
 
-    private void changeStyleSpanEnd(int style, int start, int lengthAfter, Editable ss)
-    {
-        changeCharacterStyleEnd(getStyleSpan(style, ss, start, lengthAfter), lengthAfter, ss);
-    }
-
     /**
      * use reflection to change span effect scope
      *
@@ -242,5 +236,10 @@ public class RichEditText extends AppCompatEditText
             }
         }
         return null;
+    }
+
+    private static class TypeState
+    {
+        int selection;
     }
 }
