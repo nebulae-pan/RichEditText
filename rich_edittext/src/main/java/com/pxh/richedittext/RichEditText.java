@@ -15,6 +15,7 @@ import android.text.Spanned;
 import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
@@ -33,6 +34,7 @@ public class RichEditText extends AppCompatEditText
     boolean isBold = false;
     boolean isItalic = false;
     boolean isUnderLine = false;
+    boolean isStrike = false;
 
     public RichEditText(Context context)
     {
@@ -101,6 +103,11 @@ public class RichEditText extends AppCompatEditText
     public void enableUnderLine(boolean isValid)
     {
         isUnderLine = isValid;
+    }
+
+    public void enableStrikethrough(boolean isValid)
+    {
+        isStrike = isValid;
     }
 
     public void setHtml(final String html)
@@ -174,6 +181,21 @@ public class RichEditText extends AppCompatEditText
                 }
             }
         }
+        if (isStrike) {
+            if (start == 0) {
+                getEditableText().setSpan(new StrikethroughSpan(), start, start + lengthAfter, Spanned
+                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                CharacterStyle strikeThroughSpan = getCharacterStyleSpan(StrikethroughSpan.class, getEditableText(),
+                        start - 1, start);
+                if (strikeThroughSpan == null) {
+                    getEditableText().setSpan(new StrikethroughSpan(), start, start + lengthAfter, Spanned
+                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    changeCharacterStyleEnd(strikeThroughSpan, lengthAfter, getEditableText());
+                }
+            }
+        }
     }
 
 
@@ -240,6 +262,6 @@ public class RichEditText extends AppCompatEditText
 
     private static class TypeState
     {
-        int selection;
+        private int selection;
     }
 }

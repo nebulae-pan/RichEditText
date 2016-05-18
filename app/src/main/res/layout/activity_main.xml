@@ -41,6 +41,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_margin="3dp"
+                android:onClick="strikeClick"
+                android:text="strikethrough"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_margin="3dp"
                 android:onClick="linkClick"
                 android:text="link"
                 android:layout_height="wrap_content"/>

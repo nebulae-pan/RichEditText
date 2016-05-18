@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity
     boolean isBold = false;
     boolean isItalic = false;
     boolean isUnderLine = false;
+    boolean isStrike = false;
 
     private TextView content;
 
@@ -150,6 +151,18 @@ public class MainActivity extends AppCompatActivity
         }
         isUnderLine = !isUnderLine;
         richEditText.enableUnderLine(isUnderLine);
+    }
+
+    public void strikeClick(View view)
+    {
+        if (isStrike) {
+            ((TextView) view).setTextColor(0x88000000);
+
+        } else {
+            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
+        }
+        isStrike = !isStrike;
+        richEditText.enableStrikethrough(isStrike);
     }
 
 
