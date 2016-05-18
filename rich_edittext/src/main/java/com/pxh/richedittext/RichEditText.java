@@ -248,6 +248,7 @@ public class RichEditText extends AppCompatEditText
         return null;
     }
 
+
     protected CharacterStyle getCharacterStyleSpan(Class<? extends CharacterStyle> clazz, Editable editable, int
             start, int end)
     {
