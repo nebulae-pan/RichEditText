@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity
                 richEditText.insertUrl(description.getText().toString(), url.getText().toString());
             }
         });
-
         builder.setNegativeButton("cancel", new DialogInterface.OnClickListener()
         {
             @Override
@@ -119,6 +118,9 @@ public class MainActivity extends AppCompatActivity
 
     public void boldClick(View view)
     {
+        int w = 0 | 1;
+        w = 1 & (Integer.MAX_VALUE ^ 1);
+        Log.v("w", String.valueOf(w));
         if (isBold) {
             ((TextView) view).setTextColor(0x88000000);
 
@@ -164,8 +166,6 @@ public class MainActivity extends AppCompatActivity
         isStrike = !isStrike;
         richEditText.enableStrikethrough(isStrike);
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)

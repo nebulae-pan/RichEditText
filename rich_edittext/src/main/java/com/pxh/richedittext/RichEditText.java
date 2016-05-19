@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+
 import java.lang.reflect.Field;
 
 public class RichEditText extends AppCompatEditText
@@ -30,6 +31,8 @@ public class RichEditText extends AppCompatEditText
     private Context context;
 
     private BitmapCreator bitmapCreator;
+
+    TextSpanState state;
 
     boolean isBold = false;
     boolean isItalic = false;
@@ -45,6 +48,7 @@ public class RichEditText extends AppCompatEditText
     {
         super(context, attrs);
         this.context = context;
+        this.state = new TextSpanState();
 
         post(new Runnable()
         {
@@ -119,6 +123,11 @@ public class RichEditText extends AppCompatEditText
     public String getHtml()
     {
         return Html.toHtml(getText());
+    }
+
+    public void setSpanChangeListener(TextSpanChangeListener listener)
+    {
+        state.setSpanChangeListener(listener);
     }
 
     @Override
@@ -261,8 +270,55 @@ public class RichEditText extends AppCompatEditText
         return null;
     }
 
-    private static class TypeState
+    private static class TextSpanState
     {
-        private int selection;
+        private int spanSelection = 0;
+
+        TextSpanChangeListener spanChangeListener;
+
+        public void enableBold(boolean isValid)
+        {
+            setSelection(isValid, 1);
+        }
+
+        private void setSelection(boolean isValid, int spanValue)
+        {
+            if (isValid)
+                spanSelection |= spanValue;
+            else
+                spanSelection &= (Integer.MAX_VALUE ^ spanValue);
+            if (spanChangeListener != null)
+                spanChangeListener.OnTextSpanChanged(this);
+        }
+
+        public boolean isBoldEnable()
+        {
+            return (spanSelection & 1) == 0;
+        }
+
+        public boolean isItalicEnable()
+        {
+            return (spanSelection & 2) == 0;
+        }
+
+        public boolean isUnderLineEnable()
+        {
+            return (spanSelection & 4) == 0;
+        }
+
+        public boolean isStrikethroughEnable()
+        {
+            return (spanSelection & 8) == 0;
+        }
+
+        public void setSpanChangeListener(TextSpanChangeListener listener)
+        {
+            this.spanChangeListener = listener;
+        }
+    }
+
+    public interface TextSpanChangeListener
+    {
+        void OnTextSpanChanged(TextSpanState state);
     }
 }
