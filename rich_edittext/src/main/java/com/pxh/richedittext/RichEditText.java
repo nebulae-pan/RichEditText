@@ -281,6 +281,22 @@ public class RichEditText extends AppCompatEditText
             setSelection(isValid, 1);
         }
 
+        public void enableItalic(boolean isValid)
+        {
+            setSelection(isValid, 2);
+        }
+
+        public void enableUnderLine(boolean isValid)
+        {
+            setSelection(isValid, 4);
+        }
+
+        public void enableStrikethrough(boolean isValid)
+        {
+            setSelection(isValid, 8);
+        }
+
+
         private void setSelection(boolean isValid, int spanValue)
         {
             if (isValid)
