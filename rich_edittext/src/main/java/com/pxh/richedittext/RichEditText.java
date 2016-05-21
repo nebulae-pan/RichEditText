@@ -296,7 +296,6 @@ public class RichEditText extends AppCompatEditText
             setSelection(isValid, 8);
         }
 
-
         private void setSelection(boolean isValid, int spanValue)
         {
             if (isValid)
