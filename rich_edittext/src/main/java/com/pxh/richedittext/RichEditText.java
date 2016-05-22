@@ -34,11 +34,6 @@ public class RichEditText extends AppCompatEditText
 
     TextSpanState state;
 
-    boolean isBold = false;
-    boolean isItalic = false;
-    boolean isUnderLine = false;
-    boolean isStrike = false;
-
     public RichEditText(Context context)
     {
         this(context, null);
@@ -96,22 +91,22 @@ public class RichEditText extends AppCompatEditText
 
     public void enableBold(boolean isValid)
     {
-        isBold = isValid;
+        state.enableBold(isValid);
     }
 
     public void enableItalic(boolean isValid)
     {
-        isItalic = isValid;
+        state.enableItalic(isValid);
     }
 
     public void enableUnderLine(boolean isValid)
     {
-        isUnderLine = isValid;
+        state.enableUnderLine(isValid);
     }
 
     public void enableStrikethrough(boolean isValid)
     {
-        isStrike = isValid;
+        state.enableStrikethrough(isValid);
     }
 
     public void setHtml(final String html)
@@ -144,7 +139,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setTextSpan(int start, int lengthAfter)
     {
-        if (isBold) {
+        if (state.isBoldEnable()) {
             if (start == 0) {
                 //if start=0, text must doesn't have spans, use new StyleSpan
                 getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
@@ -161,7 +156,7 @@ public class RichEditText extends AppCompatEditText
                 }
             }
         }
-        if (isItalic) {
+        if (state.isItalicEnable()) {
             if (start == 0) {
                 getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -175,7 +170,7 @@ public class RichEditText extends AppCompatEditText
                 }
             }
         }
-        if (isUnderLine) {
+        if (state.isUnderLineEnable()) {
             if (start == 0) {
                 getEditableText().setSpan(new UnderlineSpan(), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -190,7 +185,7 @@ public class RichEditText extends AppCompatEditText
                 }
             }
         }
-        if (isStrike) {
+        if (state.isStrikethroughEnable()) {
             if (start == 0) {
                 getEditableText().setSpan(new StrikethroughSpan(), start, start + lengthAfter, Spanned
                         .SPAN_EXCLUSIVE_EXCLUSIVE);
