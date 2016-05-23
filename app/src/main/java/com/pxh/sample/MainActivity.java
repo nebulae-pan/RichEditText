@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.richedittext.RichEditText;
+import com.pxh.richedittext.TextSpanState;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -32,7 +33,8 @@ public class MainActivity extends AppCompatActivity
     private TextView content;
 
 //    String html = "下面是图片了 " +
-//            "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\" height=\"50\"/>" +
+//            "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\"
+// height=\"50\"/>" +
 //            "<br>这也是图片<br>" +
 //            "<img src='http://h.hiphotos.baidu.com/image/pic/item/d000baa1cd11728b2027e428cafcc3cec3fd2cb5.jpg'/>" +
 //            "<br>还有一张<br>" +
@@ -48,6 +50,14 @@ public class MainActivity extends AppCompatActivity
         richEditText = (RichEditText) findViewById(R.id.rich_edit_text);
         content = (TextView) findViewById(R.id.content);
         content.setMovementMethod(LinkMovementMethod.getInstance());
+        richEditText.setSpanChangeListener(new RichEditText.TextSpanChangeListener()
+        {
+            @Override
+            public void OnTextSpanChanged(TextSpanState state)
+            {
+
+            }
+        });
     }
 
     @Override
@@ -85,7 +95,7 @@ public class MainActivity extends AppCompatActivity
 
         final EditText description = (EditText) v.findViewById(R.id.description);
         final EditText url = (EditText) v.findViewById(R.id.input);
-        
+
         builder.setView(v);
         builder.setTitle("input url");
         builder.setPositiveButton("confirm", new DialogInterface.OnClickListener()
@@ -116,19 +126,19 @@ public class MainActivity extends AppCompatActivity
         startActivityForResult(intent, 0);
     }
 
-    public void boldClick(View view)
+    private void changeTextColor(View view, boolean isValid)
     {
-        int w = 0 | 1;
-        w = 1 & (Integer.MAX_VALUE ^ 1);
-        Log.v("w", String.valueOf(w));
-        if (isBold) {
+        if (isValid) {
             ((TextView) view).setTextColor(0x88000000);
 
         } else {
             ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
         }
-        isBold = !isBold;
-        richEditText.enableBold(isBold);
+    }
+
+    public void boldClick(View view)
+    {
+//        richEditText.enableBold(richEditText.);
     }
 
     public void italicClick(View view)
