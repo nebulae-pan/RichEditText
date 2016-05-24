@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity
 
     private RichEditText richEditText;
 
-    boolean isBold = false;
     boolean isItalic = false;
     boolean isUnderLine = false;
     boolean isStrike = false;
@@ -138,43 +137,22 @@ public class MainActivity extends AppCompatActivity
 
     public void boldClick(View view)
     {
-//        richEditText.enableBold(richEditText.);
+        richEditText.enableBold(!richEditText.isBoldEnable());
     }
 
     public void italicClick(View view)
     {
-        if (isItalic) {
-            ((TextView) view).setTextColor(0x88000000);
 
-        } else {
-            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
-        }
-        isItalic = !isItalic;
-        richEditText.enableItalic(isItalic);
     }
 
     public void underLineClick(View view)
     {
-        if (isUnderLine) {
-            ((TextView) view).setTextColor(0x88000000);
 
-        } else {
-            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
-        }
-        isUnderLine = !isUnderLine;
-        richEditText.enableUnderLine(isUnderLine);
     }
 
     public void strikeClick(View view)
     {
-        if (isStrike) {
-            ((TextView) view).setTextColor(0x88000000);
 
-        } else {
-            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
-        }
-        isStrike = !isStrike;
-        richEditText.enableStrikethrough(isStrike);
     }
 
     @Override

@@ -94,9 +94,19 @@ public class RichEditText extends AppCompatEditText
         state.enableBold(isValid);
     }
 
+    public boolean isBoldEnable()
+    {
+        return state.isBoldEnable();
+    }
+
     public void enableItalic(boolean isValid)
     {
         state.enableItalic(isValid);
+    }
+
+    public boolean isItalicEnable()
+    {
+        return state.isItalicEnable();
     }
 
     public void enableUnderLine(boolean isValid)
