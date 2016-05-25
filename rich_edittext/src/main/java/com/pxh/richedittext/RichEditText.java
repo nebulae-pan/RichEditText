@@ -114,9 +114,19 @@ public class RichEditText extends AppCompatEditText
         state.enableUnderLine(isValid);
     }
 
+    public boolean isUnderLineEnable()
+    {
+        return state.isUnderLineEnable();
+    }
+
     public void enableStrikethrough(boolean isValid)
     {
         state.enableStrikethrough(isValid);
+    }
+
+    public boolean isStrikethroughEnable()
+    {
+        return state.isStrikethroughEnable();
     }
 
     public void setHtml(final String html)

@@ -142,17 +142,17 @@ public class MainActivity extends AppCompatActivity
 
     public void italicClick(View view)
     {
-
+        richEditText.enableItalic(!richEditText.isItalicEnable());
     }
 
     public void underLineClick(View view)
     {
-
+        richEditText.enableUnderLine(!richEditText.isUnderLineEnable());
     }
 
     public void strikeClick(View view)
     {
-
+        richEditText.enableStrikethrough(!richEditText.isStrikethroughEnable());
     }
 
     @Override
