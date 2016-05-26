@@ -5,38 +5,48 @@ package com.pxh.richedittext;
  */
 public class TextSpanState
 {
-    private int spanSelection = 0;
+    public enum TextSpan
+    {
+        Bold, Italic, UnderLine, Strikethrough
+    }
+
+    public TextSpanState()
+    {
+        spanSelection = 0;
+    }
+
+    private int spanSelection;
 
     RichEditText.TextSpanChangeListener spanChangeListener;
 
     public void enableBold(boolean isValid)
     {
-        setSelection(isValid, 1);
+        setSelection(isValid, 1, TextSpan.Bold);
     }
 
     public void enableItalic(boolean isValid)
     {
-        setSelection(isValid, 2);
+        setSelection(isValid, 2, TextSpan.Italic);
     }
 
     public void enableUnderLine(boolean isValid)
     {
-        setSelection(isValid, 4);
+        setSelection(isValid, 4, TextSpan.UnderLine);
     }
 
     public void enableStrikethrough(boolean isValid)
     {
-        setSelection(isValid, 8);
+        setSelection(isValid, 8, TextSpan.Strikethrough);
     }
 
-    private void setSelection(boolean isValid, int spanValue)
+    private void setSelection(boolean isValid, int spanValue, TextSpan type)
     {
         if (isValid)
             spanSelection |= spanValue;
         else
             spanSelection &= (Integer.MAX_VALUE ^ spanValue);
         if (spanChangeListener != null)
-            spanChangeListener.OnTextSpanChanged(this);
+            spanChangeListener.OnTextSpanChanged(type, isValid);
     }
 
     public boolean isBoldEnable()

@@ -2,7 +2,6 @@ package com.pxh.sample;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,10 +19,13 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.richedittext.RichEditText;
 import com.pxh.richedittext.TextSpanState;
 
+import java.util.HashMap;
+
 public class MainActivity extends AppCompatActivity
 {
 
     private RichEditText richEditText;
+    private HashMap<TextSpanState.TextSpan, View> views = new HashMap<>();
 
     private TextView content;
 
@@ -42,15 +44,20 @@ public class MainActivity extends AppCompatActivity
         ImageLoader.getInstance().init(configuration);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        views.put(TextSpanState.TextSpan.Bold, findViewById(R.id.bold));
+        views.put(TextSpanState.TextSpan.Italic, findViewById(R.id.italic));
+        views.put(TextSpanState.TextSpan.UnderLine, findViewById(R.id.underline));
+        views.put(TextSpanState.TextSpan.Strikethrough, findViewById(R.id.strikethrough));
         richEditText = (RichEditText) findViewById(R.id.rich_edit_text);
         content = (TextView) findViewById(R.id.content);
         content.setMovementMethod(LinkMovementMethod.getInstance());
         richEditText.setSpanChangeListener(new RichEditText.TextSpanChangeListener()
         {
             @Override
-            public void OnTextSpanChanged(TextSpanState state)
+            public void OnTextSpanChanged(TextSpanState.TextSpan type, boolean isValid)
             {
-
+                View v = views.get(type);
+                changeTextColor(v,isValid);
             }
         });
     }

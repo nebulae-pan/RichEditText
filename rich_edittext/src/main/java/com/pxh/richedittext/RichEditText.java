@@ -32,7 +32,7 @@ public class RichEditText extends AppCompatEditText
 
     private BitmapCreator bitmapCreator;
 
-    TextSpanState state;
+    TextSpanState state = new TextSpanState();
 
     public RichEditText(Context context)
     {
@@ -43,7 +43,6 @@ public class RichEditText extends AppCompatEditText
     {
         super(context, attrs);
         this.context = context;
-        this.state = new TextSpanState();
 
         post(new Runnable()
         {
@@ -159,6 +158,9 @@ public class RichEditText extends AppCompatEditText
 
     private void setTextSpan(int start, int lengthAfter)
     {
+        if (state == null) {
+            return;
+        }
         if (state.isBoldEnable()) {
             if (start == 0) {
                 //if start=0, text must doesn't have spans, use new StyleSpan
@@ -288,6 +290,6 @@ public class RichEditText extends AppCompatEditText
 
     public interface TextSpanChangeListener
     {
-        void OnTextSpanChanged(TextSpanState state);
+        void OnTextSpanChanged(TextSpanState.TextSpan type, boolean isValid);
     }
 }
