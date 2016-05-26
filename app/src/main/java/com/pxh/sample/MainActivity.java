@@ -25,10 +25,6 @@ public class MainActivity extends AppCompatActivity
 
     private RichEditText richEditText;
 
-    boolean isItalic = false;
-    boolean isUnderLine = false;
-    boolean isStrike = false;
-
     private TextView content;
 
 //    String html = "下面是图片了 " +
