@@ -51,22 +51,22 @@ public class TextSpanState
 
     public boolean isBoldEnable()
     {
-        return (spanSelection & 1) == 0;
+        return (spanSelection & 1) != 0;
     }
 
     public boolean isItalicEnable()
     {
-        return (spanSelection & 2) == 0;
+        return (spanSelection & 2) != 0;
     }
 
     public boolean isUnderLineEnable()
     {
-        return (spanSelection & 4) == 0;
+        return (spanSelection & 4) != 0;
     }
 
     public boolean isStrikethroughEnable()
     {
-        return (spanSelection & 8) == 0;
+        return (spanSelection & 8) != 0;
     }
 
     public void setSpanChangeListener(RichEditText.TextSpanChangeListener listener)

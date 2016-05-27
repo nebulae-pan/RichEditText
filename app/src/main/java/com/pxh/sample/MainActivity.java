@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity
 
     private void changeTextColor(View view, boolean isValid)
     {
-        if (isValid) {
+        if (!isValid) {
             ((TextView) view).setTextColor(0x88000000);
 
         } else {
