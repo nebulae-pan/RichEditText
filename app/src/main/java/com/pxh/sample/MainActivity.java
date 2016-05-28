@@ -132,7 +132,6 @@ public class MainActivity extends AppCompatActivity
     {
         if (!isValid) {
             ((TextView) view).setTextColor(0x88000000);
-
         } else {
             ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
         }

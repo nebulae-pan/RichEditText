@@ -22,6 +22,7 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.WindowManager;
 
 
@@ -271,8 +272,23 @@ public class RichEditText extends AppCompatEditText
 
     private void setQuote()
     {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        for (int i = 0; i < getLineCount(); i++) {
+            int lineStart = getLayout().getLineStart(i);
+            Log.v("lineStart", String.valueOf(lineStart));
+            Log.v("Start", String.valueOf(start));
+            if (lineStart == start) {
+                break;
+            }
+            if ((lineStart > start) || (lineStart < start && i == (getLineCount() - 1))) {
+                getEditableText().insert(start, "\n");
+                setSelection(start+1,end+1);
+                break;
+            }
+        }
         getEditableText().setSpan(new QuoteSpan(), getSelectionStart(), getSelectionEnd(), Spanned
-                .SPAN_EXCLUSIVE_INCLUSIVE);
+                .SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     protected StyleSpan getStyleSpan(int style, Editable editable, int start, int end)
