@@ -15,6 +15,7 @@ import android.text.Spanned;
 import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.QuoteSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
@@ -93,19 +94,9 @@ public class RichEditText extends AppCompatEditText
         state.enableBold(isValid);
     }
 
-    public boolean isBoldEnable()
-    {
-        return state.isBoldEnable();
-    }
-
     public void enableItalic(boolean isValid)
     {
         state.enableItalic(isValid);
-    }
-
-    public boolean isItalicEnable()
-    {
-        return state.isItalicEnable();
     }
 
     public void enableUnderLine(boolean isValid)
@@ -113,14 +104,29 @@ public class RichEditText extends AppCompatEditText
         state.enableUnderLine(isValid);
     }
 
+    public void enableStrikethrough(boolean isValid)
+    {
+        state.enableStrikethrough(isValid);
+    }
+
+    public void enableQuote(boolean isValid)
+    {
+        setQuote();
+    }
+
+    public boolean isBoldEnable()
+    {
+        return state.isBoldEnable();
+    }
+
     public boolean isUnderLineEnable()
     {
         return state.isUnderLineEnable();
     }
 
-    public void enableStrikethrough(boolean isValid)
+    public boolean isItalicEnable()
     {
-        state.enableStrikethrough(isValid);
+        return state.isItalicEnable();
     }
 
     public boolean isStrikethroughEnable()
@@ -261,6 +267,12 @@ public class RichEditText extends AppCompatEditText
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void setQuote()
+    {
+        getEditableText().setSpan(new QuoteSpan(), getSelectionStart(), getSelectionEnd(), Spanned
+                .SPAN_EXCLUSIVE_INCLUSIVE);
     }
 
     protected StyleSpan getStyleSpan(int style, Editable editable, int start, int end)

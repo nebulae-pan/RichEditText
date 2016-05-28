@@ -158,6 +158,11 @@ public class MainActivity extends AppCompatActivity
         richEditText.enableStrikethrough(!richEditText.isStrikethroughEnable());
     }
 
+    public void quoteClick(View view)
+    {
+        richEditText.enableQuote(true);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {

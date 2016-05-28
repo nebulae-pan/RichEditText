@@ -49,7 +49,15 @@
                 android:layout_width="wrap_content"
                 android:layout_margin="3dp"
                 android:onClick="strikeClick"
-                android:text="strikethrough"
+                android:text="strike"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/quote"
+
+                android:layout_width="wrap_content"
+                android:layout_margin="3dp"
+                android:onClick="quoteClick"
+                android:text="quote"
                 android:layout_height="wrap_content"/>
 
             <TextView
