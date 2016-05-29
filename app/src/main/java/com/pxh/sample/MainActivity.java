@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity
         views.put(TextSpanState.TextSpan.Italic, findViewById(R.id.italic));
         views.put(TextSpanState.TextSpan.UnderLine, findViewById(R.id.underline));
         views.put(TextSpanState.TextSpan.Strikethrough, findViewById(R.id.strikethrough));
+        views.put(TextSpanState.TextSpan.Quote, findViewById(R.id.quote));
+        views.put(TextSpanState.TextSpan.Bullet, findViewById(R.id.bullet));
         richEditText = (RichEditText) findViewById(R.id.rich_edit_text);
         content = (TextView) findViewById(R.id.content);
         content.setMovementMethod(LinkMovementMethod.getInstance());
@@ -160,6 +162,11 @@ public class MainActivity extends AppCompatActivity
     public void quoteClick(View view)
     {
         richEditText.enableQuote(true);
+    }
+
+    public void bulletClick(View view)
+    {
+        richEditText.enableBullet(true);
     }
 
     @Override

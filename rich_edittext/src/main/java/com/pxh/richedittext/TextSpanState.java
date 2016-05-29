@@ -7,7 +7,7 @@ public class TextSpanState
 {
     public enum TextSpan
     {
-        Bold, Italic, UnderLine, Strikethrough
+        Bold, Italic, UnderLine, Strikethrough, Quote, Bullet
     }
 
     public TextSpanState()
