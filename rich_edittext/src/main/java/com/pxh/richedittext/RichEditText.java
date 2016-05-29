@@ -167,7 +167,14 @@ public class RichEditText extends AppCompatEditText
     protected void onSelectionChanged(int selStart, int selEnd)
     {
         super.onSelectionChanged(selStart, selEnd);
+        if (state == null) {
+            return;
+        }
+        Log.v("before", String.valueOf(state.isUnderLineEnable()));
+
         changeSpanStateBySelection(selStart);
+        Log.v("after", String.valueOf(state.isUnderLineEnable()));
+
 
     }
 
@@ -189,6 +196,7 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
+        Log.v("underline", String.valueOf(state.isUnderLineEnable()));
         if (state.isBoldEnable()) {
             if (start == 0) {
                 //if start = 0, text must doesn't have spans, use new StyleSpan
