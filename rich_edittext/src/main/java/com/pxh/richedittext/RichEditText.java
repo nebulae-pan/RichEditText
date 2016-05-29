@@ -96,7 +96,10 @@ public class RichEditText extends AppCompatEditText
 
     public void enableBold(boolean isValid)
     {
-        state.enableBold(isValid);
+        if (getSelectionStart() < getSelectionEnd())
+            setSelectionTextBold(isValid);
+        else
+            state.enableBold(isValid);
     }
 
     public void enableItalic(boolean isValid)
@@ -177,7 +180,8 @@ public class RichEditText extends AppCompatEditText
     /**
      * when characters input , set the text's span by characterStyle and ParagraphStyle.
      * Parameters start and lengthAfter must use the parameter of onTextChanged
-     * @param start the start of character's input
+     *
+     * @param start       the start of character's input
      * @param lengthAfter the length of character's input
      */
     private void setTextSpan(int start, int lengthAfter)
@@ -250,6 +254,7 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * change Span's state when selection change
+     *
      * @param start the selection start after change
      */
     private void changeSpanStateBySelection(int start)
@@ -315,6 +320,19 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
+    private void setSelectionTextBold(boolean isBold)
+    {
+        if (isBold) {
+            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), getSelectionStart(), getSelectionEnd(), Spanned
+                    .SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        else
+        {
+            StyleSpan span = getStyleSpan(Typeface.BOLD, getEditableText(), getSelectionStart(), getSelectionEnd());
+            getEditableText().removeSpan(span);
+        }
+    }
+
     private void setQuote()
     {
         int start = getSelectionStart();
@@ -355,10 +373,11 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * get styleSpan by specified style from the editable text
-     * @param style the specified style
+     *
+     * @param style    the specified style
      * @param editable the editable text
-     * @param start start of editable
-     * @param end end of editable
+     * @param start    start of editable
+     * @param end      end of editable
      * @return if there has a StyleSpan which style is specified in start to end,return it,or return null
      */
     protected StyleSpan getStyleSpan(int style, Editable editable, int start, int end)
@@ -390,6 +409,7 @@ public class RichEditText extends AppCompatEditText
     {
         /**
          * called when current text span changed
+         *
          * @param type    span type
          * @param isValid is span Valid
          */
