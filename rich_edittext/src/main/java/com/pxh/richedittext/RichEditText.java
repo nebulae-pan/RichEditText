@@ -40,8 +40,6 @@ public class RichEditText extends AppCompatEditText
 
     TextSpanState state = new TextSpanState();
 
-    int preSelectionStart = 0;
-
     public RichEditText(Context context)
     {
         this(context, null);
@@ -167,6 +165,7 @@ public class RichEditText extends AppCompatEditText
     {
         super.onSelectionChanged(selStart, selEnd);
         changeSpanStateBySelection(selStart);
+
     }
 
     @Override
@@ -245,24 +244,16 @@ public class RichEditText extends AppCompatEditText
 
     private void changeSpanStateBySelection(int start)
     {
-        int preStart = preSelectionStart;
-        preSelectionStart = start;
-        if (start > preStart) {
+        /*if (start > preSelectionStart) {
+            return;
+        }*/
+        if (state == null) {
             return;
         }
+        state.clearSelection();
         StyleSpan[] spans = getEditableText().getSpans(start, start, StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == Typeface.BOLD) {
-                state.enableBold(true);
-            } else {
-                state.enableItalic(true);
-            }
-        }
-        if (spans.length == 2) {
-            state.enableBold(true);
-            state.enableItalic(true);
-        } else {
-            if (spans[0].getStyle() == Typeface.BOLD) {
                 state.enableBold(true);
             } else {
                 state.enableItalic(true);
