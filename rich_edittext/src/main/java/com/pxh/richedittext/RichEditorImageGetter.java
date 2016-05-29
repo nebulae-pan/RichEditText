@@ -18,6 +18,7 @@ import java.lang.ref.WeakReference;
 
 /**
  * Created by pxh on 2016/4/29.
+ * RichEditor ImageGetter can loadImage for TextView when it use method:setHtml()
  */
 public class RichEditorImageGetter implements Html.ImageGetter
 {

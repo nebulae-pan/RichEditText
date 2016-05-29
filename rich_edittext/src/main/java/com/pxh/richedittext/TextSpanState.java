@@ -2,6 +2,7 @@ package com.pxh.richedittext;
 
 /**
  * Created by pxh on 2016/5/23.
+ * the state of all TextSpans
  */
 public class TextSpanState
 {
