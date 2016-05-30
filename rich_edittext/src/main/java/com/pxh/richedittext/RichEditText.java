@@ -98,8 +98,7 @@ public class RichEditText extends AppCompatEditText
     {
         if (getSelectionStart() < getSelectionEnd())
             setSelectionTextBold(isValid);
-        else
-            state.enableBold(isValid);
+        state.enableBold(isValid);
     }
 
     public void enableItalic(boolean isValid)
@@ -170,12 +169,11 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
-        Log.v("before", String.valueOf(state.isUnderLineEnable()));
-
-        changeSpanStateBySelection(selStart);
-        Log.v("after", String.valueOf(state.isUnderLineEnable()));
-
-
+        if (selStart == selEnd) {
+            changeSpanStateBySelection(selStart);
+        } else {
+            changeSpanStateBySelection(selStart, selEnd);
+        }
     }
 
     @Override
@@ -267,9 +265,6 @@ public class RichEditText extends AppCompatEditText
      */
     private void changeSpanStateBySelection(int start)
     {
-        if (state == null) {
-            return;
-        }
         state.clearSelection();
         StyleSpan[] spans = getEditableText().getSpans(start, start, StyleSpan.class);
         for (StyleSpan span : spans) {
@@ -287,6 +282,42 @@ public class RichEditText extends AppCompatEditText
         if (strikethroughSpan.length != 0) {
             state.enableStrikethrough(true);
         }
+    }
+
+    private void changeSpanStateBySelection(int start, int end)
+    {
+        state.clearSelection();
+        StyleSpan[] spans = getEditableText().getSpans(start, end, StyleSpan.class);
+        for (StyleSpan span : spans) {
+            if (isSpanInRange(span, start, end)) {
+                if (span.getStyle() == Typeface.BOLD) {
+                    state.enableBold(true);
+                } else {
+                    state.enableItalic(true);
+                }
+            }
+        }
+        UnderlineSpan[] underLineSpans = getEditableText().getSpans(start, start, UnderlineSpan.class);
+        if (underLineSpans.length != 0 && isSpanInRange(underLineSpans[0], start, end)) {
+            state.enableUnderLine(true);
+        }
+        StrikethroughSpan[] strikethroughSpan = getEditableText().getSpans(start, start, StrikethroughSpan.class);
+        if (strikethroughSpan.length != 0 && isSpanInRange(strikethroughSpan[0], start, end)) {
+            state.enableStrikethrough(true);
+        }
+    }
+
+    /**
+     * estimate span whether in the editText limit by parameters start and end
+     *
+     * @param span  the span to estimate
+     * @param start start of the text
+     * @param end   end of the text
+     * @return if in this bound return true else return false
+     */
+    private boolean isSpanInRange(Object span, int start, int end)
+    {
+        return getEditableText().getSpanStart(span) <= start && getEditableText().getSpanEnd(span) >= end;
     }
 
 
@@ -315,7 +346,6 @@ public class RichEditText extends AppCompatEditText
             Object[] mSpans = (Object[]) spans.get(ss);
             int[] mSpanEnds = (int[]) ends.get(ss);
 
-
             for (int i = mSpanCount - 1; i >= 0; i--) {
                 if (mSpans[i] == span) {
                     mSpanEnds[i] += lengthAfter;
@@ -333,9 +363,7 @@ public class RichEditText extends AppCompatEditText
         if (isBold) {
             getEditableText().setSpan(new StyleSpan(Typeface.BOLD), getSelectionStart(), getSelectionEnd(), Spanned
                     .SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        else
-        {
+        } else {
             StyleSpan span = getStyleSpan(Typeface.BOLD, getEditableText(), getSelectionStart(), getSelectionEnd());
             getEditableText().removeSpan(span);
         }
