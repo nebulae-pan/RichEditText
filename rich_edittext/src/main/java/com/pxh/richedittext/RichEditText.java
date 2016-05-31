@@ -28,6 +28,7 @@ import android.view.WindowManager;
 
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -261,7 +262,7 @@ public class RichEditText extends AppCompatEditText
     private void changeSpanStateBySelection(int start)
     {
         state.clearSelection();
-        StyleSpan[] spans = getEditableText().getSpans(start - 1, start - 1 , StyleSpan.class);
+        StyleSpan[] spans = getEditableText().getSpans(start - 1, start , StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == Typeface.BOLD) {
                 state.enableBold(true);
@@ -355,17 +356,27 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextBold(boolean isBold, int start, int end)
     {
-        StyleSpan span = getStyleSpan(Typeface.BOLD, getEditableText(), start, end);
-        StyleSpan[] spans = getStyleSpans(Typeface.BOLD, start, end);
+        //merge span
         if (isBold) {
-            for (StyleSpan ss : spans) {
-                Log.v("ss", ss.toString());
-            }
-            if (span != null) {
+            StyleSpan[] spans = getStyleSpans(Typeface.BOLD, start, end);
+            for (StyleSpan span : spans) {
                 getEditableText().removeSpan(span);
             }
-            setSpan(new StyleSpan(Typeface.BOLD), start, end);
-        } else {
+            int newStart = start;
+            int newEnd = end;
+            StyleSpan before = getStyleSpan(Typeface.BOLD, getEditableText(), start - 1, start);
+            if (before != null) {
+                newStart = getEditableText().getSpanStart(before);
+                getEditableText().removeSpan(before);
+            }
+            StyleSpan after = getStyleSpan(Typeface.BOLD, getEditableText(), end, end + 1);
+            if (after != null) {
+                newEnd = getEditableText().getSpanEnd(after);
+                getEditableText().removeSpan(after);
+            }
+            setSpan(new StyleSpan(Typeface.BOLD), newStart, newEnd);
+        } else { // spilt span
+            StyleSpan span = getStyleSpan(Typeface.BOLD, getEditableText(), start, end);
             int spanStart = getEditableText().getSpanStart(span);
             int spanEnd = getEditableText().getSpanEnd(span);
             if (spanStart < start) {
