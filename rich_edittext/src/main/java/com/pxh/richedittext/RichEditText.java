@@ -28,6 +28,8 @@ import android.view.WindowManager;
 
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RichEditText extends AppCompatEditText
 {
@@ -96,8 +98,10 @@ public class RichEditText extends AppCompatEditText
 
     public void enableBold(boolean isValid)
     {
-        if (getSelectionStart() < getSelectionEnd())
-            setSelectionTextBold(isValid);
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        if (start < end)
+            setSelectionTextBold(isValid, start, end);
         state.enableBold(isValid);
     }
 
@@ -194,18 +198,15 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
-        Log.v("underline", String.valueOf(state.isUnderLineEnable()));
         if (state.isBoldEnable()) {
             if (start == 0) {
                 //if start = 0, text must doesn't have spans, use new StyleSpan
-                getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+                setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter);
             } else {
                 //estimate the character what in front of input whether have span
                 StyleSpan boldSpan = getStyleSpan(Typeface.BOLD, getEditableText(), start - 1, start);
                 if (boldSpan == null) {
-                    getEditableText().setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                    setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter);
                 } else {
                     //if have span , change the span's effect scope
                     changeCharacterStyleEnd(boldSpan, lengthAfter, getEditableText());
@@ -214,13 +215,11 @@ public class RichEditText extends AppCompatEditText
         }
         if (state.isItalicEnable()) {
             if (start == 0) {
-                getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+                setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter);
             } else {
                 StyleSpan italicSpan = getStyleSpan(Typeface.ITALIC, getEditableText(), start - 1, start);
                 if (italicSpan == null) {
-                    getEditableText().setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                    setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter);
                 } else {
                     changeCharacterStyleEnd(italicSpan, lengthAfter, getEditableText());
                 }
@@ -228,14 +227,12 @@ public class RichEditText extends AppCompatEditText
         }
         if (state.isUnderLineEnable()) {
             if (start == 0) {
-                getEditableText().setSpan(new UnderlineSpan(), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+                setSpan(new UnderlineSpan(), start, start + lengthAfter);
             } else {
                 CharacterStyle underLineSpan = getCharacterStyleSpan(UnderlineSpan.class, getEditableText(), start - 1,
                         start);
                 if (underLineSpan == null) {
-                    getEditableText().setSpan(new UnderlineSpan(), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                    setSpan(new UnderlineSpan(), start, start + lengthAfter);
                 } else {
                     changeCharacterStyleEnd(underLineSpan, lengthAfter, getEditableText());
                 }
@@ -243,14 +240,12 @@ public class RichEditText extends AppCompatEditText
         }
         if (state.isStrikethroughEnable()) {
             if (start == 0) {
-                getEditableText().setSpan(new StrikethroughSpan(), start, start + lengthAfter, Spanned
-                        .SPAN_EXCLUSIVE_EXCLUSIVE);
+                setSpan(new StrikethroughSpan(), start, start + lengthAfter);
             } else {
                 CharacterStyle strikeThroughSpan = getCharacterStyleSpan(StrikethroughSpan.class, getEditableText(),
                         start - 1, start);
                 if (strikeThroughSpan == null) {
-                    getEditableText().setSpan(new StrikethroughSpan(), start, start + lengthAfter, Spanned
-                            .SPAN_EXCLUSIVE_EXCLUSIVE);
+                    setSpan(new StrikethroughSpan(), start, start + lengthAfter);
                 } else {
                     changeCharacterStyleEnd(strikeThroughSpan, lengthAfter, getEditableText());
                 }
@@ -266,7 +261,7 @@ public class RichEditText extends AppCompatEditText
     private void changeSpanStateBySelection(int start)
     {
         state.clearSelection();
-        StyleSpan[] spans = getEditableText().getSpans(start, start, StyleSpan.class);
+        StyleSpan[] spans = getEditableText().getSpans(start - 1, start - 1 , StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == Typeface.BOLD) {
                 state.enableBold(true);
@@ -358,13 +353,27 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setSelectionTextBold(boolean isBold)
+    private void setSelectionTextBold(boolean isBold, int start, int end)
     {
+        StyleSpan span = getStyleSpan(Typeface.BOLD, getEditableText(), start, end);
+        StyleSpan[] spans = getStyleSpans(Typeface.BOLD, start, end);
         if (isBold) {
-            getEditableText().setSpan(new StyleSpan(Typeface.BOLD), getSelectionStart(), getSelectionEnd(), Spanned
-                    .SPAN_EXCLUSIVE_EXCLUSIVE);
+            for (StyleSpan ss : spans) {
+                Log.v("ss", ss.toString());
+            }
+            if (span != null) {
+                getEditableText().removeSpan(span);
+            }
+            setSpan(new StyleSpan(Typeface.BOLD), start, end);
         } else {
-            StyleSpan span = getStyleSpan(Typeface.BOLD, getEditableText(), getSelectionStart(), getSelectionEnd());
+            int spanStart = getEditableText().getSpanStart(span);
+            int spanEnd = getEditableText().getSpanEnd(span);
+            if (spanStart < start) {
+                setSpan(new StyleSpan(Typeface.BOLD), spanStart, start);
+            }
+            if (spanEnd > end) {
+                setSpan(new StyleSpan(Typeface.BOLD), end, spanEnd);
+            }
             getEditableText().removeSpan(span);
         }
     }
@@ -384,8 +393,7 @@ public class RichEditText extends AppCompatEditText
                 break;
             }
         }
-        getEditableText().setSpan(new QuoteSpan(), getSelectionStart(), getSelectionEnd(), Spanned
-                .SPAN_EXCLUSIVE_EXCLUSIVE);
+        setSpan(new QuoteSpan(), getSelectionStart(), getSelectionEnd());
     }
 
     private void setBullet()
@@ -403,8 +411,7 @@ public class RichEditText extends AppCompatEditText
                 break;
             }
         }
-        getEditableText().setSpan(new BulletSpan(), getSelectionStart(), getSelectionEnd(), Spanned
-                .SPAN_EXCLUSIVE_EXCLUSIVE);
+        setSpan(new BulletSpan(), getSelectionStart(), getSelectionEnd());
     }
 
     /**
@@ -427,6 +434,18 @@ public class RichEditText extends AppCompatEditText
         return null;
     }
 
+    protected StyleSpan[] getStyleSpans(int style, int start, int end)
+    {
+        StyleSpan[] spans = getEditableText().getSpans(start, end, StyleSpan.class);
+        ArrayList<StyleSpan> result = new ArrayList<>();
+        for (StyleSpan span : spans) {
+            if (span.getStyle() == style) {
+                result.add(span);
+            }
+        }
+        return result.toArray(new StyleSpan[result.size()]);
+    }
+
 
     protected CharacterStyle getCharacterStyleSpan(Class<? extends CharacterStyle> clazz, Editable editable, int
             start, int end)
@@ -438,6 +457,11 @@ public class RichEditText extends AppCompatEditText
             }
         }
         return null;
+    }
+
+    private void setSpan(Object span, int start, int end)
+    {
+        getEditableText().setSpan(span,start,end,Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
 
