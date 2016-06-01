@@ -23,14 +23,10 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
-
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class RichEditText extends AppCompatEditText
 {
@@ -262,7 +258,7 @@ public class RichEditText extends AppCompatEditText
     private void changeSpanStateBySelection(int start)
     {
         state.clearSelection();
-        StyleSpan[] spans = getEditableText().getSpans(start - 1, start , StyleSpan.class);
+        StyleSpan[] spans = getEditableText().getSpans(start - 1, start, StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == Typeface.BOLD) {
                 state.enableBold(true);
@@ -294,13 +290,26 @@ public class RichEditText extends AppCompatEditText
             }
         }
         UnderlineSpan[] underLineSpans = getEditableText().getSpans(start, start, UnderlineSpan.class);
-        if (underLineSpans.length != 0 && isSpanInRange(underLineSpans[0], start, end)) {
+        if (underLineSpans.length != 0 && isRangeInSpan(underLineSpans[0], start, end)) {
             state.enableUnderLine(true);
         }
         StrikethroughSpan[] strikethroughSpan = getEditableText().getSpans(start, start, StrikethroughSpan.class);
-        if (strikethroughSpan.length != 0 && isSpanInRange(strikethroughSpan[0], start, end)) {
+        if (strikethroughSpan.length != 0 && isRangeInSpan(strikethroughSpan[0], start, end)) {
             state.enableStrikethrough(true);
         }
+    }
+
+    /**
+     * estimate range whether in the span's start to end
+     *
+     * @param span  the span to estimate
+     * @param start start of the range
+     * @param end   end of the range
+     * @return if in this bound return true else return false
+     */
+    private boolean isRangeInSpan(Object span, int start, int end)
+    {
+        return getEditableText().getSpanStart(span) <= start && getEditableText().getSpanEnd(span) >= end;
     }
 
     /**
@@ -313,7 +322,7 @@ public class RichEditText extends AppCompatEditText
      */
     private boolean isSpanInRange(Object span, int start, int end)
     {
-        return getEditableText().getSpanStart(span) <= start && getEditableText().getSpanEnd(span) >= end;
+        return getEditableText().getSpanStart(span) >= start && getEditableText().getSpanEnd(span)<=end;
     }
 
 
@@ -360,7 +369,9 @@ public class RichEditText extends AppCompatEditText
         if (isBold) {
             StyleSpan[] spans = getStyleSpans(Typeface.BOLD, start, end);
             for (StyleSpan span : spans) {
-                getEditableText().removeSpan(span);
+                if (isSpanInRange(span, start, end)) {
+                    getEditableText().removeSpan(span);
+                }
             }
             int newStart = start;
             int newEnd = end;
@@ -472,7 +483,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setSpan(Object span, int start, int end)
     {
-        getEditableText().setSpan(span,start,end,Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        getEditableText().setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
 
