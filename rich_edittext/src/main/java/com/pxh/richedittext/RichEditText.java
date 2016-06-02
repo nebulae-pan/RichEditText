@@ -180,7 +180,21 @@ public class RichEditText extends AppCompatEditText
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter)
     {
-        setTextSpan(start, lengthAfter);
+        if (state == null) {
+            return;
+        }
+        if (state.isBoldEnable()) {
+            setTextSpan(Typeface.BOLD, start, lengthAfter);
+        }
+        if (state.isItalicEnable()) {
+            setTextSpan(Typeface.ITALIC, start, lengthAfter);
+        }
+        if (state.isUnderLineEnable()) {
+            setTextSpan(new UnderlineSpan(),start,lengthAfter);
+        }
+        if (state.isStrikethroughEnable()) {
+            setTextSpan(new StrikethroughSpan(), start, lengthAfter);
+        }
     }
 
     /**
@@ -190,62 +204,33 @@ public class RichEditText extends AppCompatEditText
      * @param start       the start of character's input
      * @param lengthAfter the length of character's input
      */
-    private void setTextSpan(int start, int lengthAfter)
+    private void setTextSpan(int style, int start, int lengthAfter)
     {
-        if (state == null) {
-            return;
-        }
-        if (state.isBoldEnable()) {
-            if (start == 0) {
-                //if start = 0, text must doesn't have spans, use new StyleSpan
-                setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter);
+        if (start == 0) {
+            //if start = 0, text must doesn't have spans, use new StyleSpan
+            setSpan(new StyleSpan(style), start, start + lengthAfter);
+        } else {
+            //estimate the character what in front of input whether have span
+            StyleSpan boldSpan = getStyleSpan(style, getEditableText(), start - 1, start);
+            if (boldSpan == null) {
+                setSpan(new StyleSpan(style), start, start + lengthAfter);
             } else {
-                //estimate the character what in front of input whether have span
-                StyleSpan boldSpan = getStyleSpan(Typeface.BOLD, getEditableText(), start - 1, start);
-                if (boldSpan == null) {
-                    setSpan(new StyleSpan(Typeface.BOLD), start, start + lengthAfter);
-                } else {
-                    //if have span , change the span's effect scope
-                    changeCharacterStyleEnd(boldSpan, lengthAfter, getEditableText());
-                }
+                //if have span , change the span's effect scope
+                changeCharacterStyleEnd(boldSpan, lengthAfter, getEditableText());
             }
         }
-        if (state.isItalicEnable()) {
-            if (start == 0) {
-                setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter);
+    }
+
+    private void setTextSpan(CharacterStyle span, int start, int lengthAfter)
+    {
+        if (start == 0) {
+            setSpan(span, start, start + lengthAfter);
+        } else {
+            CharacterStyle characterStyleSpan = getCharacterStyleSpan(span.getClass(), start - 1, start);
+            if (characterStyleSpan == null) {
+                setSpan(span, start, start + lengthAfter);
             } else {
-                StyleSpan italicSpan = getStyleSpan(Typeface.ITALIC, getEditableText(), start - 1, start);
-                if (italicSpan == null) {
-                    setSpan(new StyleSpan(Typeface.ITALIC), start, start + lengthAfter);
-                } else {
-                    changeCharacterStyleEnd(italicSpan, lengthAfter, getEditableText());
-                }
-            }
-        }
-        if (state.isUnderLineEnable()) {
-            if (start == 0) {
-                setSpan(new UnderlineSpan(), start, start + lengthAfter);
-            } else {
-                CharacterStyle underLineSpan = getCharacterStyleSpan(UnderlineSpan.class, getEditableText(), start - 1,
-                        start);
-                if (underLineSpan == null) {
-                    setSpan(new UnderlineSpan(), start, start + lengthAfter);
-                } else {
-                    changeCharacterStyleEnd(underLineSpan, lengthAfter, getEditableText());
-                }
-            }
-        }
-        if (state.isStrikethroughEnable()) {
-            if (start == 0) {
-                setSpan(new StrikethroughSpan(), start, start + lengthAfter);
-            } else {
-                CharacterStyle strikeThroughSpan = getCharacterStyleSpan(StrikethroughSpan.class, getEditableText(),
-                        start - 1, start);
-                if (strikeThroughSpan == null) {
-                    setSpan(new StrikethroughSpan(), start, start + lengthAfter);
-                } else {
-                    changeCharacterStyleEnd(strikeThroughSpan, lengthAfter, getEditableText());
-                }
+                changeCharacterStyleEnd(characterStyleSpan, lengthAfter, getEditableText());
             }
         }
     }
@@ -281,7 +266,7 @@ public class RichEditText extends AppCompatEditText
         state.clearSelection();
         StyleSpan[] spans = getEditableText().getSpans(start, end, StyleSpan.class);
         for (StyleSpan span : spans) {
-            if (isSpanInRange(span, start, end)) {
+            if (isRangeInSpan(span, start, end)) {
                 if (span.getStyle() == Typeface.BOLD) {
                     state.enableBold(true);
                 } else {
@@ -322,7 +307,7 @@ public class RichEditText extends AppCompatEditText
      */
     private boolean isSpanInRange(Object span, int start, int end)
     {
-        return getEditableText().getSpanStart(span) >= start && getEditableText().getSpanEnd(span)<=end;
+        return getEditableText().getSpanStart(span) >= start && getEditableText().getSpanEnd(span) <= end;
     }
 
 
@@ -365,7 +350,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextBold(boolean isBold, int start, int end)
     {
-        setSelectionTextSpan(isBold,Typeface.BOLD,start,end);
+        setSelectionTextSpan(isBold, Typeface.BOLD, start, end);
     }
 
     private void setSelectionTextSpan(boolean isValid, int style, int start, int end)
@@ -510,10 +495,10 @@ public class RichEditText extends AppCompatEditText
         return result.toArray(new StyleSpan[result.size()]);
     }
 
-    protected CharacterStyle getCharacterStyleSpan(Class<? extends CharacterStyle> clazz, Editable editable, int
+    protected CharacterStyle getCharacterStyleSpan(Class<? extends CharacterStyle> clazz, int
             start, int end)
     {
-        CharacterStyle[] spans = editable.getSpans(start, end, CharacterStyle.class);
+        CharacterStyle[] spans = getEditableText().getSpans(start, end, CharacterStyle.class);
         for (CharacterStyle span : spans) {
             if (span.getClass().equals(clazz)) {
                 return span;
