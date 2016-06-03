@@ -107,7 +107,7 @@ public class RichEditText extends AppCompatEditText
         int start = getSelectionStart();
         int end = getSelectionEnd();
         if (start < end)
-            setSelectionTextBold(isValid, start, end);
+            setSelectionTextItalic(isValid, start, end);
         state.enableItalic(isValid);
     }
 
