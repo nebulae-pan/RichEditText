@@ -113,11 +113,19 @@ public class RichEditText extends AppCompatEditText
 
     public void enableUnderLine(boolean isValid)
     {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        if (start < end)
+            setSelectionTextUnderLine(isValid, start, end);
         state.enableUnderLine(isValid);
     }
 
     public void enableStrikethrough(boolean isValid)
     {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        if (start < end)
+            setSelectionTextStrikeThrough(isValid, start, end);
         state.enableStrikethrough(isValid);
     }
 
@@ -362,6 +370,16 @@ public class RichEditText extends AppCompatEditText
         setSelectionTextSpan(isItalic, Typeface.ITALIC, start, end);
     }
 
+    private void setSelectionTextUnderLine(boolean isItalic, int start, int end)
+    {
+        setSelectionTextSpan(isItalic, new UnderlineSpan(), start, end);
+    }
+
+    private void setSelectionTextStrikeThrough(boolean isItalic, int start, int end)
+    {
+        setSelectionTextSpan(isItalic, new StrikethroughSpan(), start, end);
+    }
+
     private void setSelectionTextSpan(boolean isValid, int style, int start, int end)
     {
         //merge span
@@ -399,7 +417,7 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setTextSelection(boolean isBold, CharacterStyle cSpan, int start, int end)
+    private void setSelectionTextSpan(boolean isBold, CharacterStyle cSpan, int start, int end)
     {
         //merge span
         if (isBold) {

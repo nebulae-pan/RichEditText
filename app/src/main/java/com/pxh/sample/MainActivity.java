@@ -83,7 +83,20 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.post:
                 Log.v("html", richEditText.getHtml());
-                content.setText(Html.fromHtml(richEditText.getHtml()));
+                ////content.setText(Html.fromHtml(richEditText.getHtml()));
+                richEditText.setHtml("<html>\n" +
+                        "\n" +
+                        "<body>\n" +
+                        "\n" +
+                        "<h4>一个无序列表：</h4>\n" +
+                        "<ul>\n" +
+                        "  <li>咖啡</li>\n" +
+                        "  <li>茶</li>\n" +
+                        "  <li>牛奶</li>\n" +
+                        "</ul>\n" +
+                        "\n" +
+                        "</body>\n" +
+                        "</html>\n");
                 break;
         }
         return super.onOptionsItemSelected(item);
