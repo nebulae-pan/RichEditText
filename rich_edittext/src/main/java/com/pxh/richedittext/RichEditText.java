@@ -141,6 +141,11 @@ public class RichEditText extends AppCompatEditText
 
     public void enableBullet(boolean isValid)
     {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        if (start < end)
+            setSelectionTextStrikeThrough(isValid, start, end);
+        state.enableStrikethrough(isValid);
         setBullet();
     }
 
