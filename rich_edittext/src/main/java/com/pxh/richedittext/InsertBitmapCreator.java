@@ -112,7 +112,7 @@ public class InsertBitmapCreator implements BitmapCreator
     }
 
     /**
-     * @return 返回指定笔和指定字符串的长度
+     * @return font length
      */
     public static float getFontLength(Paint paint, String str)
     {
@@ -120,7 +120,7 @@ public class InsertBitmapCreator implements BitmapCreator
     }
 
     /**
-     * @return 返回指定笔的文字高度
+     * @return font height
      */
     public static float getFontHeight(Paint paint)
     {
@@ -129,7 +129,7 @@ public class InsertBitmapCreator implements BitmapCreator
     }
 
     /**
-     * @return 返回指定笔离文字顶部的基准距离
+     * @return font leading
      */
     public static float getFontLeading(Paint paint)
     {

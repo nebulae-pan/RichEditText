@@ -93,6 +93,10 @@ public class RichEditText extends AppCompatEditText
         getEditableText().insert(getSelectionStart(), ss);
     }
 
+    /**
+     * enable bold span
+     * @param isValid if enable is true
+     */
     public void enableBold(boolean isValid)
     {
         int start = getSelectionStart();
