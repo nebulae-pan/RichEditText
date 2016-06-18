@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity
 
     private TextView content;
 
+
 //    String html = "下面是图片了 " +
 //            "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\"
 // height=\"50\"/>" +
