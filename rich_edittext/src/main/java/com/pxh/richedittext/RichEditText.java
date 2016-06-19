@@ -106,6 +106,10 @@ public class RichEditText extends AppCompatEditText
         state.enableBold(isValid);
     }
 
+    /**
+     * enable italic span
+     * @param isValid if enable is true
+     */
     public void enableItalic(boolean isValid)
     {
         int start = getSelectionStart();
@@ -139,7 +143,7 @@ public class RichEditText extends AppCompatEditText
         int end = getSelectionEnd();
         if (start < end)
             setSelectionTextStrikeThrough(isValid, start, end);
-        state.enableStrikethrough(isValid);
+        state.enableQuote(isValid);
         setQuote();
     }
 
@@ -149,7 +153,6 @@ public class RichEditText extends AppCompatEditText
         int end = getSelectionEnd();
         if (start < end)
             setSelectionTextStrikeThrough(isValid, start, end);
-        state.enableStrikethrough(isValid);
         setBullet();
     }
 

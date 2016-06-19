@@ -40,6 +40,11 @@ public class TextSpanState
         setStateSelection(isValid, 8, TextSpan.Strikethrough);
     }
 
+    public void enableQuote(boolean isValid)
+    {
+        setStateSelection(isValid, 16, TextSpan.Quote);
+    }
+
     private void setStateSelection(boolean isValid, int spanValue, TextSpan type)
     {
         if (isValid == getStateSelection(spanValue)) {
@@ -72,6 +77,11 @@ public class TextSpanState
     public boolean isStrikethroughEnable()
     {
         return getStateSelection(8);
+    }
+
+    public boolean isQuoteEnable()
+    {
+        return getStateSelection(16);
     }
 
     private boolean getStateSelection(int spanValue)
