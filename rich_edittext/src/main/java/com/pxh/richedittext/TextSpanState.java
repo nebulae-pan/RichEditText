@@ -45,6 +45,11 @@ public class TextSpanState
         setStateSelection(isValid, 16, TextSpan.Quote);
     }
 
+    public void enableBullet(boolean isValid)
+    {
+        setStateSelection(isValid, 32, TextSpan.Bullet);
+    }
+
     private void setStateSelection(boolean isValid, int spanValue, TextSpan type)
     {
         if (isValid == getStateSelection(spanValue)) {
@@ -82,6 +87,11 @@ public class TextSpanState
     public boolean isQuoteEnable()
     {
         return getStateSelection(16);
+    }
+
+    public boolean isBulletEnable()
+    {
+        return getStateSelection(32);
     }
 
     private boolean getStateSelection(int spanValue)
