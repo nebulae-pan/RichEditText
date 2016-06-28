@@ -397,6 +397,11 @@ public class RichEditText extends AppCompatEditText
         setSelectionTextSpan(isItalic, new StrikethroughSpan(), start, end);
     }
 
+    private void setSelectionTextQuote(boolean isItalic, int start, int end)
+    {
+        setSelectionTextSpan(isItalic, new StrikethroughSpan(), start, end);
+    }
+
     private void setSelectionTextSpan(boolean isValid, int style, int start, int end)
     {
         //merge span
