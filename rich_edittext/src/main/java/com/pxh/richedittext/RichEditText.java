@@ -399,7 +399,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextQuote(boolean isItalic, int start, int end)
     {
-        setSelectionTextSpan(isItalic, new StrikethroughSpan(), start, end);
+        setSelectionTextSpan(isItalic, new QuoteSpan(), start, end);
     }
 
     private void setSelectionTextSpan(boolean isValid, int style, int start, int end)
@@ -474,6 +474,11 @@ public class RichEditText extends AppCompatEditText
             }
             getEditableText().removeSpan(span);
         }
+    }
+
+    private void setSelectionTextSpan(boolean isBold, QuoteSpan span, int start, int end)
+    {
+
     }
 
     private void setQuote()
