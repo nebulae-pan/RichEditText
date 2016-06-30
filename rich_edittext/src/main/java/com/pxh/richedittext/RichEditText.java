@@ -16,6 +16,7 @@ import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
@@ -439,10 +440,10 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setSelectionTextSpan(boolean isBold, CharacterStyle cSpan, int start, int end)
+    private void setSelectionTextSpan(boolean isValid, CharacterStyle cSpan, int start, int end)
     {
         //merge span
-        if (isBold) {
+        if (isValid) {
             CharacterStyle[] spans = getCharacterStyles(cSpan.getClass(), start, end);
             for (CharacterStyle span : spans) {
                 if (isSpanInRange(span, start, end)) {
@@ -476,9 +477,10 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setSelectionTextSpan(boolean isBold, QuoteSpan span, int start, int end)
+    private void setSelectionTextSpan(boolean isValid, LeadingMarginSpan leadingMarginSpan, int start, int end)
     {
-
+        if (isValid) {
+        }
     }
 
     private void setQuote()
