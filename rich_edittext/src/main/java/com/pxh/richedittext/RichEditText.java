@@ -96,6 +96,7 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * enable bold span
+     *
      * @param isValid if enable is true
      */
     public void enableBold(boolean isValid)
@@ -109,6 +110,7 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * enable italic span
+     *
      * @param isValid if enable is true
      */
     public void enableItalic(boolean isValid)
@@ -147,9 +149,8 @@ public class RichEditText extends AppCompatEditText
         state.enableQuote(isValid);
         setQuote();*/
         UnderlineSpan quoteSpan = new UnderlineSpan();
-        for(Object object : getParagraphStyles(quoteSpan.getClass(),getSelectionStart(),getSelectionEnd()))
-        {
-            Log.v("quote",object.toString());
+        for (Object object : getParagraphStyles(quoteSpan.getClass(), getSelectionStart(), getSelectionEnd())) {
+            Log.v("quote", object.toString());
         }
     }
 
@@ -159,7 +160,7 @@ public class RichEditText extends AppCompatEditText
         int end = getSelectionEnd();
         if (start < end)
             //setSelectionTextStrikeThrough(isValid, start, end);
-        setBullet();
+            setBullet();
     }
 
     public boolean isBoldEnable()
@@ -230,6 +231,10 @@ public class RichEditText extends AppCompatEditText
         if (state.isStrikethroughEnable()) {
             setTextSpan(new StrikethroughSpan(), start, lengthAfter);
         }
+        if(state.isQuoteEnable())
+        {
+            //setTextSpan
+        }
     }
 
     /**
@@ -266,6 +271,20 @@ public class RichEditText extends AppCompatEditText
                 setSpan(span, start, start + lengthAfter);
             } else {
                 changeCharacterStyleEnd(characterStyleSpan, lengthAfter, getEditableText());
+            }
+        }
+    }
+
+    private void setTextSpan(Object span, int start, int lengthAfter)
+    {
+        if (start == 0) {
+            setSpan(span, start, start + lengthAfter);
+        } else {
+            Object preSpan = getParagraphStyle(span.getClass(), start - 1, start);
+            if (preSpan == null) {
+                setSpan(span, start, start + lengthAfter);
+            } else {
+                changeStyleEnd(preSpan, lengthAfter, getEditableText());
             }
         }
     }
@@ -383,6 +402,37 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
+    private void changeStyleEnd(Object span, int lengthAfter, Editable ss)
+    {
+        if (lengthAfter == 0)
+            return;
+        try {
+            Class<?> classType = ss.getClass();
+
+            Field count = classType.getDeclaredField("mSpanCount");
+            Field spans = classType.getDeclaredField("mSpans");
+            Field ends = classType.getDeclaredField("mSpanEnds");
+            count.setAccessible(true);
+            spans.setAccessible(true);
+            ends.setAccessible(true);
+
+            int mSpanCount = (int) count.get(ss);
+            Object[] mSpans = (Object[]) spans.get(ss);
+            int[] mSpanEnds = (int[]) ends.get(ss);
+
+            for (int i = mSpanCount - 1; i >= 0; i--) {
+                if (mSpans[i] == span) {
+                    mSpanEnds[i] += lengthAfter;
+                    break;
+                }
+            }
+            ends.set(ss, mSpanEnds);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private void setSelectionTextBold(boolean isBold, int start, int end)
     {
         setSelectionTextSpan(isBold, Typeface.BOLD, start, end);
@@ -484,38 +534,38 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextSpan(boolean isValid, Object paragraphStyle, int start, int end)
     {
-        /*if (isValid) {
-            StyleSpan[] spans = getStyleSpans(style, start, end);
-            for (StyleSpan span : spans) {
+        if (isValid) {
+            Object[] spans = getParagraphStyles(paragraphStyle.getClass(), start, end);
+            for (Object span : spans) {
                 if (isSpanInRange(span, start, end)) {
                     getEditableText().removeSpan(span);
                 }
             }
             int newStart = start;
             int newEnd = end;
-            StyleSpan before = getStyleSpan(style, getEditableText(), start - 1, start);
+            Object before = getParagraphStyle(paragraphStyle.getClass(), start - 1, start);
             if (before != null) {
                 newStart = getEditableText().getSpanStart(before);
                 getEditableText().removeSpan(before);
             }
-            StyleSpan after = getStyleSpan(style, getEditableText(), end, end + 1);
+            Object after = getParagraphStyle(paragraphStyle.getClass(), end, end + 1);
             if (after != null) {
                 newEnd = getEditableText().getSpanEnd(after);
                 getEditableText().removeSpan(after);
             }
-            setSpan(new StyleSpan(style), newStart, newEnd);
+            setSpan(paragraphStyle, newStart, newEnd);
         } else { // spilt span
-            StyleSpan span = getStyleSpan(style, getEditableText(), start, end);
+            Object span = getParagraphStyle(paragraphStyle.getClass(), start, end);
             int spanStart = getEditableText().getSpanStart(span);
             int spanEnd = getEditableText().getSpanEnd(span);
             if (spanStart < start) {
-                setSpan(new StyleSpan(style), spanStart, start);
+                setSpan(paragraphStyle, spanStart, start);
             }
             if (spanEnd > end) {
-                setSpan(new StyleSpan(style), end, spanEnd);
+                setSpan(paragraphStyle, end, spanEnd);
             }
             getEditableText().removeSpan(span);
-        }*/
+        }
     }
 
     private void setQuote()
@@ -603,9 +653,20 @@ public class RichEditText extends AppCompatEditText
         return getEditableText().getSpans(start, end, clazz);
     }
 
-    protected Object[] getParagraphStyles(Class<?> clazz,int start, int end)
+    protected Object[] getParagraphStyles(Class<?> clazz, int start, int end)
     {
         return getEditableText().getSpans(start, end, clazz);
+    }
+
+    protected Object getParagraphStyle(Class<?> clazz, int start, int end)
+    {
+        Object[] spans = getEditableText().getSpans(start, end, clazz);
+        for (Object span : spans) {
+            if (span.getClass().equals(clazz)) {
+                return span;
+            }
+        }
+        return null;
     }
 
     private void setSpan(Object span, int start, int end)

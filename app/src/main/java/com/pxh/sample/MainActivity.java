@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity
 //            "<img src='http://h.hiphotos.baidu.com/image/pic/item/d000baa1cd11728b2027e428cafcc3cec3fd2cb5.jpg'/>" +
 //            "<br>还有一张<br>" +
 //            "<img src='http://img.61gequ.com/allimg/2011-4/201142614314278502.jpg' />";
+    String html = "<p dir=\"ltr\">12<b>3123</b><b><i>21312</i></b><b><i><u>3131</u></i></b><b><i><u><strike" +
+        ">2323123123123123123123123123123123131</strike></u></i></b><b><i><u>23123</u></i></b><i><u>123</u></i><u" +
+        ">1231</u>23123</p>";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
