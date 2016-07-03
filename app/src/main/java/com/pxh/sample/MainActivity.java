@@ -5,8 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
+import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +22,10 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.richedittext.RichEditText;
 import com.pxh.richedittext.TextSpanState;
+import com.pxh.richparser.RichHtml;
 
+import org.ccil.cowan.tagsoup.HTMLSchema;
+import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -30,9 +37,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -43,16 +47,16 @@ public class MainActivity extends AppCompatActivity
     private TextView content;
 
 
-    String html = "<html>下面是图片了 " +
-            "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\" "+
-            "height=\"50\"/>" +
-            "<br>这也是图片<br>" +
-            "<img src='http://h.hiphotos.baidu.com/image/pic/item/d000baa1cd11728b2027e428cafcc3cec3fd2cb5.jpg'/>" +
-            "<br>还有一张<br>" +
-            "<img src='http://img.61gequ.com/allimg/2011-4/201142614314278502.jpg' /></html>";
-//    String html = "<p dir=\"ltr\">12<b>3123</b><b><i>21312</i></b><b><i><u>3131</u></i></b><b><i><u><strike" +
-//        ">2323123123123123123123123123123123131</strike></u></i></b><b><i><u>23123</u></i></b><i><u>123</u></i><u" +
-//        ">1231</u>23123</p>";
+//    String html = "下面是图片了 " +
+//            "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\" "+
+//            "height=\"50\"/>" +
+//            "<br>这也是图片<br>" +
+//            "<img src='http://h.hiphotos.baidu.com/image/pic/item/d000baa1cd11728b2027e428cafcc3cec3fd2cb5.jpg'/>" +
+//            "<br>还有一张<br>" +
+//            "<img src='http://img.61gequ.com/allimg/2011-4/201142614314278502.jpg' />";
+    String html = "<p dir=\"ltr\">12<b>3123</b><b><i>21312</i></b><b><i><u>3131</u></i></b><b><i><u><strike" +
+        ">2323123123123123123123123123123123131</strike></u></i></b><b><i><u>23123</u></i></b><i><u>123</u></i><u" +
+        ">1231</u>23123</p>";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -90,95 +94,9 @@ public class MainActivity extends AppCompatActivity
 
     private void test()
     {
-        Log.v("1","1231");
-        try {
-            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-            SAXParser newSAXParser = saxParserFactory.newSAXParser();
-            XMLReader parser = newSAXParser.getXMLReader();
-            parser.setContentHandler(new MyContentHandler());
-            parser.parse(new InputSource(new StringReader(html)));
 
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
     }
 
-    class MyContentHandler implements ContentHandler
-    {
-        @Override
-        public void setDocumentLocator(Locator locator)
-        {
-
-        }
-
-        @Override
-        public void startDocument() throws SAXException
-        {
-            Log.v("start", "Document");
-        }
-
-        @Override
-        public void endDocument() throws SAXException
-        {
-            Log.v("end", "Document");
-        }
-
-        @Override
-        public void startPrefixMapping(String prefix, String uri) throws SAXException
-        {
-            Log.v("start", "mapping"+"prefix:"+prefix+"\nuri"+uri);
-        }
-
-        @Override
-        public void endPrefixMapping(String prefix) throws SAXException
-        {
-            Log.v("start", "mapping"+"prefix:"+prefix);
-        }
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException
-        {
-            Log.d(TAG, "startElement() called with: " + "uri = [" + uri + "], localName = [" + localName + "], qName " +
-                    "= [" + qName + "], atts = [" + atts.getValue("width") + "]");
-
-        }
-
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException
-        {
-            Log.d(TAG, "endElement() called with: " + "uri = [" + uri + "], localName = [" + localName + "], qName = " +
-                    "[" + qName + "]");
-        }
-
-        @Override
-        public void characters(char[] ch, int start, int length) throws SAXException
-        {
-            Log.d(TAG, "characters() called with: "+new String(ch));
-        }
-
-        @Override
-        public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException
-        {
-            Log.d(TAG, "ignorableWhitespace() called with: " + "ch = [" + ch + "], start = [" + start + "], length = " +
-                    "[" + length + "]");
-        }
-
-        @Override
-        public void processingInstruction(String target, String data) throws SAXException
-        {
-
-        }
-
-        @Override
-        public void skippedEntity(String name) throws SAXException
-        {
-            Log.d(TAG, "skippedEntity() called with: " + "name = [" + name + "]");
-        }
-    }
 
    @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -191,12 +109,58 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, 0);
                 break;
             case R.id.post:
-                test();
-                Log.v("html", richEditText.getHtml());
-                content.setText(Html.fromHtml(richEditText.getHtml()));
+                //Log.v("html", richEditText.getHtml());
+                content.setText(RichHtml.fromHtml(html,null, new MyTagHandler()));
+
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    static class MyTagHandler implements Html.TagHandler
+    {
+        private static class Strike { }
+        @Override
+        public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader)
+        {
+            if(opening)
+            {
+                Log.v("tag", tag);
+                if(tag.equals("strike"))
+                {
+                    int len = output.length();
+                    Log.v("len", len + "");
+                    output.setSpan(new Strike(), len, len, Spannable.SPAN_MARK_MARK);
+                }
+            }else
+            {
+                if(tag.equals("strike"))
+                {
+                    int len = output.length();
+                    Object obj = getLast(output, Strike.class);
+                    int where = output.getSpanStart(obj);
+                    output.removeSpan(obj);
+
+                    if (where != len) {
+                        output.setSpan(new StrikethroughSpan(), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                }
+            }
+        }
+
+        private static Object getLast(Spanned text, Class kind) {
+        /*
+         * This knows that the last returned object from getSpans()
+         * will be the most recently added.
+         */
+            Object[] objs = text.getSpans(0, text.length(), kind);
+
+            if (objs.length == 0) {
+                return null;
+            } else {
+                return objs[objs.length - 1];
+            }
+        }
     }
 
 

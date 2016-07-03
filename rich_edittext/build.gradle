@@ -23,4 +23,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    compile group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: '1.2.1'
+
 }
