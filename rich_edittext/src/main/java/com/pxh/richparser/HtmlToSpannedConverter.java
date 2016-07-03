@@ -109,6 +109,7 @@ public class HtmlToSpannedConverter implements ContentHandler
 
     private void handleStartTag(String tag, Attributes attributes)
     {
+        Log.v("starttag", "tag");
         switch (tag.toLowerCase()) {
             case "p":
                 handleP(mSpannableStringBuilder);
@@ -269,7 +270,7 @@ public class HtmlToSpannedConverter implements ContentHandler
         if (d == null) {
             /*d = Resources.getSystem().
                     getDrawable(com.android.internal.R.drawable.unknown_image);*/
-            d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
+            //d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
         }
         int len = text.length();
         text.append("\uFFFC");
