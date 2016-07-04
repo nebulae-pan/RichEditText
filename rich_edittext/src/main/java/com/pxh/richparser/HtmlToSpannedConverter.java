@@ -2,7 +2,6 @@ package com.pxh.richparser;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
@@ -16,9 +15,8 @@ import android.text.style.ImageSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
-import android.text.style.SubscriptSpan;
-import android.text.style.SuperscriptSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
@@ -104,12 +102,38 @@ public class HtmlToSpannedConverter implements ContentHandler
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
-
+        StringBuilder sb = new StringBuilder();
+        /*
+         * Ignore whitespace that immediately follows other whitespace;
+         * newlines count as spaces.
+         */
+        for (int i = 0; i < length; i++) {
+            char c = ch[i + start];
+            if (c == ' ' || c == '\n') {
+                char preC;
+                int len = sb.length();
+                if (len == 0) {
+                    len = mSpannableStringBuilder.length();
+                    if (len == 0) {
+                        preC = '\n';
+                    } else {
+                        preC = mSpannableStringBuilder.charAt(len - 1);
+                    }
+                } else {
+                    preC = sb.charAt(len - 1);
+                }
+                if (preC != ' ' && preC != '\n') {
+                    sb.append(' ');
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        mSpannableStringBuilder.append(sb);
     }
 
     private void handleStartTag(String tag, Attributes attributes)
     {
-        Log.v("starttag", "tag");
         switch (tag.toLowerCase()) {
             case "p":
                 handleP(mSpannableStringBuilder);
@@ -142,6 +166,9 @@ public class HtmlToSpannedConverter implements ContentHandler
                 break;
             case "img":
                 startImg(mSpannableStringBuilder, attributes, mImageGetter);
+            case "strike":
+                start(mSpannableStringBuilder, new Strike());
+                break;
             default:
                 if (tag.length() == 2 &&
                         Character.toLowerCase(tag.charAt(0)) == 'h' &&
@@ -190,6 +217,8 @@ public class HtmlToSpannedConverter implements ContentHandler
             case "u":
                 end(mSpannableStringBuilder, Underline.class, new UnderlineSpan());
                 break;
+            case "strike":
+                end(mSpannableStringBuilder, Strike.class, new StrikethroughSpan());
             default:
                 if (tag.length() == 2 &&
                         Character.toLowerCase(tag.charAt(0)) == 'h' &&
@@ -259,6 +288,7 @@ public class HtmlToSpannedConverter implements ContentHandler
         text.append("\n");
     }
 
+    @SuppressWarnings("deprecation")
     private static void startImg(SpannableStringBuilder text,
                                  Attributes attributes, Html.ImageGetter img)
     {
@@ -268,15 +298,18 @@ public class HtmlToSpannedConverter implements ContentHandler
             d = img.getDrawable(src);
         }
         if (d == null) {
-            /*d = Resources.getSystem().
-                    getDrawable(com.android.internal.R.drawable.unknown_image);*/
-            //d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
+            d = Resources.getSystem().
+                    getDrawable(com.android.internal.R.drawable.unknown_image);
+            if(d==null)
+            {
+                return;
+            }
+            d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
         }
         int len = text.length();
         text.append("\uFFFC");
 
-        text.setSpan(new ImageSpan(d, src), len, text.length(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ImageSpan(d, src), len, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     private static void startFont(SpannableStringBuilder text,
@@ -356,7 +389,6 @@ public class HtmlToSpannedConverter implements ContentHandler
         int index = 0;
         int len = nm.length();
         int base = 10;
-
         if ('-' == nm.charAt(0)) {
             sign = -1;
             index++;
@@ -366,7 +398,6 @@ public class HtmlToSpannedConverter implements ContentHandler
             if (index == (len - 1))
                 return 0;
             char c = nm.charAt(index + 1);
-
             if ('x' == c || 'X' == c) {
                 index += 2;
                 base = 16;
@@ -480,6 +511,10 @@ public class HtmlToSpannedConverter implements ContentHandler
     {
     }
 
+    private static class Strike
+    {
+    }
+
     private static class Bold
     {
     }
@@ -492,27 +527,7 @@ public class HtmlToSpannedConverter implements ContentHandler
     {
     }
 
-    private static class Big
-    {
-    }
-
-    private static class Small
-    {
-    }
-
-    private static class Monospace
-    {
-    }
-
     private static class Blockquote
-    {
-    }
-
-    private static class Super
-    {
-    }
-
-    private static class Sub
     {
     }
 
@@ -575,13 +590,13 @@ public class HtmlToSpannedConverter implements ContentHandler
     public static final int CYAN = 0xFF00FFFF;
     @ColorInt
     public static final int MAGENTA = 0xFFFF00FF;
-    @ColorInt
-    public static final int TRANSPARENT = 0;
+//    @ColorInt
+//    public static final int TRANSPARENT = 0;
 
     private static final HashMap<String, Integer> sColorNameMap;
 
     static {
-        sColorNameMap = new HashMap<String, Integer>();
+        sColorNameMap = new HashMap<>();
         sColorNameMap.put("black", BLACK);
         sColorNameMap.put("darkgray", DKGRAY);
         sColorNameMap.put("gray", GRAY);

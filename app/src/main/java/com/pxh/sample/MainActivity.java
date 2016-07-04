@@ -5,12 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.Html;
-import android.text.Spannable;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,30 +19,18 @@ import com.pxh.richedittext.RichEditText;
 import com.pxh.richedittext.TextSpanState;
 import com.pxh.richparser.RichHtml;
 
-import org.ccil.cowan.tagsoup.HTMLSchema;
-import org.ccil.cowan.tagsoup.Parser;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity
 {
-    private static final String TAG = "MainActivity";
     private RichEditText richEditText;
     private HashMap<TextSpanState.TextSpan, View> views = new HashMap<>();
 
     private TextView content;
 
 
-//    String html = "下面是图片了 " +
+    //    String html = "下面是图片了 " +
 //            "<img src='http://www.qqpk.cn/Article/UploadFiles/201411/20141116135722282.jpg' width=\"50\" "+
 //            "height=\"50\"/>" +
 //            "<br>这也是图片<br>" +
@@ -55,8 +38,8 @@ public class MainActivity extends AppCompatActivity
 //            "<br>还有一张<br>" +
 //            "<img src='http://img.61gequ.com/allimg/2011-4/201142614314278502.jpg' />";
     String html = "<p dir=\"ltr\">12<b>3123</b><b><i>21312</i></b><b><i><u>3131</u></i></b><b><i><u><strike" +
-        ">2323123123123123123123123123123123131</strike></u></i></b><b><i><u>23123</u></i></b><i><u>123</u></i><u" +
-        ">1231</u>23123</p>";
+            ">2323123123123123123123123123123123131</strike></u></i></b><b><i><u>23123</u></i></b><i><u>123</u></i><u" +
+            ">1231</u>23123</p>";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -80,7 +63,7 @@ public class MainActivity extends AppCompatActivity
             public void OnTextSpanChanged(TextSpanState.TextSpan type, boolean isValid)
             {
                 View v = views.get(type);
-                changeTextColor(v,isValid);
+                changeTextColor(v, isValid);
             }
         });
     }
@@ -98,7 +81,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-   @Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         switch (item.getItemId()) {
@@ -109,60 +92,13 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, 0);
                 break;
             case R.id.post:
-                //Log.v("html", richEditText.getHtml());
-                content.setText(RichHtml.fromHtml(html,null, new MyTagHandler()));
+                Log.v("html", richEditText.getHtml());
+                content.setText(RichHtml.fromHtml(html, null, null));
 
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
-
-    static class MyTagHandler implements Html.TagHandler
-    {
-        private static class Strike { }
-        @Override
-        public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader)
-        {
-            if(opening)
-            {
-                Log.v("tag", tag);
-                if(tag.equals("strike"))
-                {
-                    int len = output.length();
-                    Log.v("len", len + "");
-                    output.setSpan(new Strike(), len, len, Spannable.SPAN_MARK_MARK);
-                }
-            }else
-            {
-                if(tag.equals("strike"))
-                {
-                    int len = output.length();
-                    Object obj = getLast(output, Strike.class);
-                    int where = output.getSpanStart(obj);
-                    output.removeSpan(obj);
-
-                    if (where != len) {
-                        output.setSpan(new StrikethroughSpan(), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                }
-            }
-        }
-
-        private static Object getLast(Spanned text, Class kind) {
-        /*
-         * This knows that the last returned object from getSpans()
-         * will be the most recently added.
-         */
-            Object[] objs = text.getSpans(0, text.length(), kind);
-
-            if (objs.length == 0) {
-                return null;
-            } else {
-                return objs[objs.length - 1];
-            }
-        }
-    }
-
 
     public void linkClick(View view)
     {
