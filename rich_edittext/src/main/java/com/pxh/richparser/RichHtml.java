@@ -19,6 +19,7 @@ import android.text.style.SuperscriptSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
@@ -56,6 +57,7 @@ public class RichHtml
         int next;
         for (int i = 0; i < text.length(); i = next) {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
+            Log.v("next", next+"");
             ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
             String elements = " ";
             boolean needDiv = false;
@@ -84,8 +86,7 @@ public class RichHtml
         }
     }
 
-    private static void withinDiv(StringBuilder out, Spanned text,
-                                  int start, int end)
+    private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
         for (int i = start; i < end; i = next) {
@@ -104,29 +105,9 @@ public class RichHtml
         }
     }
 
-    private static String getOpenParaTagWithDirection(Spanned text, int start, int end)
+    private static void withinBlockquote(StringBuilder out, Spanned text, int start, int end)
     {
-        /*final int len = end - start;
-        final byte[] levels = ArrayUtils.newUnpaddedByteArray(len);
-        final char[] buffer = TextUtils.obtain(len);
-        TextUtils.getChars(text, start, end, buffer, 0);
-
-        int paraDir = AndroidBidi.bidi(Layout.DIR_REQUEST_DEFAULT_LTR, buffer, levels, len,
-                false /* no info *//*);
-        switch (paraDir) {
-            case Layout.DIR_RIGHT_TO_LEFT:
-                return "<p dir=\"rtl\">";
-            case Layout.DIR_LEFT_TO_RIGHT:
-            default:
-                return "<p dir=\"ltr\">";
-        }*/
-        return null;
-    }
-
-    private static void withinBlockquote(StringBuilder out, Spanned text,
-                                         int start, int end)
-    {
-        out.append(getOpenParaTagWithDirection(text, start, end));
+        //out.append(getOpenParaTagWithDirection(text, start, end));
 
         int next;
         for (int i = start; i < end; i = next) {
@@ -144,8 +125,9 @@ public class RichHtml
 
             if (withinParagraph(out, text, i, next - nl, nl, next == end)) {
                 /* Paragraph should be closed */
-                out.append("</p>\n");
-                out.append(getOpenParaTagWithDirection(text, next, end));
+                Log.v("tag", "withinParagraph");
+                //out.append("</p>\n");
+                //out.append(getOpenParaTagWithDirection(text, next, end));
             }
         }
 
@@ -153,9 +135,7 @@ public class RichHtml
     }
 
     /* Returns true if the caller should close and reopen the paragraph. */
-    private static boolean withinParagraph(StringBuilder out, Spanned text,
-                                           int start, int end, int nl,
-                                           boolean last)
+    private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end, int nl, boolean last)
     {
         int next;
         for (int i = start; i < end; i = next) {
@@ -295,8 +275,8 @@ public class RichHtml
                     char d = text.charAt(i + 1);
                     if (d >= 0xDC00 && d <= 0xDFFF) {
                         i++;
-                        int codepoint = 0x010000 | (int) c - 0xD800 << 10 | (int) d - 0xDC00;
-                        out.append("&#").append(codepoint).append(";");
+                        int codePoint = 0x010000 | (int) c - 0xD800 << 10 | (int) d - 0xDC00;
+                        out.append("&#").append(codePoint).append(";");
                     }
                 }
             } else if (c > 0x7E || c < ' ') {

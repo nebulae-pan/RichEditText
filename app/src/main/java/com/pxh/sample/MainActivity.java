@@ -75,11 +75,6 @@ public class MainActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void test()
-    {
-
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -93,7 +88,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.post:
                 Log.v("html", richEditText.getHtml());
-                content.setText(RichHtml.fromHtml(html, null, null));
+                content.setText(RichHtml.fromHtml(richEditText.getHtml(), null, null));
 
                 break;
         }
@@ -145,7 +140,7 @@ public class MainActivity extends AppCompatActivity
         if (!isValid) {
             ((TextView) view).setTextColor(0x88000000);
         } else {
-            ((TextView) view).setTextColor(getResources().getColor(R.color.colorPrimary));
+            ((TextView) view).setTextColor(getResources().getColor(R.color.colorAccent));
         }
     }
 
@@ -171,7 +166,7 @@ public class MainActivity extends AppCompatActivity
 
     public void quoteClick(View view)
     {
-        richEditText.enableQuote(true);
+        richEditText.enableQuote(!richEditText.isQuoteEnable());
     }
 
     public void bulletClick(View view)

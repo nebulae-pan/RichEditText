@@ -23,6 +23,8 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 
+import com.pxh.richedittext.R;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -298,10 +300,8 @@ public class HtmlToSpannedConverter implements ContentHandler
             d = img.getDrawable(src);
         }
         if (d == null) {
-            d = Resources.getSystem().
-                    getDrawable(com.android.internal.R.drawable.unknown_image);
-            if(d==null)
-            {
+            d = Resources.getSystem().getDrawable(R.drawable.unknown_image);
+            if (d == null) {
                 return;
             }
             d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
