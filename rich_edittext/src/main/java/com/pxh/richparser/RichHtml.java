@@ -7,6 +7,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
+import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
@@ -57,7 +58,6 @@ public class RichHtml
         int next;
         for (int i = 0; i < text.length(); i = next) {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
-            Log.v("next", next+"");
             ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
             String elements = " ";
             boolean needDiv = false;
@@ -86,7 +86,7 @@ public class RichHtml
         }
     }
 
-    private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
+    /*private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
         for (int i = start; i < end; i = next) {
@@ -101,6 +101,40 @@ public class RichHtml
 
             for (QuoteSpan quote : quotes) {
                 out.append("</blockquote>\n");
+            }
+        }
+    }*/
+    private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
+    {
+        int next;
+        for (int i = start; i < end; i = next) {
+            next = text.nextSpanTransition(i, end, ParagraphStyle.class);
+            ParagraphStyle[] spans = text.getSpans(i, next, ParagraphStyle.class);
+            for (ParagraphStyle style : spans) {
+                if (style instanceof BulletSpan) {
+                    out.append("<ul>");
+                    withinBullet(out,text,i,next);
+                    out.append("</ul>");
+                }
+            }
+        }
+    }
+
+    private static void withinBullet(StringBuilder out, Spanned text, int start, int end)
+    {
+        int next;
+
+        for (int i = start; i < end; i = next) {
+            next = text.nextSpanTransition(i, end, BulletSpan.class);
+
+            BulletSpan[] spans = text.getSpans(i, next, BulletSpan.class);
+            for (BulletSpan span : spans) {
+                out.append("<li>");
+            }
+
+            withinBlockquote(out, text, i, next);
+            for (BulletSpan span : spans) {
+                out.append("</li>");
             }
         }
     }
@@ -130,8 +164,6 @@ public class RichHtml
                 //out.append(getOpenParaTagWithDirection(text, next, end));
             }
         }
-
-        out.append("</p>\n");
     }
 
     /* Returns true if the caller should close and reopen the paragraph. */

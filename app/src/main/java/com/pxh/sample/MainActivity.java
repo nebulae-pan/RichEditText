@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity
 
     public void bulletClick(View view)
     {
-        richEditText.enableBullet(true);
+        richEditText.enableBullet(!richEditText.isBulletEnable());
     }
 
     @Override

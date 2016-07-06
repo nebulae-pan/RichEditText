@@ -13,7 +13,6 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BulletSpan;
-import android.text.style.CharacterStyle;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.QuoteSpan;
@@ -153,7 +152,10 @@ public class RichEditText extends AppCompatEditText
 
     public void enableBullet(boolean isValid)
     {
-
+        if (isValid) {
+            setBullet();
+        }
+        state.enableQuote(isValid);
     }
 
     public boolean isBoldEnable()
@@ -209,11 +211,7 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
-        if (selStart == selEnd) {
-            changeSpanStateBySelection(selStart, selEnd);
-        } else {
-            changeSpanStateBySelection(selStart, selEnd);
-        }
+        changeSpanStateBySelection(selStart, selEnd);
     }
 
     @Override
@@ -258,7 +256,7 @@ public class RichEditText extends AppCompatEditText
                 setSpan(new StyleSpan(style), start, start + lengthAfter);
             } else {
                 //if have span , change the span's effect scope
-                changeCharacterStyleEnd(styleSpan, lengthAfter, getEditableText());
+                changeStyleEnd(styleSpan, lengthAfter, getEditableText());
             }
         }
     }
@@ -304,8 +302,8 @@ public class RichEditText extends AppCompatEditText
         if (underLineSpans.length != 0 && isRangeInSpan(underLineSpans[0], start, end)) {
             state.enableUnderLine(true);
         }
-        StrikethroughSpan[] strikethroughSpan = getEditableText().getSpans(start, start, StrikethroughSpan.class);
-        if (strikethroughSpan.length != 0 && isRangeInSpan(strikethroughSpan[0], start, end)) {
+        StrikethroughSpan[] strikethroughSpans = getEditableText().getSpans(start, start, StrikethroughSpan.class);
+        if (strikethroughSpans.length != 0 && isRangeInSpan(strikethroughSpans[0], start, end)) {
             state.enableStrikethrough(true);
         }
         QuoteSpan[] quoteSpans = getEditableText().getSpans(start, start, QuoteSpan.class);
@@ -340,44 +338,13 @@ public class RichEditText extends AppCompatEditText
         return getEditableText().getSpanStart(span) >= start && getEditableText().getSpanEnd(span) <= end;
     }
 
-
     /**
      * use reflection to change span effect scope
      *
-     * @param span        the span what is extend CharacterStyle
+     * @param span        span
      * @param lengthAfter the input character's increment
      * @param ss          use method EditText.getEditableText()
      */
-    private void changeCharacterStyleEnd(CharacterStyle span, int lengthAfter, Editable ss)
-    {
-        if (lengthAfter == 0)
-            return;
-        try {
-            Class<?> classType = ss.getClass();
-
-            Field count = classType.getDeclaredField("mSpanCount");
-            Field spans = classType.getDeclaredField("mSpans");
-            Field ends = classType.getDeclaredField("mSpanEnds");
-            count.setAccessible(true);
-            spans.setAccessible(true);
-            ends.setAccessible(true);
-
-            int mSpanCount = (int) count.get(ss);
-            Object[] mSpans = (Object[]) spans.get(ss);
-            int[] mSpanEnds = (int[]) ends.get(ss);
-
-            for (int i = mSpanCount - 1; i >= 0; i--) {
-                if (mSpans[i] == span) {
-                    mSpanEnds[i] += lengthAfter;
-                    break;
-                }
-            }
-            ends.set(ss, mSpanEnds);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void changeStyleEnd(Object span, int lengthAfter, Editable ss)
     {
         if (lengthAfter == 0)
@@ -511,7 +478,7 @@ public class RichEditText extends AppCompatEditText
     private void setSelectionTextSpan(boolean isValid, Object assignSpan, int start, int end)
     {
         if (isValid) {
-            Object[] spans = getParagraphStyles(assignSpan.getClass(), start, end);
+            Object[] spans = getAssignSpans(assignSpan.getClass(), start, end);
             for (Object span : spans) {
                 if (isSpanInRange(span, start, end)) {
                     getEditableText().removeSpan(span);
@@ -612,7 +579,7 @@ public class RichEditText extends AppCompatEditText
         return result.toArray(new StyleSpan[result.size()]);
     }
 
-    protected Object[] getParagraphStyles(Class<?> clazz, int start, int end)
+    protected Object[] getAssignSpans(Class<?> clazz, int start, int end)
     {
         return getEditableText().getSpans(start, end, clazz);
     }
