@@ -113,7 +113,16 @@ public class RichHtml
             for (ParagraphStyle style : spans) {
                 if (style instanceof BulletSpan) {
                     out.append("<ul>");
-                    withinBullet(out,text,i,next);
+                }
+                if (style instanceof QuoteSpan) {
+                    out.append("<blockquote>");
+                }
+            }
+            for (int j = spans.length - 1; j >= 0; j--) {
+                if (spans[j] instanceof QuoteSpan) {
+                    out.append("</blockquote>");
+                }
+                if (spans[j] instanceof BulletSpan) {
                     out.append("</ul>");
                 }
             }
