@@ -147,7 +147,6 @@ public class RichHtml
 
     private static void withinBlockquote(StringBuilder out, Spanned text, int start, int end)
     {
-        //out.append(getOpenParaTagWithDirection(text, start, end));
 
         int next;
         for (int i = start; i < end; i = next) {
@@ -164,10 +163,6 @@ public class RichHtml
             }
 
             if (withinParagraph(out, text, i, next - nl, nl, next == end)) {
-                /* Paragraph should be closed */
-                Log.v("tag", "withinParagraph");
-                //out.append("</p>\n");
-                //out.append(getOpenParaTagWithDirection(text, next, end));
             }
         }
     }
