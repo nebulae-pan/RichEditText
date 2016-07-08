@@ -86,38 +86,25 @@ public class RichHtml
         }
     }
 
-    /*private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
-    {
-        int next;
-        for (int i = start; i < end; i = next) {
-            next = text.nextSpanTransition(i, end, QuoteSpan.class);
-            QuoteSpan[] quotes = text.getSpans(i, next, QuoteSpan.class);
 
-            for (QuoteSpan quote : quotes) {
-                out.append("<blockquote>");
-            }
-
-            withinBlockquote(out, text, i, next);
-
-            for (QuoteSpan quote : quotes) {
-                out.append("</blockquote>\n");
-            }
-        }
-    }*/
     private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
+        boolean hasBullet = false;
         for (int i = start; i < end; i = next) {
+            hasBullet = false;
             next = text.nextSpanTransition(i, end, ParagraphStyle.class);
             ParagraphStyle[] spans = text.getSpans(i, next, ParagraphStyle.class);
             for (ParagraphStyle style : spans) {
                 if (style instanceof BulletSpan) {
                     out.append("<ul>");
+                    hasBullet = true;
                 }
                 if (style instanceof QuoteSpan) {
                     out.append("<blockquote>");
                 }
             }
+            withinParagraphStyle(hasBullet, out, text, start, end);
             for (int j = spans.length - 1; j >= 0; j--) {
                 if (spans[j] instanceof QuoteSpan) {
                     out.append("</blockquote>");
@@ -129,22 +116,32 @@ public class RichHtml
         }
     }
 
+    private static void withinParagraphStyle(boolean hasBullet, StringBuilder out, Spanned text, int start, int end)
+    {
+        if (hasBullet) {
+            withinBullet(out, text, start, end);
+        } else {
+            withinBlockquote(out, text, start, end);
+        }
+    }
+
     private static void withinBullet(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
-
         for (int i = start; i < end; i = next) {
-            next = text.nextSpanTransition(i, end, BulletSpan.class);
-
-            BulletSpan[] spans = text.getSpans(i, next, BulletSpan.class);
-            for (BulletSpan span : spans) {
-                out.append("<li>");
+            next = TextUtils.indexOf(text, '\n', i, end);
+            if (next < 0) {
+                next = end;
             }
 
-            withinBlockquote(out, text, i, next);
-            for (BulletSpan span : spans) {
-                out.append("</li>");
+            int nl = 0;
+
+            while (next < end && text.charAt(next) == '\n') {
+                nl++;
+                next++;
             }
+
+            withinParagraph(out, text, i, next - nl, nl, next == end);
         }
     }
 
