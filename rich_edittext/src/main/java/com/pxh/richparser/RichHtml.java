@@ -3,6 +3,7 @@ package com.pxh.richparser;
 import android.graphics.Typeface;
 import android.text.Html;
 import android.text.Layout;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
@@ -58,14 +59,13 @@ public class RichHtml
         int next;
         for (int i = 0; i < text.length(); i = next) {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
-            ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
+            ParagraphStyle[] styles = text.getSpans(i, next, ParagraphStyle.class);
             String elements = " ";
             boolean needDiv = false;
 
-            for (int j = 0; j < style.length; j++) {
-                if (style[j] instanceof AlignmentSpan) {
-                    Layout.Alignment align =
-                            ((AlignmentSpan) style[j]).getAlignment();
+            for (ParagraphStyle style : styles) {
+                if (style instanceof AlignmentSpan) {
+                    Layout.Alignment align = ((AlignmentSpan) style).getAlignment();
                     needDiv = true;
                     if (align == Layout.Alignment.ALIGN_CENTER) {
                         elements = "align=\"center\" " + elements;
@@ -90,7 +90,7 @@ public class RichHtml
     private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
-        boolean hasBullet = false;
+        boolean hasBullet;
         for (int i = start; i < end; i = next) {
             hasBullet = false;
             next = text.nextSpanTransition(i, end, ParagraphStyle.class);
@@ -127,22 +127,26 @@ public class RichHtml
 
     private static void withinBullet(StringBuilder out, Spanned text, int start, int end)
     {
+        Log.d("tag", "withinBullet() called with: " + "out = [" + out + "], text = [" + text + "], start = [" + start +
+                "], end = [" + end + "]");
         int next;
         for (int i = start; i < end; i = next) {
-            next = TextUtils.indexOf(text, '\n', i, end);
-            if (next < 0) {
-                next = end;
-            }
-
-            int nl = 0;
-
-            while (next < end && text.charAt(next) == '\n') {
-                nl++;
-                next++;
-            }
-
-            withinParagraph(out, text, i, next - nl, nl, next == end);
+            next = getLineFeed(text, i, end);
+            out.append("<li>");
+            withinStyle(out, text, start, end);
+            out.append("</li>");
         }
+    }
+
+    private static int getLineFeed(Spanned text, int start, int end)
+    {
+        CharSequence spanned = text.subSequence(start + 1, end);
+        for (int i = 0; i < spanned.length(); i++) {
+            if (spanned.charAt(i) == '\n') {
+                return i;
+            }
+        }
+        return end;
     }
 
     private static void withinBlockquote(StringBuilder out, Spanned text, int start, int end)

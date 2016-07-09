@@ -155,7 +155,7 @@ public class RichEditText extends AppCompatEditText
         if (isValid) {
             setBullet();
         }
-        state.enableQuote(isValid);
+        state.enableBullet(isValid);
     }
 
     public boolean isBoldEnable()
@@ -437,43 +437,6 @@ public class RichEditText extends AppCompatEditText
             getEditableText().removeSpan(span);
         }
     }
-
-    /*private void setSelectionTextSpan(boolean isValid, CharacterStyle cSpan, int start, int end)
-    {
-        //merge span
-        if (isValid) {
-            CharacterStyle[] spans = getCharacterStyles(cSpan.getClass(), start, end);
-            for (CharacterStyle span : spans) {
-                if (isSpanInRange(span, start, end)) {
-                    getEditableText().removeSpan(span);
-                }
-            }
-            int newStart = start;
-            int newEnd = end;
-            Object before = getAssignSpan(cSpan.getClass(), start - 1, start);
-            if (before != null) {
-                newStart = getEditableText().getSpanStart(before);
-                getEditableText().removeSpan(before);
-            }
-            Object after = getAssignSpan(cSpan.getClass(), end, end + 1);
-            if (after != null) {
-                newEnd = getEditableText().getSpanEnd(after);
-                getEditableText().removeSpan(after);
-            }
-            setSpan(cSpan, newStart, newEnd);
-        } else { // spilt span
-            Object span = getAssignSpan(cSpan.getClass(), start, end);
-            int spanStart = getEditableText().getSpanStart(span);
-            int spanEnd = getEditableText().getSpanEnd(span);
-            if (spanStart < start) {
-                setSpan(cSpan, spanStart, start);
-            }
-            if (spanEnd > end) {
-                setSpan(cSpan, end, spanEnd);
-            }
-            getEditableText().removeSpan(span);
-        }
-    }*/
 
     private void setSelectionTextSpan(boolean isValid, Object assignSpan, int start, int end)
     {
