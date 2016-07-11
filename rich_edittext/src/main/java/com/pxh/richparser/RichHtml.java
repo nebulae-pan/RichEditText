@@ -36,8 +36,19 @@ public class RichHtml
     public static String toHtml(Spanned text)
     {
         StringBuilder out = new StringBuilder();
-        withinHtml(out, text);
-        return out.toString();
+        //withinHtml(out, text);
+        int len = text.length();
+
+        int next;
+        for (int i = 0; i < text.length(); i = next) {
+            next = text.nextSpanTransition(i, len, CharacterStyle.class);
+            CharacterStyle[] styles = text.getSpans(i, next, CharacterStyle.class);
+            Log.v("tag", "i:" + i + "::" + "next:" + next);
+            for (CharacterStyle style : styles) {
+                Log.v("span", style.toString());
+            }
+        }
+        return Html.toHtml(text);
     }
 
     public static Spanned fromHtml(String text, Html.ImageGetter imageGetter, Html.TagHandler tagHandler)
@@ -90,15 +101,17 @@ public class RichHtml
     private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
-        boolean hasBullet;
+        boolean hasBullet = false;
+        boolean isNeedMerger = false;
         for (int i = start; i < end; i = next) {
-            hasBullet = false;
+            //hasBullet = false;
             next = text.nextSpanTransition(i, end, ParagraphStyle.class);
             ParagraphStyle[] spans = text.getSpans(i, next, ParagraphStyle.class);
             for (ParagraphStyle style : spans) {
                 if (style instanceof BulletSpan) {
                     out.append("<ul>");
                     hasBullet = true;
+
                 }
                 if (style instanceof QuoteSpan) {
                     out.append("<blockquote>");
@@ -118,23 +131,16 @@ public class RichHtml
 
     private static void withinParagraphStyle(boolean hasBullet, StringBuilder out, Spanned text, int start, int end)
     {
-        if (hasBullet) {
-            withinBullet(out, text, start, end);
-        } else {
-            withinBlockquote(out, text, start, end);
-        }
-    }
-
-    private static void withinBullet(StringBuilder out, Spanned text, int start, int end)
-    {
-        Log.d("tag", "withinBullet() called with: " + "out = [" + out + "], text = [" + text + "], start = [" + start +
-                "], end = [" + end + "]");
         int next;
         for (int i = start; i < end; i = next) {
             next = getLineFeed(text, i, end);
-            out.append("<li>");
-            withinStyle(out, text, start, end);
-            out.append("</li>");
+            if (hasBullet) {
+                out.append("<li>");
+            }
+            withinParagraph(out, text, start, end, 0, false);
+            if (hasBullet) {
+                out.append("</li>");
+            }
         }
     }
 
