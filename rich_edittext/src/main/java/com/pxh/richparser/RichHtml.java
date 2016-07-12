@@ -3,7 +3,6 @@ package com.pxh.richparser;
 import android.graphics.Typeface;
 import android.text.Html;
 import android.text.Layout;
-import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
@@ -36,8 +35,8 @@ public class RichHtml
     public static String toHtml(Spanned text)
     {
         StringBuilder out = new StringBuilder();
-        //withinHtml(out, text);
-        int len = text.length();
+        withinHtml(out, text);
+        /*int len = text.length();
 
         int next;
         for (int i = 0; i < text.length(); i = next) {
@@ -47,8 +46,8 @@ public class RichHtml
             for (CharacterStyle style : styles) {
                 Log.v("span", style.toString());
             }
-        }
-        return Html.toHtml(text);
+        }*/
+        return out.toString();
     }
 
     public static Spanned fromHtml(String text, Html.ImageGetter imageGetter, Html.TagHandler tagHandler)
@@ -101,17 +100,27 @@ public class RichHtml
     private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
         int next;
-        boolean hasBullet = false;
-        boolean isNeedMerger = false;
+        boolean hasBullet;   //if has Bullet, add <li> in withinParagraph
+        boolean isNeedMerger = false;//if need merger, bullet don't need add <ul>
+        int preBulletEnd = -1; //preBulletEnd , log pre BulletSpanEnd position
         for (int i = start; i < end; i = next) {
-            //hasBullet = false;
+            hasBullet = false;
             next = text.nextSpanTransition(i, end, ParagraphStyle.class);
             ParagraphStyle[] spans = text.getSpans(i, next, ParagraphStyle.class);
             for (ParagraphStyle style : spans) {
                 if (style instanceof BulletSpan) {
-                    out.append("<ul>");
+                    //estimate whether need merge
+                    if(!isNeedMerger)
+                    {
+                        out.append("<ul>");
+                    }
                     hasBullet = true;
-
+                    int curBulletStart = text.getSpanStart(style);
+                    int curBulletEnd = text.getSpanEnd(style);
+                    if (curBulletStart <= preBulletEnd) {
+                        isNeedMerger = true;
+                    }
+                    preBulletEnd = curBulletEnd;
                 }
                 if (style instanceof QuoteSpan) {
                     out.append("<blockquote>");
@@ -123,7 +132,13 @@ public class RichHtml
                     out.append("</blockquote>");
                 }
                 if (spans[j] instanceof BulletSpan) {
-                    out.append("</ul>");
+                    if (!isNeedMerger) {
+                        out.append("</ul>");
+                    }
+                    else
+                    {
+                        isNeedMerger = false;
+                    }
                 }
             }
         }
@@ -136,6 +151,15 @@ public class RichHtml
             next = getLineFeed(text, i, end);
             if (hasBullet) {
                 out.append("<li>");
+            }
+            else
+            {
+                int nl = 0;
+
+                while (next < end && text.charAt(next) == '\n') {
+                    nl++;
+                    next++;
+                }
             }
             withinParagraph(out, text, start, end, 0, false);
             if (hasBullet) {
@@ -155,27 +179,6 @@ public class RichHtml
         return end;
     }
 
-    private static void withinBlockquote(StringBuilder out, Spanned text, int start, int end)
-    {
-
-        int next;
-        for (int i = start; i < end; i = next) {
-            next = TextUtils.indexOf(text, '\n', i, end);
-            if (next < 0) {
-                next = end;
-            }
-
-            int nl = 0;
-
-            while (next < end && text.charAt(next) == '\n') {
-                nl++;
-                next++;
-            }
-
-            if (withinParagraph(out, text, i, next - nl, nl, next == end)) {
-            }
-        }
-    }
 
     /* Returns true if the caller should close and reopen the paragraph. */
     private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end, int nl, boolean last)
