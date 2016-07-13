@@ -87,8 +87,9 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, 0);
                 break;
             case R.id.post:
-                Log.v("html", richEditText.getHtml());
-                content.setText(RichHtml.fromHtml(richEditText.getHtml(), null, null));
+                String s = richEditText.getHtml();
+                Log.v("html", s);
+                content.setText(RichHtml.fromHtml(s, null, null));
 
                 break;
         }

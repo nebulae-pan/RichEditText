@@ -99,46 +99,37 @@ public class RichHtml
 
     private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
     {
-        int next;
-        boolean hasBullet;   //if has Bullet, add <li> in withinParagraph
         boolean isNeedMerger = false;//if need merger, bullet don't need add <ul>
+        boolean hasBullet;   //if has Bullet, add <li> in withinParagraph
         int preBulletEnd = -1; //preBulletEnd , log pre BulletSpanEnd position
-        for (int i = start; i < end; i = next) {
-            hasBullet = false;
-            next = text.nextSpanTransition(i, end, ParagraphStyle.class);
-            ParagraphStyle[] spans = text.getSpans(i, next, ParagraphStyle.class);
-            for (ParagraphStyle style : spans) {
-                if (style instanceof BulletSpan) {
-                    //estimate whether need merge
-                    if(!isNeedMerger)
-                    {
-                        out.append("<ul>");
-                    }
-                    hasBullet = true;
-                    int curBulletStart = text.getSpanStart(style);
-                    int curBulletEnd = text.getSpanEnd(style);
-                    if (curBulletStart <= preBulletEnd) {
-                        isNeedMerger = true;
-                    }
-                    preBulletEnd = curBulletEnd;
+        hasBullet = false;
+        ParagraphStyle[] spans = text.getSpans(start, end, ParagraphStyle.class);
+        for (ParagraphStyle style : spans) {
+            if (style instanceof BulletSpan) {
+                //estimate whether need merge
+                if (!isNeedMerger) {
+                    out.append("<ul>");
                 }
-                if (style instanceof QuoteSpan) {
-                    out.append("<blockquote>");
-                }
+                hasBullet = true;
+                int curBulletStart = text.getSpanStart(style);
+                int curBulletEnd = text.getSpanEnd(style);
+                isNeedMerger = curBulletStart <= preBulletEnd + 1;
+                preBulletEnd = curBulletEnd;
             }
-            withinParagraphStyle(hasBullet, out, text, start, end);
-            for (int j = spans.length - 1; j >= 0; j--) {
-                if (spans[j] instanceof QuoteSpan) {
-                    out.append("</blockquote>");
-                }
-                if (spans[j] instanceof BulletSpan) {
-                    if (!isNeedMerger) {
-                        out.append("</ul>");
-                    }
-                    else
-                    {
-                        isNeedMerger = false;
-                    }
+            if (style instanceof QuoteSpan) {
+                out.append("<blockquote>");
+            }
+        }
+        withinParagraphStyle(hasBullet, out, text, start, end);
+        for (int j = spans.length - 1; j >= 0; j--) {
+
+            if (spans[j] instanceof QuoteSpan) {
+                out.append("</blockquote>");
+            }
+            if (spans[j] instanceof BulletSpan) {
+                Log.v("3", String.valueOf(isNeedMerger));
+                if (!isNeedMerger) {
+                    out.append("</ul>");
                 }
             }
         }
@@ -147,21 +138,18 @@ public class RichHtml
     private static void withinParagraphStyle(boolean hasBullet, StringBuilder out, Spanned text, int start, int end)
     {
         int next;
+        int nl = 0;
         for (int i = start; i < end; i = next) {
             next = getLineFeed(text, i, end);
             if (hasBullet) {
                 out.append("<li>");
-            }
-            else
-            {
-                int nl = 0;
-
+            } else {
                 while (next < end && text.charAt(next) == '\n') {
                     nl++;
                     next++;
                 }
             }
-            withinParagraph(out, text, start, end, 0, false);
+            withinParagraph(out, text, start, end, nl, false);
             if (hasBullet) {
                 out.append("</li>");
             }
