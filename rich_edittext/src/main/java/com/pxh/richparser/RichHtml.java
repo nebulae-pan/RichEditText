@@ -47,7 +47,7 @@ public class RichHtml
                 Log.v("span", style.toString());
             }
         }*/
-        return out.toString();
+        return Html.toHtml(text);
     }
 
     public static Spanned fromHtml(String text, Html.ImageGetter imageGetter, Html.TagHandler tagHandler)
@@ -67,11 +67,9 @@ public class RichHtml
         int len = text.length();
         boolean isNeedMerger = false;//if need merger, bullet don't need add <ul>
         boolean hasBullet;   //if has Bullet, add <li> in withinParagraph
-        int preBulletEnd = -1; //preBulletEnd , log pre BulletSpanEnd position
         int next;
         for (int i = 0; i < text.length(); i = next) {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
-            Log.v("i&next", "i:" + i + ":::next:" + next);
             ParagraphStyle[] styles = text.getSpans(i, next, ParagraphStyle.class);
             String elements = " ";
             boolean needDiv = false;
@@ -102,15 +100,12 @@ public class RichHtml
                         out.append("<ul>");
                     }
                     hasBullet = true;
-                    int curBulletStart = text.getSpanStart(style);
-                    int curBulletEnd = text.getSpanEnd(style);
-                    isNeedMerger = curBulletStart <= preBulletEnd + 1;
-                    preBulletEnd = curBulletEnd;
                 }
                 if (style instanceof QuoteSpan) {
                     out.append("<blockquote>");
                 }
             }
+            Log.v("withinHtml", out.toString());
             withinParagraphStyle(hasBullet, out, text, i, next);
             for (int j = spans.length - 1; j >= 0; j--) {
 
@@ -119,8 +114,7 @@ public class RichHtml
                 }
                 if (spans[j] instanceof BulletSpan) {
                     int adNext = text.nextSpanTransition(next, len, BulletSpan.class);
-                    Log.v("next", next + "");
-                    Log.v("adNext", adNext + "");
+                    isNeedMerger = (adNext == next + 1);
                     if (!isNeedMerger) {
                         out.append("</ul>");
                     }
@@ -143,8 +137,7 @@ public class RichHtml
         int next;
         int nl = 0;
         for (int i = start; i < end; i = next) {
-            next = TextUtils.indexOf(text, '\n', i + 1, end);
-            //next = getLineFeed(text, i, end);
+            next = TextUtils.indexOf(text, '\n', i, end);
             if (next < 0) {
                 next = end;
             }
@@ -157,6 +150,8 @@ public class RichHtml
                     next++;
                 }
             }
+            Log.v("withinParagraphstyle", out.toString());
+
             withinParagraph(out, text, start, end, nl, false);
             if (hasBullet) {
                 out.append("</li>");
@@ -245,6 +240,8 @@ public class RichHtml
                 }
             }
 
+            Log.v("withinparagraph1", out.toString());
+
             withinStyle(out, text, i, next);
 
             for (int j = style.length - 1; j >= 0; j--) {
@@ -291,6 +288,7 @@ public class RichHtml
 
         if (nl == 1) {
             out.append("<br>\n");
+            Log.v("withinparagraph2", out.toString());
             return false;
         } else {
             for (int i = 2; i < nl; i++) {
@@ -334,6 +332,8 @@ public class RichHtml
                 out.append(c);
             }
         }
+        Log.v("withinStyle", out.toString());
+
     }
 
     private static class HtmlParser
