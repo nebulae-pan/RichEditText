@@ -127,11 +127,6 @@ public class RichHtml
     }
 
 
-    private static void withinDiv(StringBuilder out, Spanned text, int start, int end)
-    {
-
-    }
-
     private static void withinParagraphStyle(boolean hasBullet, StringBuilder out, Spanned text, int start, int end)
     {
         int next;
