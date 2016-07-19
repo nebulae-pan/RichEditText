@@ -47,7 +47,7 @@ public class RichHtml
                 Log.v("span", style.toString());
             }
         }*/
-        return Html.toHtml(text);
+        return out.toString();
     }
 
     public static Spanned fromHtml(String text, Html.ImageGetter imageGetter, Html.TagHandler tagHandler)
@@ -136,18 +136,16 @@ public class RichHtml
             if (next < 0) {
                 next = end;
             }
-            Log.v("tag", "end:" + end + ":next" + next);
+
             if (hasBullet) {
                 out.append("<li>");
-            } else {
-                while (next < end && text.charAt(next) == '\n') {
-                    nl++;
-                    next++;
-                }
             }
-            Log.v("withinParagraphstyle", out.toString());
-
-            withinParagraph(out, text, start, end, nl, false);
+            while (next < end && text.charAt(next) == '\n') {
+                nl++;
+                next++;
+            }
+//            Log.v("withinParagraphstyle", out.toString());
+            withinParagraph(out, text, start, next - nl, nl, false);
             if (hasBullet) {
                 out.append("</li>");
             }
@@ -298,7 +296,6 @@ public class RichHtml
     {
         for (int i = start; i < end; i++) {
             char c = text.charAt(i);
-
             if (c == '<') {
                 out.append("&lt;");
             } else if (c == '>') {
@@ -327,8 +324,7 @@ public class RichHtml
                 out.append(c);
             }
         }
-        Log.v("withinStyle", out.toString());
-
+//        Log.v("withinStyle", out.toString());
     }
 
     private static class HtmlParser
