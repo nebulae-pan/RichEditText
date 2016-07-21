@@ -36,17 +36,6 @@ public class RichHtml
     {
         StringBuilder out = new StringBuilder();
         withinHtml(out, text);
-        /*int len = text.length();
-
-        int next;
-        for (int i = 0; i < text.length(); i = next) {
-            next = text.nextSpanTransition(i, len, CharacterStyle.class);
-            CharacterStyle[] styles = text.getSpans(i, next, CharacterStyle.class);
-            Log.v("tag", "i:" + i + "::" + "next:" + next);
-            for (CharacterStyle style : styles) {
-                Log.v("span", style.toString());
-            }
-        }*/
         return out.toString();
     }
 
@@ -144,7 +133,6 @@ public class RichHtml
                 nl++;
                 next++;
             }
-//            Log.v("withinParagraphstyle", out.toString());
             withinParagraph(out, text, start, next - nl, nl, false);
             if (hasBullet) {
                 out.append("</li>");
@@ -233,7 +221,7 @@ public class RichHtml
                 }
             }
 
-            Log.v("withinparagraph1", out.toString());
+//            Log.v("withinparagraph1", out.toString());
 
             withinStyle(out, text, i, next);
 
@@ -318,8 +306,7 @@ public class RichHtml
                     out.append("&nbsp;");
                     i++;
                 }
-
-                out.append(' ');
+                 out.append(' ');
             } else {
                 out.append(c);
             }
