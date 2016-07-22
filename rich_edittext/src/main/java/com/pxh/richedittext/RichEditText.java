@@ -145,13 +145,23 @@ public class RichEditText extends AppCompatEditText
     {
         int start = getSelectionStart();
         int end = getSelectionEnd();
+        if (!isValid) {
+            getEditableText().insert(start, "\n");
+        }
         if (start < end)
             setSelectionTextQuote(isValid, start, end);
+        else if (isValid) {
+            setQuote();
+        }
         state.enableQuote(isValid);
     }
 
     public void enableBullet(boolean isValid)
     {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+        if (start < end)
+            setSelectionTextBullet(isValid, start, end);
         if (isValid) {
             setBullet();
         }
@@ -399,6 +409,11 @@ public class RichEditText extends AppCompatEditText
     private void setSelectionTextQuote(boolean isValid, int start, int end)
     {
         setSelectionTextSpan(isValid, new QuoteSpan(), start, end);
+    }
+
+    private void setSelectionTextBullet(boolean isValid, int start, int end)
+    {
+        setSelectionTextSpan(isValid, new BulletSpan(), start, end);
     }
 
     private void setSelectionTextSpan(boolean isValid, int style, int start, int end)
