@@ -22,7 +22,6 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
 import com.pxh.richparser.RichHtml;
@@ -145,13 +144,16 @@ public class RichEditText extends AppCompatEditText
     {
         int start = getSelectionStart();
         int end = getSelectionEnd();
-        if (!isValid) {
-            getEditableText().insert(start, "\n");
-        }
-        if (start < end)
+        if (start < end) {
             setSelectionTextQuote(isValid, start, end);
-        else if (isValid) {
-            setQuote();
+        } else {
+            if (isValid) {
+                //enable input quote
+                setQuote();
+            } else {
+                getEditableText().insert(start, "\n");
+
+            }
         }
         state.enableQuote(isValid);
     }
@@ -243,7 +245,7 @@ public class RichEditText extends AppCompatEditText
             setTextSpan(new StrikethroughSpan(), start, lengthAfter);
         }
         if (state.isQuoteEnable()) {
-            setTextSpan(new QuoteSpan(), start, lengthAfter);
+            setTextSpan(new RichQuoteSpan(), start, lengthAfter);
         }
     }
 
@@ -408,7 +410,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextQuote(boolean isValid, int start, int end)
     {
-        setSelectionTextSpan(isValid, new QuoteSpan(), start, end);
+        setSelectionTextSpan(isValid, new RichQuoteSpan(), start, end);
     }
 
     private void setSelectionTextBullet(boolean isValid, int start, int end)
@@ -504,7 +506,18 @@ public class RichEditText extends AppCompatEditText
                 break;
             }
         }
-        setSpan(new QuoteSpan(), getSelectionStart(), getSelectionEnd());
+        setSpan(new RichQuoteSpan(), getSelectionStart(), getSelectionEnd());
+    }
+
+    private boolean isLineFront(int start)
+    {
+        for (int i = 0; i < getLineCount(); i++) {
+            int lineStart = getLayout().getLineStart(i);
+            if (lineStart == start) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setBullet()
