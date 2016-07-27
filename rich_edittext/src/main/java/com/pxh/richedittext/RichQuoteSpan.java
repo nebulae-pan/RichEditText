@@ -3,9 +3,7 @@ package com.pxh.richedittext;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.Layout;
-import android.text.style.MetricAffectingSpan;
 import android.text.style.QuoteSpan;
-import android.text.style.ReplacementSpan;
 
 /**
  * Created by pxh on 2016/7/26.

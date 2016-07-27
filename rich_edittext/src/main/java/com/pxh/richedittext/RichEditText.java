@@ -148,11 +148,14 @@ public class RichEditText extends AppCompatEditText
             setSelectionTextQuote(isValid, start, end);
         } else {
             if (isValid) {
+                int quoteStart = getParagraphStart(start);
+                int quoteEnd = getParagraphEnd(start);
+                setSpan(new RichQuoteSpan(), quoteStart, quoteEnd);
                 //enable input quote
-                setQuote();
+                //setQuote();
             } else {
-                getEditableText().insert(start, "\n");
-
+                Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
+                getEditableText().removeSpan(richQuoteSpan);
             }
         }
         state.enableQuote(isValid);
@@ -203,7 +206,7 @@ public class RichEditText extends AppCompatEditText
     public void setHtml(final String html)
     {
         Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
-        setText(Html.fromHtml(html, imgGetter, null));
+        setText(RichHtml.fromHtml(html, imgGetter, null));
     }
 
     public String getHtml()
@@ -509,17 +512,6 @@ public class RichEditText extends AppCompatEditText
         setSpan(new RichQuoteSpan(), getSelectionStart(), getSelectionEnd());
     }
 
-    private boolean isLineFront(int start)
-    {
-        for (int i = 0; i < getLineCount(); i++) {
-            int lineStart = getLayout().getLineStart(i);
-            if (lineStart == start) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void setBullet()
     {
         int start = getSelectionStart();
@@ -536,6 +528,26 @@ public class RichEditText extends AppCompatEditText
             }
         }
         setSpan(new BulletSpan(), getSelectionStart(), getSelectionEnd());
+    }
+
+    private int getParagraphStart(int selectionStart)
+    {
+        for (int i = selectionStart - 1; i > 0; i--) {
+            if (getEditableText().charAt(i) == '\n') {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private int getParagraphEnd(int selectionEnd)
+    {
+        for(int i = selectionEnd; i < getEditableText().length() - 1;i++) {
+            if (getEditableText().charAt(i) == '\n') {
+                return i;
+            }
+        }
+        return getEditableText().length();
     }
 
     /**
