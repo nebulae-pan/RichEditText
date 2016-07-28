@@ -8,7 +8,14 @@ public class TextSpanState
 {
     public enum TextSpan
     {
-        Bold, Italic, UnderLine, Strikethrough, Quote, Bullet
+        Bold(1), Italic(2), UnderLine(4), Strikethrough(8), Quote(16), Bullet(32);
+
+        int value;
+
+        TextSpan(int value)
+        {
+            this.value = value;
+        }
     }
 
     public TextSpanState()
@@ -22,76 +29,81 @@ public class TextSpanState
 
     public void enableBold(boolean isValid)
     {
-        setStateSelection(isValid, 1, TextSpan.Bold);
+        setStateSelection(isValid, TextSpan.Bold);
     }
 
     public void enableItalic(boolean isValid)
     {
-        setStateSelection(isValid, 2, TextSpan.Italic);
+        setStateSelection(isValid, TextSpan.Italic);
     }
 
     public void enableUnderLine(boolean isValid)
     {
-        setStateSelection(isValid, 4, TextSpan.UnderLine);
+        setStateSelection(isValid, TextSpan.UnderLine);
     }
 
     public void enableStrikethrough(boolean isValid)
     {
-        setStateSelection(isValid, 8, TextSpan.Strikethrough);
+        setStateSelection(isValid, TextSpan.Strikethrough);
     }
 
     public void enableQuote(boolean isValid)
     {
-        setStateSelection(isValid, 16, TextSpan.Quote);
+        setStateSelection(isValid, TextSpan.Quote);
     }
 
     public void enableBullet(boolean isValid)
     {
-        setStateSelection(isValid, 32, TextSpan.Bullet);
+        setStateSelection(isValid, TextSpan.Bullet);
     }
 
-    private void setStateSelection(boolean isValid, int spanValue, TextSpan type)
+    private void setStateSelection(boolean isValid, TextSpan type)
     {
-        if (isValid == getStateSelection(spanValue)) {
+        if (isValid == getStateSelection(type.value)) {
             return;
         }
         if (isValid)
-            spanSelection |= spanValue;
+            spanSelection |= type.value;
         else
-            spanSelection &= (Integer.MAX_VALUE ^ spanValue);
+            spanSelection &= (Integer.MAX_VALUE ^ type.value);
         if (spanChangeListener != null)
             spanChangeListener.OnTextSpanChanged(type, isValid);
 
     }
 
+    public boolean isTextSpanEnable(TextSpan textSpan)
+    {
+        return getStateSelection(textSpan.value);
+    }
+
     public boolean isBoldEnable()
     {
-        return getStateSelection(1);
+        return isTextSpanEnable(TextSpan.Bold);
     }
 
     public boolean isItalicEnable()
     {
-        return getStateSelection(2);
+        return isTextSpanEnable(TextSpan.Italic);
     }
 
     public boolean isUnderLineEnable()
     {
-        return getStateSelection(4);
+        return isTextSpanEnable(TextSpan.UnderLine);
     }
 
     public boolean isStrikethroughEnable()
     {
-        return getStateSelection(8);
+        return isTextSpanEnable(TextSpan.Strikethrough);
     }
 
     public boolean isQuoteEnable()
     {
-        return getStateSelection(16);
+        return isTextSpanEnable(TextSpan.Quote);
     }
 
     public boolean isBulletEnable()
     {
-        return getStateSelection(32);
+        return isTextSpanEnable(TextSpan.Bullet);
     }
 
     private boolean getStateSelection(int spanValue)

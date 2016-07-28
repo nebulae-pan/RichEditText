@@ -31,9 +31,13 @@ import com.pxh.richparser.RichHtml;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+/**
+ * Created by pxh on 2016/4/13.
+ * RichEditText extend AppCompatEditText
+ */
 public class RichEditText extends AppCompatEditText
 {
-    private Context context;
+    private static final String TAG = "RichEditText";
 
     /**
      * use bitmap creator get a bitmap
@@ -52,7 +56,6 @@ public class RichEditText extends AppCompatEditText
     public RichEditText(final Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        this.context = context;
 
         post(new Runnable()
         {
@@ -71,13 +74,13 @@ public class RichEditText extends AppCompatEditText
 
     public void insertImage(Uri uri)
     {
-        String path = UriUtils.getValidPath(context, uri);
+        String path = UriUtils.getValidPath(getContext(), uri);
         Bitmap bitmap = bitmapCreator.getBitmapByDiskPath(path);
 
         SpannableString ss = new SpannableString(path);
 
         //construct a Drawable and set Bounds
-        Drawable mDrawable = new BitmapDrawable(context.getResources(), bitmap);
+        Drawable mDrawable = new BitmapDrawable(getContext().getResources(), bitmap);
         int width = mDrawable.getIntrinsicWidth();
         int height = mDrawable.getIntrinsicHeight();
         mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0);
@@ -169,9 +172,7 @@ public class RichEditText extends AppCompatEditText
                 }
             } else {
                 if (start == replacementQuotePosition) {
-                    Object richQuoteSpan = getAssignSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start, start);
-                    getEditableText().removeSpan(richQuoteSpan);
-                    getEditableText().delete(replacementQuotePosition - 7, replacementQuotePosition);
+                    removeReplacementSpan(ReplacementSpan.class, start);
                 } else {
                     Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
                     getEditableText().removeSpan(richQuoteSpan);
@@ -191,6 +192,11 @@ public class RichEditText extends AppCompatEditText
             setBullet();
         }
         state.enableBullet(isValid);
+    }
+
+    public boolean isTextSpanEnable(TextSpanState.TextSpan textSpan)
+    {
+        return state.isTextSpanEnable(textSpan);
     }
 
     public boolean isBoldEnable()
@@ -262,13 +268,16 @@ public class RichEditText extends AppCompatEditText
             setTextSpan(Typeface.ITALIC, start, lengthAfter);
         }
         if (state.isUnderLineEnable()) {
-            setTextSpan(new UnderlineSpan(), start, lengthAfter);
+            setTextSpan(UnderlineSpan.class, start, lengthAfter);
         }
         if (state.isStrikethroughEnable()) {
-            setTextSpan(new StrikethroughSpan(), start, lengthAfter);
+            setTextSpan(StrikethroughSpan.class, start, lengthAfter);
         }
         if (state.isQuoteEnable()) {
-            setTextSpan(new RichQuoteSpan(), start, lengthAfter);
+            setTextSpan(RichQuoteSpan.class, start, lengthAfter);
+            if (start == replacementQuotePosition) {
+                removeReplacementSpan(ReplacementSpan.class, start);
+            }
         }
     }
 
@@ -296,17 +305,22 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setTextSpan(Object span, int start, int lengthAfter)
+    private void setTextSpan(Class<?> clazz, int start, int lengthAfter)
     {
-        if (start == 0) {
-            setSpan(span, start, start + lengthAfter);
-        } else {
-            Object preSpan = getAssignSpan(span.getClass(), start - 1, start);
-            if (preSpan == null) {
-                setSpan(span, start, start + lengthAfter);
+        try {
+            if (start == 0) {
+                setSpan(clazz.newInstance(), start, start + lengthAfter);
             } else {
-                changeStyleEnd(preSpan, lengthAfter, getEditableText());
+                Object preSpan = getAssignSpan(clazz, start - 1, start);
+                if (preSpan == null) {
+                    setSpan(clazz.newInstance(), start, start + lengthAfter);
+                } else {
+                    changeStyleEnd(preSpan, lengthAfter, getEditableText());
+                }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "can not instantiated " + clazz);
+            e.printStackTrace();
         }
     }
 
@@ -518,23 +532,23 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setQuote()
-    {
-        int start = getSelectionStart();
-        int end = getSelectionEnd();
-        for (int i = 0; i < getLineCount(); i++) {
-            int lineStart = getLayout().getLineStart(i);
-            if (lineStart == start) {
-                break;
-            }
-            if ((lineStart > start) || (lineStart < start && i == (getLineCount() - 1))) {
-                getEditableText().insert(start, "\n");
-                setSelection(start + 1, end + 1);
-                break;
-            }
-        }
-        setSpan(new RichQuoteSpan(), getSelectionStart(), getSelectionEnd());
-    }
+//    private void setQuote()
+//    {
+//        int start = getSelectionStart();
+//        int end = getSelectionEnd();
+//        for (int i = 0; i < getLineCount(); i++) {
+//            int lineStart = getLayout().getLineStart(i);
+//            if (lineStart == start) {
+//                break;
+//            }
+//            if ((lineStart > start) || (lineStart < start && i == (getLineCount() - 1))) {
+//                getEditableText().insert(start, "\n");
+//                setSelection(start + 1, end + 1);
+//                break;
+//            }
+//        }
+//        setSpan(new RichQuoteSpan(), getSelectionStart(), getSelectionEnd());
+//    }
 
     private void setBullet()
     {
@@ -557,8 +571,8 @@ public class RichEditText extends AppCompatEditText
     /**
      * get current paragraph's start
      *
-     * @param selectionStart
-     * @return
+     * @param selectionStart selectionStart
+     * @return paragraph start position
      */
     private int getParagraphStart(int selectionStart)
     {
@@ -573,8 +587,8 @@ public class RichEditText extends AppCompatEditText
     /**
      * exclude \n
      *
-     * @param selectionEnd
-     * @return
+     * @param selectionEnd selectionEnd
+     * @return paragraph end position
      */
     private int getParagraphEnd(int selectionEnd)
     {
@@ -637,6 +651,14 @@ public class RichEditText extends AppCompatEditText
     private void setSpan(Object span, int start, int end)
     {
         getEditableText().setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    private void removeReplacementSpan(Class<?> clazz, int start)
+    {
+        Object replacementSpan = getAssignSpan(clazz, start, start);
+        getEditableText().removeSpan(replacementSpan);
+        getEditableText().delete(start - 7, start);
+        replacementQuotePosition = -1;
     }
 
 
