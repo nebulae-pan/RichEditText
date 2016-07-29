@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -54,7 +55,8 @@ public class RichEditorImageGetter implements Html.ImageGetter
                         editor.setText(editor.getText());
                     }
                 });
-        BitmapDrawable bd = (BitmapDrawable) editor.getContext().getResources().getDrawable(R.drawable.holder);
+//        BitmapDrawable bd = (BitmapDrawable) editor.getContext().getResources().getDrawable(R.drawable.holder);
+        BitmapDrawable bd = (BitmapDrawable) ContextCompat.getDrawable(editor.getContext(), R.drawable.holder);
         Bitmap holder = bd.getBitmap();
         float scaleWidth = ((float) width) / holder.getWidth();
         Matrix matrix = new Matrix();

@@ -47,6 +47,8 @@ public class RichEditText extends AppCompatEditText
     TextSpanState state = new TextSpanState();
 
     int replacementQuotePosition = -1;
+    boolean isNeedSetQuote = true;
+    boolean isRemoveAndSetCompleted = true;
 
     public RichEditText(Context context)
     {
@@ -162,17 +164,17 @@ public class RichEditText extends AppCompatEditText
             if (isValid) {
                 int quoteStart = getParagraphStart(start);
                 int quoteEnd = getParagraphEnd(start);
-                if (quoteStart == start) {
-                    String quoteReplacement = "Replace";
-                    getEditableText().append(quoteReplacement);
-                    setSpan(new RichQuoteSpan.ReplaceQuoteSpan(), start, start + quoteReplacement.length());
-                    replacementQuotePosition = start + quoteReplacement.length();
+                //if there is just a single line,
+                if (quoteStart == start &&
+                        (getEditableText().length() == quoteStart ||
+                                getEditableText().charAt(quoteStart) == '\n')) {
+                    insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
                 } else {
                     setSpan(new RichQuoteSpan(), quoteStart, quoteEnd);
                 }
             } else {
                 if (start == replacementQuotePosition) {
-                    removeReplacementSpan(ReplacementSpan.class, start);
+                    removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
                 } else {
                     Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
                     getEditableText().removeSpan(richQuoteSpan);
@@ -274,15 +276,32 @@ public class RichEditText extends AppCompatEditText
             setTextSpan(StrikethroughSpan.class, start, lengthAfter);
         }
         if (state.isQuoteEnable()) {
-            setTextSpan(RichQuoteSpan.class, start, lengthAfter);
-            if (start == replacementQuotePosition) {
-                removeReplacementSpan(ReplacementSpan.class, start);
+//            if (isNeedSetQuote) {
+//                setTextSpan(RichQuoteSpan.class, start, lengthAfter);
+//            }
+//            if (lengthAfter == 1 && text.charAt(start) == '\n') {
+//                insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start + 1);
+//            } else if (start == replacementQuotePosition) {
+//                removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
+//            }
+            //considerate span state, double enter exit quote mod, no replacementQuoteSpan convert to html
+            if (lengthAfter == 1 && text.charAt(start) == '\n') {
+                insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start + 1);
             }
+            if (isNeedSetQuote) {
+                if (start == replacementQuotePosition) {
+                    setTextSpanBySpanBeforeReplacement(RichQuoteSpan.class, start, lengthAfter, 7);
+                    removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
+                } else {
+                    setTextSpan(RichQuoteSpan.class, start, lengthAfter);
+                }
+            }
+
         }
     }
 
     /**
-     * when characters input , set the text's span by characterStyle and ParagraphStyle.
+     * when characters input , set the text's span by styleSpan.
      * Parameters start and lengthAfter must use the parameter of onTextChanged
      *
      * @param start       the start of character's input
@@ -305,6 +324,13 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
+    /**
+     * when characters input , set the text's span by characterStyle and ParagraphStyle.
+     * Parameters start and lengthAfter must use the parameter of onTextChanged
+     *
+     * @param start       the start of character's input
+     * @param lengthAfter the length of character's input
+     */
     private void setTextSpan(Class<?> clazz, int start, int lengthAfter)
     {
         try {
@@ -324,6 +350,25 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
+    private void setTextSpanBySpanBeforeReplacement(Class<?> clazz, int start, int lengthAfter, int replacementLength)
+    {
+        try {
+            if (start == 0) {
+                setSpan(clazz.newInstance(), start, start + lengthAfter);
+            } else {
+                Object preSpan = getAssignSpan(clazz, start - 1 - replacementLength, start - replacementLength);
+                if (preSpan == null) {
+                    setSpan(clazz.newInstance(), start, start + lengthAfter);
+                } else {
+                    changeStyleEnd(preSpan, lengthAfter + replacementLength, getEditableText());
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "can not instantiated " + clazz);
+            e.printStackTrace();
+        }
+    }
+
     /**
      * change Span's state when selection change
      *
@@ -331,6 +376,11 @@ public class RichEditText extends AppCompatEditText
      */
     private void changeSpanStateBySelection(int start, int end)
     {
+//        Log.d(TAG, "changeSpanStateBySelection() called with: " + "start = [" + start + "], end = [" + end + "]");
+//        Object[] spanss = getAssignSpans(ParagraphStyle.class,start,end);
+//        for (Object span : spanss) {
+//            Log.v("Selection", span.toString());
+//        }
         state.clearSelection();
         StyleSpan[] spans;
         if (start != end) {
@@ -359,7 +409,8 @@ public class RichEditText extends AppCompatEditText
         if (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end)) {
             state.enableQuote(true);
         }
-        ReplacementSpan[] replacementSpan = getEditableText().getSpans(start - 1, start, ReplacementSpan.class);
+        ReplacementSpan[] replacementSpan = getEditableText().getSpans(start - 1, start, RichQuoteSpan
+                .ReplaceQuoteSpan.class);
         if (replacementSpan.length != 0 && isRangeInSpan(replacementSpan[0], start, end)) {
             state.enableQuote(true);
         }
@@ -594,7 +645,7 @@ public class RichEditText extends AppCompatEditText
     {
         for (int i = selectionEnd; i < getEditableText().length() - 1; i++) {
             if (getEditableText().charAt(i) == '\n') {
-                return i - 1;
+                return i;
             }
         }
         return getEditableText().length();
@@ -651,6 +702,21 @@ public class RichEditText extends AppCompatEditText
     private void setSpan(Object span, int start, int end)
     {
         getEditableText().setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    private void insertReplacementSpan(Class<?> clazz, int start)
+    {
+        try {
+            isNeedSetQuote = false;
+            String quoteReplacement = "Replace";
+            getEditableText().insert(start, quoteReplacement);
+            setSpan(clazz.newInstance(), start, start + quoteReplacement.length());
+            replacementQuotePosition = start + quoteReplacement.length();
+            isNeedSetQuote = true;
+        } catch (Exception e) {
+            Log.e(TAG, "can not instantiated " + clazz);
+            e.printStackTrace();
+        }
     }
 
     private void removeReplacementSpan(Class<?> clazz, int start)
