@@ -30,7 +30,6 @@ public class RichQuoteSpan extends QuoteSpan
         p.setStyle(Paint.Style.FILL);
         p.setColor(0xff000000);
         c.drawRect(x + quoteGapWidth / 2, top, x + quoteGapWidth / 2 + dir * quoteStripeWidth, bottom, p);
-
         p.setStyle(style);
         p.setColor(color);
     }

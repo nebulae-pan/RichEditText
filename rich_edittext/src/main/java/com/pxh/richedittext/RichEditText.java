@@ -48,7 +48,7 @@ public class RichEditText extends AppCompatEditText
 
     int replacementQuotePosition = -1;
     boolean isNeedSetQuote = true;
-    boolean isRemoveAndSetCompleted = true;
+    boolean quoteEnterOnce = false;
 
     public RichEditText(Context context)
     {
@@ -276,19 +276,19 @@ public class RichEditText extends AppCompatEditText
             setTextSpan(StrikethroughSpan.class, start, lengthAfter);
         }
         if (state.isQuoteEnable()) {
-//            if (isNeedSetQuote) {
-//                setTextSpan(RichQuoteSpan.class, start, lengthAfter);
-//            }
-//            if (lengthAfter == 1 && text.charAt(start) == '\n') {
-//                insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start + 1);
-//            } else if (start == replacementQuotePosition) {
-//                removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
-//            }
-            //considerate span state, double enter exit quote mod, no replacementQuoteSpan convert to html
-            if (lengthAfter == 1 && text.charAt(start) == '\n') {
-                insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start + 1);
-            }
             if (isNeedSetQuote) {
+                if (lengthAfter == 1 && text.charAt(start) == '\n') {
+                    if (!quoteEnterOnce) {
+                        quoteEnterOnce = true;
+                        insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start + 1);
+                    } else {
+                        quoteEnterOnce = false;
+                        removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
+                        return;
+                    }
+                } else {
+                    quoteEnterOnce = false;
+                }
                 if (start == replacementQuotePosition) {
                     setTextSpanBySpanBeforeReplacement(RichQuoteSpan.class, start, lengthAfter, 7);
                     removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
@@ -296,7 +296,7 @@ public class RichEditText extends AppCompatEditText
                     setTextSpan(RichQuoteSpan.class, start, lengthAfter);
                 }
             }
-
+//            setTextSpan(RichQuoteSpan.class, start, lengthAfter);
         }
     }
 
