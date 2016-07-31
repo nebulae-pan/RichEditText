@@ -32,6 +32,8 @@ import org.xml.sax.SAXNotSupportedException;
  */
 public class RichHtml
 {
+    private static final String TAG = "RichHtml";
+
     public static String toHtml(Spanned text)
     {
         StringBuilder out = new StringBuilder();
@@ -118,14 +120,15 @@ public class RichHtml
 
     private static void withinParagraphStyle(boolean hasBullet, StringBuilder out, Spanned text, int start, int end)
     {
+        Log.d(TAG, "withinParagraphStyle() called with: " + "hasBullet = [" + hasBullet + "], out = [" + out + "], " +
+                "text = [" + text + "], start = [" + start + "], end = [" + end + "]");
         int next;
-        int nl = 0;
         for (int i = start; i < end; i = next) {
             next = TextUtils.indexOf(text, '\n', i, end);
             if (next < 0) {
                 next = end;
             }
-
+            int nl = 0;
             if (hasBullet) {
                 out.append("<li>");
             }
@@ -133,7 +136,7 @@ public class RichHtml
                 nl++;
                 next++;
             }
-            withinParagraph(out, text, start, next - nl, nl, false);
+            withinParagraph(out, text, i, next - nl, nl, false);
             if (hasBullet) {
                 out.append("</li>");
             }
@@ -155,6 +158,8 @@ public class RichHtml
     /* Returns true if the caller should close and reopen the paragraph. */
     private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end, int nl, boolean last)
     {
+        Log.d(TAG, "withinParagraph() called with: " + "out = [" + out + "], text = [" + text + "], start = [" +
+                start + "], end = [" + end + "], nl = [" + nl + "], last = [" + last + "]");
         int next;
         for (int i = start; i < end; i = next) {
             next = text.nextSpanTransition(i, end, CharacterStyle.class);
@@ -221,7 +226,7 @@ public class RichHtml
                 }
             }
 
-//            Log.v("withinparagraph1", out.toString());
+            Log.v("withinparagraph1", out.toString());
 
             withinStyle(out, text, i, next);
 
@@ -282,6 +287,8 @@ public class RichHtml
     private static void withinStyle(StringBuilder out, CharSequence text,
                                     int start, int end)
     {
+        Log.d(TAG, "withinStyle() called with: " + "out = [" + out + "], text = [" + text + "], start = [" + start +
+                "], end = [" + end + "]");
         for (int i = start; i < end; i++) {
             char c = text.charAt(i);
             if (c == '<') {
@@ -306,12 +313,12 @@ public class RichHtml
                     out.append("&nbsp;");
                     i++;
                 }
-                 out.append(' ');
+                out.append(' ');
             } else {
                 out.append(c);
             }
         }
-//        Log.v("withinStyle", out.toString());
+        Log.v("withinStyle", out.toString());
     }
 
     private static class HtmlParser
