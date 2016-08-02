@@ -74,6 +74,10 @@ public class RichEditText extends AppCompatEditText
         });
     }
 
+    /**
+     * use local uri to insert a image
+     * @param uri image uri
+     */
     public void insertImage(Uri uri)
     {
         String path = UriUtils.getValidPath(getContext(), uri);
@@ -96,6 +100,11 @@ public class RichEditText extends AppCompatEditText
         setSelection(start + ss.length());  //set selection start position
     }
 
+    /**
+     * insert a hyperlink and display by describe
+     * @param describe hyperlink display
+     * @param url url
+     */
     public void insertUrl(String describe, String url)
     {
         SpannableString ss = new SpannableString(describe);
@@ -644,7 +653,7 @@ public class RichEditText extends AppCompatEditText
      * get current paragraph's start
      *
      * @param selectionStart selectionStart
-     * @return paragraph start position
+     * @return paragraph's start position
      */
     private int getParagraphStart(int selectionStart)
     {
@@ -660,7 +669,7 @@ public class RichEditText extends AppCompatEditText
      * exclude \n
      *
      * @param selectionEnd selectionEnd
-     * @return paragraph end position
+     * @return paragraph's end position
      */
     private int getParagraphEnd(int selectionEnd)
     {

@@ -55,7 +55,6 @@ public class RichEditorImageGetter implements Html.ImageGetter
                         editor.setText(editor.getText());
                     }
                 });
-//        BitmapDrawable bd = (BitmapDrawable) editor.getContext().getResources().getDrawable(R.drawable.holder);
         BitmapDrawable bd = (BitmapDrawable) ContextCompat.getDrawable(editor.getContext(), R.drawable.holder);
         Bitmap holder = bd.getBitmap();
         float scaleWidth = ((float) width) / holder.getWidth();
