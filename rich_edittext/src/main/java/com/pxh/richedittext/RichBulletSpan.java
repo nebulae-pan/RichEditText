@@ -7,11 +7,12 @@ import android.os.Parcel;
 import android.text.Layout;
 import android.text.Spanned;
 import android.text.style.BulletSpan;
+import android.text.style.ReplacementSpan;
 
 /**
  * Created by pxh on 2016/8/3.
  */
-public class RichBulletQuote extends BulletSpan
+public class RichBulletSpan extends BulletSpan
 {
     private final int mGapWidth;
     private final boolean mWantColor;
@@ -21,28 +22,28 @@ public class RichBulletQuote extends BulletSpan
     private static Path sBulletPath = null;
     public static final int STANDARD_GAP_WIDTH = 2;
 
-    public RichBulletQuote()
+    public RichBulletSpan()
     {
         mGapWidth = STANDARD_GAP_WIDTH;
         mWantColor = false;
         mColor = 0;
     }
 
-    public RichBulletQuote(int gapWidth)
+    public RichBulletSpan(int gapWidth)
     {
         mGapWidth = gapWidth;
         mWantColor = false;
         mColor = 0;
     }
 
-    public RichBulletQuote(int gapWidth, int color)
+    public RichBulletSpan(int gapWidth, int color)
     {
         mGapWidth = gapWidth;
         mWantColor = true;
         mColor = color;
     }
 
-    public RichBulletQuote(Parcel src)
+    public RichBulletSpan(Parcel src)
     {
         mGapWidth = src.readInt();
         mWantColor = src.readInt() != 0;
@@ -94,6 +95,49 @@ public class RichBulletQuote extends BulletSpan
             }
 
             p.setStyle(style);
+        }
+    }
+
+    static public class ReplaceBulletSpan extends ReplacementSpan
+    {
+        private final int mGapWidth = STANDARD_GAP_WIDTH;
+        private final boolean mWantColor = false;
+        private final int mColor = 0;
+
+        private static final int BULLET_RADIUS = 3;
+        private static Path sBulletPath = null;
+        public static final int STANDARD_GAP_WIDTH = 2;
+
+
+        @Override
+        public int getSize(Paint paint, CharSequence text, int start, int end, Paint.FontMetricsInt fm)
+        {
+            return 2 * BULLET_RADIUS + mGapWidth;
+        }
+
+        @Override
+        public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom,
+                         Paint paint)
+        {
+            if (((Spanned) text).getSpanStart(this) == start) {
+                Paint.Style style = paint.getStyle();
+                int oldcolor = 0;
+
+                if (mWantColor) {
+                    oldcolor = paint.getColor();
+                    paint.setColor(mColor);
+                }
+
+                paint.setStyle(Paint.Style.FILL);
+
+                canvas.drawCircle(x + BULLET_RADIUS, (top + bottom) / 2.0f, BULLET_RADIUS, paint);
+
+                if (mWantColor) {
+                    paint.setColor(oldcolor);
+                }
+
+                paint.setStyle(style);
+            }
         }
     }
 }
