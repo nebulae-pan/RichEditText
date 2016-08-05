@@ -30,6 +30,7 @@ import com.pxh.richparser.RichHtml;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by pxh on 2016/4/13.
@@ -46,13 +47,7 @@ public class RichEditText extends AppCompatEditText
 
     TextSpanState state = new TextSpanState();
 
-    int replacementQuotePosition = -1;
-    boolean isNeedSetQuote = true;
-    boolean isQuoteEnterOnce = false;
-
-    int replacementBulletPosition = -1;
-    boolean isNeedSetBullet = true;
-    boolean isBulletEnterOnce = false;
+    HashMap<Class<?>, ReplaceInfo> replaceMap = new HashMap<>();
 
     public RichEditText(Context context)
     {
@@ -62,6 +57,9 @@ public class RichEditText extends AppCompatEditText
     public RichEditText(final Context context, AttributeSet attrs)
     {
         super(context, attrs);
+
+        replaceMap.put(RichQuoteSpan.class, new ReplaceInfo(RichQuoteSpan.ReplaceQuoteSpan.class));
+        replaceMap.put(RichBulletSpan.class, new ReplaceInfo(RichBulletSpan.ReplaceBulletSpan.class));
 
         post(new Runnable()
         {
@@ -214,7 +212,7 @@ public class RichEditText extends AppCompatEditText
                     setSpan(new RichQuoteSpan(), quoteStart, quoteEnd);
                 }
             } else {
-                if (start == replacementQuotePosition) {
+                if (start == replaceMap.get(RichQuoteSpan.class).position) {
                     removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
                 } else {
                     Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
@@ -250,7 +248,7 @@ public class RichEditText extends AppCompatEditText
                     setSpan(new RichBulletSpan(), bulletStart, bulletEnd);
                 }
             } else {
-                if (start == replacementBulletPosition) {
+                if (start == replaceMap.get(RichBulletSpan.class).position) {
                     removeReplacementSpan(RichBulletSpan.ReplaceBulletSpan.class, start);
                 } else {
                     Object richBulletSpan = getAssignSpan(RichBulletSpan.class, start, start);
@@ -341,58 +339,34 @@ public class RichEditText extends AppCompatEditText
             setTextSpan(StrikethroughSpan.class, start, lengthAfter);
         }
         if (state.isQuoteEnable()) {
-            onQuoteEnabledInput(text, start, lengthAfter);
+            onEnabledInput(RichQuoteSpan.class, text, start, lengthAfter);
 //            setTextSpan(RichQuoteSpan.class, start, lengthAfter);
         }
         if (state.isBulletEnable()) {
-            onBulletEnabledInput(text, start, lengthAfter);
+            onEnabledInput(RichBulletSpan.class, text, start, lengthAfter);
         }
     }
 
-    private void onBulletEnabledInput(CharSequence text, int start, int lengthAfter)
+    private void onEnabledInput(Class<?> clazz, CharSequence text, int start, int lengthAfter)
     {
-        if (isNeedSetBullet) {
+        if (replaceMap.get(clazz).isNeedSet) {
             if (lengthAfter == 1 && text.charAt(start) == '\n') {
-                if (!isBulletEnterOnce) {
-                    isBulletEnterOnce = true;
-                    insertReplacementSpan(RichBulletSpan.ReplaceBulletSpan.class, start + 1);
+                if (!replaceMap.get(clazz).isEnterOnce) {
+                    replaceMap.get(clazz).isEnterOnce = true;
+                    insertReplacementSpan(replaceMap.get(clazz).clazz, start + 1);
                 } else {
-                    isBulletEnterOnce = false;
-                    removeReplacementSpan(RichBulletSpan.ReplaceBulletSpan.class, start);
+                    replaceMap.get(clazz).isEnterOnce = false;
+                    removeReplacementSpan(replaceMap.get(clazz).clazz, start);
                     return;
                 }
             } else {
-                isBulletEnterOnce = false;
+                replaceMap.get(clazz).isEnterOnce = false;
             }
-            if (start == replacementBulletPosition) {
-                setTextSpanBySpanBeforeReplacement(RichBulletSpan.class, start, lengthAfter, 7);
-                removeReplacementSpan(RichBulletSpan.ReplaceBulletSpan.class, start);
+            if (start == replaceMap.get(clazz).position) {
+                setTextSpanBySpanBeforeReplacement(clazz, start, lengthAfter, 7);
+                removeReplacementSpan(replaceMap.get(clazz).clazz, start);
             } else {
-                setTextSpan(RichBulletSpan.class, start, lengthAfter);
-            }
-        }
-    }
-
-    private void onQuoteEnabledInput(CharSequence text, int start, int lengthAfter)
-    {
-        if (isNeedSetQuote) {
-            if (lengthAfter == 1 && text.charAt(start) == '\n') {
-                if (!isQuoteEnterOnce) {
-                    isQuoteEnterOnce = true;
-                    insertReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start + 1);
-                } else {
-                    isQuoteEnterOnce = false;
-                    removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
-                    return;
-                }
-            } else {
-                isQuoteEnterOnce = false;
-            }
-            if (start == replacementQuotePosition) {
-                setTextSpanBySpanBeforeReplacement(RichQuoteSpan.class, start, lengthAfter, 7);
-                removeReplacementSpan(RichQuoteSpan.ReplaceQuoteSpan.class, start);
-            } else {
-                setTextSpan(RichQuoteSpan.class, start, lengthAfter);
+                setTextSpan(clazz, start, lengthAfter);
             }
         }
     }
@@ -790,13 +764,13 @@ public class RichEditText extends AppCompatEditText
     private void insertReplacementSpan(Class<?> clazz, int start)
     {
         try {
-            isNeedSetQuote = false;
+            replaceMap.get(clazz).isNeedSet = true;
             String quoteReplacement = "Replace";
             getEditableText().insert(start, quoteReplacement);
             setSpan(clazz.newInstance(), start, start + quoteReplacement.length());
-            replacementQuotePosition = start + quoteReplacement.length();//TODO:// FIXME: 2016/8/4 create a map to
+            replaceMap.get(clazz).position = start + quoteReplacement.length();
             // save paragraph parameters
-            isNeedSetQuote = true;
+            replaceMap.get(clazz).isNeedSet = true;
         } catch (Exception e) {
             Log.e(TAG, "can not instantiated " + clazz);
             e.printStackTrace();
@@ -808,7 +782,20 @@ public class RichEditText extends AppCompatEditText
         Object replacementSpan = getAssignSpan(clazz, start, start);
         getEditableText().removeSpan(replacementSpan);
         getEditableText().delete(start - 7, start);
-        replacementQuotePosition = -1;
+        replaceMap.get(clazz).position = -1;
+    }
+
+    static class ReplaceInfo
+    {
+        public ReplaceInfo(Class<?> clazz)
+        {
+            this.clazz = clazz;
+        }
+
+        int position = -1;
+        boolean isNeedSet = true;
+        boolean isEnterOnce = false;
+        Class<?> clazz;
     }
 
 
