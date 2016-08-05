@@ -658,24 +658,6 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
-    private void setBullet()
-    {
-        int start = getSelectionStart();
-        int end = getSelectionEnd();
-        for (int i = 0; i < getLineCount(); i++) {
-            int lineStart = getLayout().getLineStart(i);
-            if (lineStart == start) {
-                break;
-            }
-            if ((lineStart > start) || (lineStart < start && i == (getLineCount() - 1))) {
-                getEditableText().insert(start, "\n");
-                setSelection(start + 1, end + 1);
-                break;
-            }
-        }
-        setSpan(new BulletSpan(), getSelectionStart(), getSelectionEnd());
-    }
-
     /**
      * get current paragraph's start
      *
