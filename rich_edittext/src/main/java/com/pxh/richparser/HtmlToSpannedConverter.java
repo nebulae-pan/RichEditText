@@ -24,6 +24,8 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 import com.pxh.richedittext.R;
+import com.pxh.richedittext.RichBulletSpan;
+import com.pxh.richedittext.RichQuoteSpan;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -160,6 +162,10 @@ public class HtmlToSpannedConverter implements ContentHandler
                 handleP(mSpannableStringBuilder);
                 start(mSpannableStringBuilder, new Blockquote());
                 break;
+            case "li":
+                handleP(mSpannableStringBuilder);
+                start(mSpannableStringBuilder, new Li());
+                break;
             case "a":
                 startA(mSpannableStringBuilder, attributes);
                 break;
@@ -211,7 +217,11 @@ public class HtmlToSpannedConverter implements ContentHandler
                 break;
             case "blockquote":
                 handleP(mSpannableStringBuilder);
-                end(mSpannableStringBuilder, Blockquote.class, new QuoteSpan());
+                end(mSpannableStringBuilder, Blockquote.class, new RichQuoteSpan());
+                break;
+            case "li":
+                handleP(mSpannableStringBuilder);
+                end(mSpannableStringBuilder, Li.class, new RichBulletSpan());
                 break;
             case "a":
                 endA(mSpannableStringBuilder);
@@ -528,6 +538,14 @@ public class HtmlToSpannedConverter implements ContentHandler
     }
 
     private static class Blockquote
+    {
+    }
+
+    private static class Bullet
+    {
+    }
+
+    private static class Li
     {
     }
 

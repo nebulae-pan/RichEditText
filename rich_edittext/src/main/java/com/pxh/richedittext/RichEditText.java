@@ -340,7 +340,6 @@ public class RichEditText extends AppCompatEditText
         }
         if (state.isQuoteEnable()) {
             onEnabledInput(RichQuoteSpan.class, text, start, lengthAfter);
-//            setTextSpan(RichQuoteSpan.class, start, lengthAfter);
         }
         if (state.isBulletEnable()) {
             onEnabledInput(RichBulletSpan.class, text, start, lengthAfter);
