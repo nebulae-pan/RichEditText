@@ -13,6 +13,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
+import android.text.style.ReplacementSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
@@ -21,6 +22,9 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+
+import com.pxh.richedittext.RichBulletSpan;
+import com.pxh.richedittext.RichQuoteSpan;
 
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
@@ -161,6 +165,7 @@ public class RichHtml
         Log.d(TAG, "withinParagraph() called with: " + "out = [" + out + "], text = [" + text + "], start = [" +
                 start + "], end = [" + end + "], nl = [" + nl + "], last = [" + last + "]");
         int next;
+        boolean skip = false;
         for (int i = start; i < end; i = next) {
             next = text.nextSpanTransition(i, end, CharacterStyle.class);
             CharacterStyle[] style = text.getSpans(i, next,
@@ -224,13 +229,24 @@ public class RichHtml
                     out.append(color);
                     out.append("\">");
                 }
+                if (style[j] instanceof RichBulletSpan.ReplaceBulletSpan || style[j] instanceof RichQuoteSpan
+                        .ReplaceQuoteSpan) {
+                    skip = true;
+                }
             }
 
             Log.v("withinparagraph1", out.toString());
 
-            withinStyle(out, text, i, next);
+            if (!skip) {
+                withinStyle(out, text, i, next);
+            }
 
             for (int j = style.length - 1; j >= 0; j--) {
+                if (style[j] instanceof RichBulletSpan.ReplaceBulletSpan || style[j] instanceof RichQuoteSpan
+                        .ReplaceQuoteSpan) {
+                    skip = false;
+                    continue;
+                }
                 if (style[j] instanceof ForegroundColorSpan) {
                     out.append("</font>");
                 }

@@ -102,7 +102,6 @@ public class RichEditText extends AppCompatEditText
         getEditableText().insert(start, ss);//insert the imageSpan
         setSelection(start + ss.length());  //set selection start position
     }
-
     /**
      * insert a hyperlink and display by describe
      *
@@ -362,7 +361,11 @@ public class RichEditText extends AppCompatEditText
                 replaceMap.get(clazz).isEnterOnce = false;
             }
             if (start == replaceMap.get(clazz).position) {
-                setTextSpanBySpanBeforeReplacement(clazz, start, lengthAfter, 7);
+                if (clazz.equals(RichBulletSpan.class)) {
+                    setTextSpan(clazz, start, lengthAfter);
+                } else {
+                    setTextSpanBySpanBeforeReplacement(clazz, start, lengthAfter, 7);
+                }
                 removeReplacementSpan(clazz, start);
             } else {
                 setTextSpan(clazz, start, lengthAfter);
