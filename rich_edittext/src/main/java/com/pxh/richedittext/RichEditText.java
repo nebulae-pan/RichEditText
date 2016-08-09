@@ -102,6 +102,7 @@ public class RichEditText extends AppCompatEditText
         getEditableText().insert(start, ss);//insert the imageSpan
         setSelection(start + ss.length());  //set selection start position
     }
+
     /**
      * insert a hyperlink and display by describe
      *
@@ -197,27 +198,27 @@ public class RichEditText extends AppCompatEditText
         }
         if (start < end) {
             setSelectionTextQuote(isValid, start, end);
-        } else {// start == end
-            if (isValid) {
-                int quoteStart = getParagraphStart(start);
-                int quoteEnd = getParagraphEnd(start);
-                //if there is just a single line,insert a replacement span
-                if (quoteStart == start &&
-                        (getEditableText().length() == quoteStart ||
-                                getEditableText().charAt(quoteStart) == '\n')) {
-                    insertReplacementSpan(RichQuoteSpan.class, start);
-                } else {
-                    //else set whole paragraph by quote span
-                    setSpan(new RichQuoteSpan(), quoteStart, quoteEnd);
-                }
-            } else {
-                if (start == replaceMap.get(RichQuoteSpan.class).position) {
-                    removeReplacementSpan(RichQuoteSpan.class, start);
-                } else {
-                    Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
-                    getEditableText().removeSpan(richQuoteSpan);
-                }
-            }
+//        } else {// start == end
+//            if (isValid) {
+//                int quoteStart = getParagraphStart(start);
+//                int quoteEnd = getParagraphEnd(start);
+//                //if there is just a single line,insert a replacement span
+//                if (quoteStart == start &&
+//                        (getEditableText().length() == quoteStart ||
+//                                getEditableText().charAt(quoteStart) == '\n')) {
+//                    insertReplacementSpan(RichQuoteSpan.class, start);
+//                } else {
+//                    //else set whole paragraph by quote span
+//                    setSpan(new RichQuoteSpan(this), quoteStart, quoteEnd);
+//                }
+//            } else {
+//                if (start == replaceMap.get(RichQuoteSpan.class).position) {
+//                    removeReplacementSpan(RichQuoteSpan.class, start);
+//                } else {
+//                    Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
+//                    getEditableText().removeSpan(richQuoteSpan);
+//                }
+//            }
         }
         state.enableQuote(isValid);
     }
@@ -338,7 +339,8 @@ public class RichEditText extends AppCompatEditText
             setTextSpan(StrikethroughSpan.class, start, lengthAfter);
         }
         if (state.isQuoteEnable()) {
-            onEnabledInput(RichQuoteSpan.class, text, start, lengthAfter);
+            //onEnabledInput(RichQuoteSpan.class, text, start, lengthAfter);
+            setTextSpan(new RichQuoteSpan(this), start, lengthAfter);
         }
         if (state.isBulletEnable()) {
             onEnabledInput(RichBulletSpan.class, text, start, lengthAfter);
@@ -420,6 +422,20 @@ public class RichEditText extends AppCompatEditText
         } catch (Exception e) {
             Log.e(TAG, "can not instantiated " + clazz);
             e.printStackTrace();
+        }
+    }
+
+    private void setTextSpan(Object span, int start, int lengthAfter)
+    {
+        if (start == 0) {
+            setSpan(span, start, start + lengthAfter);
+        } else {
+            Object preSpan = getAssignSpan(span.getClass(), start - 1, start);
+            if (preSpan == null) {
+                setSpan(span, start, start + lengthAfter);
+            } else {
+                changeStyleEnd(preSpan, lengthAfter, getEditableText());
+            }
         }
     }
 
@@ -579,7 +595,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextQuote(boolean isValid, int start, int end)
     {
-        setSelectionTextSpan(isValid, new RichQuoteSpan(), start, end);
+        setSelectionTextSpan(isValid, new RichQuoteSpan(this), start, end);
     }
 
     private void setSelectionTextBullet(boolean isValid, int start, int end)

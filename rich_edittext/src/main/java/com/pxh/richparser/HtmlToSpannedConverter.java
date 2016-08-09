@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.ParagraphStyle;
+import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
@@ -216,7 +217,7 @@ public class HtmlToSpannedConverter implements ContentHandler
                 break;
             case "blockquote":
                 handleP(mSpannableStringBuilder);
-                end(mSpannableStringBuilder, Blockquote.class, new RichQuoteSpan());
+                end(mSpannableStringBuilder, Blockquote.class, new QuoteSpan());
                 break;
             case "li":
                 handleP(mSpannableStringBuilder);
