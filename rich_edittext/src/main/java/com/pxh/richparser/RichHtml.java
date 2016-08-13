@@ -147,18 +147,6 @@ public class RichHtml
         }
     }
 
-    private static int getLineFeed(Spanned text, int start, int end)
-    {
-        CharSequence spanned = text.subSequence(start + 1, end);
-        for (int i = 0; i < spanned.length(); i++) {
-            if (spanned.charAt(i) == '\n') {
-                return i;
-            }
-        }
-        return end;
-    }
-
-
     /* Returns true if the caller should close and reopen the paragraph. */
     private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end, int nl, boolean last)
     {

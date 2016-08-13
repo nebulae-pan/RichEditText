@@ -19,7 +19,6 @@ public class RichBulletSpan extends BulletSpan
     private final int mColor;
 
     private static final int BULLET_RADIUS = 3;
-    private static Path sBulletPath = null;
     public static final int STANDARD_GAP_WIDTH = 2;
 
     public RichBulletSpan()
@@ -101,11 +100,8 @@ public class RichBulletSpan extends BulletSpan
     static public class ReplaceBulletSpan extends ReplacementSpan
     {
         private final int mGapWidth = STANDARD_GAP_WIDTH;
-        private final boolean mWantColor = false;
-        private final int mColor = 0;
 
         private static final int BULLET_RADIUS = 3;
-        private static Path sBulletPath = null;
         public static final int STANDARD_GAP_WIDTH = 2;
 
 
@@ -121,21 +117,8 @@ public class RichBulletSpan extends BulletSpan
         {
             if (((Spanned) text).getSpanStart(this) == start) {
                 Paint.Style style = paint.getStyle();
-                int oldcolor = 0;
-
-                if (mWantColor) {
-                    oldcolor = paint.getColor();
-                    paint.setColor(mColor);
-                }
-
                 paint.setStyle(Paint.Style.FILL);
-
                 canvas.drawCircle(x + BULLET_RADIUS, (top + bottom) / 2.0f, BULLET_RADIUS, paint);
-
-                if (mWantColor) {
-                    paint.setColor(oldcolor);
-                }
-
                 paint.setStyle(style);
             }
         }

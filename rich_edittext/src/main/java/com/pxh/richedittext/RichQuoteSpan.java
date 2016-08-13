@@ -35,10 +35,6 @@ public class RichQuoteSpan extends QuoteSpan
     public void drawLeadingMargin(Canvas c, Paint p, int x, int dir, int top, int baseline, int bottom,
                                   CharSequence text, int start, int end, boolean first, Layout layout)
     {
-        Log.d("123", "c = [" + c + "], p = [" + p + "], x = [" + x + "], dir = ["
-                + dir + "], top = [" + top + "], baseline = [" + baseline + "], bottom = [" + bottom + "], text = ["
-                + text + "], start = [" + start + "], end = [" + end + "], first = [" + first + "], layout = [" +
-                layout + "]");
         final long lineRange = getLineRangeForDraw(c);
         int firstLine = unpackRangeStartFromLong(lineRange);
         int lastLine = unpackRangeEndFromLong(lineRange);
