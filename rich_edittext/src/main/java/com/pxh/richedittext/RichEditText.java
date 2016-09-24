@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.widget.AppCompatEditText;
+import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
@@ -259,7 +260,7 @@ public class RichEditText extends AppCompatEditText
         state.enableBullet(isValid);
     }
 
-    public boolean isTextSpanEnable(TextSpanState.TextSpan textSpan)
+    public boolean isTextSpanEnable(int textSpan)
     {
         return state.isTextSpanEnable(textSpan);
     }
@@ -326,7 +327,10 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
-        if (state.isBoldEnable()) {
+        Log.v("line", getLayout().getLineForOffset(getSelectionStart()) + "");
+        Log.v("line", String.valueOf(getLayout() instanceof DynamicLayout));
+
+        /*if (state.isBoldEnable()) {
             setTextSpan(Typeface.BOLD, start, lengthAfter);
         }
         if (state.isItalicEnable()) {
@@ -344,7 +348,7 @@ public class RichEditText extends AppCompatEditText
         }
         if (state.isBulletEnable()) {
             onEnabledInput(RichBulletSpan.class, text, start, lengthAfter);
-        }
+        }*/
     }
 
     private void onEnabledInput(Class<?> clazz, CharSequence text, int start, int lengthAfter)
@@ -807,6 +811,6 @@ public class RichEditText extends AppCompatEditText
          * @param type    span type
          * @param isValid is span Valid
          */
-        void OnTextSpanChanged(TextSpanState.TextSpan type, boolean isValid);
+        void OnTextSpanChanged(int type, boolean isValid);
     }
 }

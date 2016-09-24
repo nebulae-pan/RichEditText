@@ -6,18 +6,6 @@ package com.pxh.richedittext;
  */
 public class TextSpanState
 {
-    public enum TextSpan
-    {
-        Bold(1), Italic(2), UnderLine(4), Strikethrough(8), Quote(16), Bullet(32);
-
-        int value;
-
-        TextSpan(int value)
-        {
-            this.value = value;
-        }
-    }
-
     public TextSpanState()
     {
         spanSelection = 0;
@@ -29,84 +17,84 @@ public class TextSpanState
 
     public void enableBold(boolean isValid)
     {
-        setStateSelection(isValid, TextSpan.Bold);
+        setStateSelection(isValid, TextSpans.Bold);
     }
 
     public void enableItalic(boolean isValid)
     {
-        setStateSelection(isValid, TextSpan.Italic);
+        setStateSelection(isValid, TextSpans.Italic);
     }
 
     public void enableUnderLine(boolean isValid)
     {
-        setStateSelection(isValid, TextSpan.UnderLine);
+        setStateSelection(isValid, TextSpans.UnderLine);
     }
 
     public void enableStrikethrough(boolean isValid)
     {
-        setStateSelection(isValid, TextSpan.Strikethrough);
+        setStateSelection(isValid, TextSpans.Strikethrough);
     }
 
     public void enableQuote(boolean isValid)
     {
-        setStateSelection(isValid, TextSpan.Quote);
+        setStateSelection(isValid, TextSpans.Quote);
     }
 
     public void enableBullet(boolean isValid)
     {
-        setStateSelection(isValid, TextSpan.Bullet);
+        setStateSelection(isValid, TextSpans.Bullet);
     }
 
-    private void setStateSelection(boolean isValid, TextSpan type)
+    private void setStateSelection(boolean isValid, int type)
     {
-        if (isValid == getStateSelection(type.value)) {
+        if (isValid == isStateSelection(type)) {
             return;
         }
         if (isValid)
-            spanSelection |= type.value;
+            spanSelection |= type;
         else
-            spanSelection &= (Integer.MAX_VALUE ^ type.value);
+            spanSelection &= (Integer.MAX_VALUE ^ type);
         if (spanChangeListener != null)
             spanChangeListener.OnTextSpanChanged(type, isValid);
 
     }
 
-    public boolean isTextSpanEnable(TextSpan textSpan)
+    public boolean isTextSpanEnable(int textSpan)
     {
-        return getStateSelection(textSpan.value);
+        return isStateSelection(textSpan);
     }
 
     public boolean isBoldEnable()
     {
-        return isTextSpanEnable(TextSpan.Bold);
+        return isTextSpanEnable(TextSpans.Bold);
     }
 
     public boolean isItalicEnable()
     {
-        return isTextSpanEnable(TextSpan.Italic);
+        return isTextSpanEnable(TextSpans.Italic);
     }
 
     public boolean isUnderLineEnable()
     {
-        return isTextSpanEnable(TextSpan.UnderLine);
+        return isTextSpanEnable(TextSpans.UnderLine);
     }
 
     public boolean isStrikethroughEnable()
     {
-        return isTextSpanEnable(TextSpan.Strikethrough);
+        return isTextSpanEnable(TextSpans.Strikethrough);
     }
 
     public boolean isQuoteEnable()
     {
-        return isTextSpanEnable(TextSpan.Quote);
+        return isTextSpanEnable(TextSpans.Quote);
     }
 
     public boolean isBulletEnable()
     {
-        return isTextSpanEnable(TextSpan.Bullet);
+        return isTextSpanEnable(TextSpans.Bullet);
     }
 
-    private boolean getStateSelection(int spanValue)
+    private boolean isStateSelection(int spanValue)
     {
         return (spanSelection & spanValue) != 0;
     }
@@ -115,9 +103,9 @@ public class TextSpanState
     {
         if (spanChangeListener != null) {
             int i = 1;
-            for (TextSpan type : TextSpan.values()) {
-                if (getStateSelection(i))
-                    spanChangeListener.OnTextSpanChanged(type, false);
+            while (i <= spanSelection) {
+                if (isStateSelection(i))
+                    spanChangeListener.OnTextSpanChanged(i, false);
                 i <<= 1;
             }
         }

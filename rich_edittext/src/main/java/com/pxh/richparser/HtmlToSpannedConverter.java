@@ -25,7 +25,6 @@ import android.util.Log;
 
 import com.pxh.richedittext.R;
 import com.pxh.richedittext.RichBulletSpan;
-import com.pxh.richedittext.RichQuoteSpan;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
