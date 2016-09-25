@@ -24,7 +24,7 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 import com.pxh.richedittext.R;
-import com.pxh.richedittext.RichBulletSpan;
+import com.pxh.span.RichBulletSpan;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;

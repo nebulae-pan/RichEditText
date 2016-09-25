@@ -1,4 +1,4 @@
-package com.pxh.richedittext;
+package com.pxh.span;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

@@ -16,7 +16,8 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.richedittext.RichEditText;
-import com.pxh.richedittext.TextSpanState;
+import com.pxh.richedittext.TextSpanStatus;
+import com.pxh.richedittext.TextSpans;
 import com.pxh.richparser.RichHtml;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity
 {
     private RichEditText richEditText;
-    private HashMap<TextSpanState.TextSpan, View> views = new HashMap<>();
+    private HashMap<Integer, View> views = new HashMap<>();
 
     private TextView content;
 
@@ -48,19 +49,19 @@ public class MainActivity extends AppCompatActivity
         ImageLoader.getInstance().init(configuration);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        views.put(TextSpanState.TextSpan.Bold, findViewById(R.id.bold));
-        views.put(TextSpanState.TextSpan.Italic, findViewById(R.id.italic));
-        views.put(TextSpanState.TextSpan.UnderLine, findViewById(R.id.underline));
-        views.put(TextSpanState.TextSpan.Strikethrough, findViewById(R.id.strikethrough));
-        views.put(TextSpanState.TextSpan.Quote, findViewById(R.id.quote));
-        views.put(TextSpanState.TextSpan.Bullet, findViewById(R.id.bullet));
+        views.put(TextSpans.Bold, findViewById(R.id.bold));
+        views.put(TextSpans.Italic, findViewById(R.id.italic));
+        views.put(TextSpans.UnderLine, findViewById(R.id.underline));
+        views.put(TextSpans.Strikethrough, findViewById(R.id.strikethrough));
+        views.put(TextSpans.Quote, findViewById(R.id.quote));
+        views.put(TextSpans.Bullet, findViewById(R.id.bullet));
         richEditText = (RichEditText) findViewById(R.id.rich_edit_text);
         content = (TextView) findViewById(R.id.content);
         content.setMovementMethod(LinkMovementMethod.getInstance());
         richEditText.setSpanChangeListener(new RichEditText.TextSpanChangeListener()
         {
             @Override
-            public void OnTextSpanChanged(TextSpanState.TextSpan type, boolean isValid)
+            public void OnTextSpanChanged(int type, boolean isValid)
             {
                 View v = views.get(type);
                 changeTextColor(v, isValid);

@@ -2,11 +2,11 @@ package com.pxh.richedittext;
 
 /**
  * Created by pxh on 2016/5/23.
- * the state of all TextSpans
+ * status handler
  */
-public class TextSpanState
+public class TextSpanStatus
 {
-    public TextSpanState()
+    public TextSpanStatus()
     {
         spanSelection = 0;
     }
@@ -58,6 +58,12 @@ public class TextSpanState
             spanChangeListener.OnTextSpanChanged(type, isValid);
 
     }
+
+    public void setTextSpanEnable(int textSpan, boolean isEnable)
+    {
+        setStateSelection(isEnable, textSpan);
+    }
+
 
     public boolean isTextSpanEnable(int textSpan)
     {
