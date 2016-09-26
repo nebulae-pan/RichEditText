@@ -16,12 +16,12 @@ import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.ReplacementSpan;
-import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.pxh.adapter.BoldSpanAdapter;
@@ -93,7 +93,6 @@ public class RichEditText extends AppCompatEditText
         addSpanAdapterInternal(new ItalicSpanAdapter(this));
         addSpanAdapterInternal(new UnderLineSpanAdapter(this));
         addSpanAdapterInternal(new StrikethroughSpanAdapter(this));
-
     }
 
     private void addSpanAdapterInternal(SpanAdapter adapter)
@@ -160,7 +159,7 @@ public class RichEditText extends AppCompatEditText
      */
     public void enableBold(boolean isValid)
     {
-        enableSpan(isValid,TextSpans.Bold);
+        enableSpan(isValid, TextSpans.Bold);
     }
 
     /**
@@ -170,7 +169,7 @@ public class RichEditText extends AppCompatEditText
      */
     public void enableItalic(boolean isValid)
     {
-        enableSpan(isValid,TextSpans.Italic);
+        enableSpan(isValid, TextSpans.Italic);
     }
 
     /**
@@ -190,12 +189,13 @@ public class RichEditText extends AppCompatEditText
 
     /**
      * enable the span which is assigned by code, use for custom span
+     *
      * @param isValid whether enable
-     * @param code span code, must be integer power of 2
+     * @param code    span code, must be integer power of 2
      */
     public void enableSpan(boolean isValid, int code)
     {
-        adapters.get(code).enableSpan(isValid, state);
+        adapters.get(code).enableSpan(isValid, state, code);
     }
 
     public void enableQuote(boolean isValid)
@@ -337,6 +337,25 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
+//        Log.d(TAG, "onTextChanged() called with: " + "text = [" + text + "], start = [" + start + "], lengthBefore = " +
+//                "[" + lengthBefore + "], lengthAfter = [" + lengthAfter + "]");
+//        if (text.charAt(start + lengthAfter - 1) == '\n') {
+//            Log.v("tag", text.getClass().toString());
+//            Field field = null;
+//            try {
+//                field = text.getClass().getDeclaredField("mText");
+//                field.setAccessible(true);
+//                char[] mText = (char[]) field.get(text);
+//                if (mText.length > text.length() + 1) {
+//                    mText[text.length()] = '1';
+//                }
+//                field.set(text, mText);
+//                Log.v("tag", mText.length + "" + new String(mText));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            return;
+//        }
 //        Log.v("line", getLayout().getLineForOffset(getSelectionStart()) + "");
 //        Log.v("line", String.valueOf(getLayout() instanceof DynamicLayout));
 
@@ -450,19 +469,19 @@ public class RichEditText extends AppCompatEditText
     private void changeSpanStateBySelection(int start, int end)
     {
         state.clearSelection();
-        for(int i = 0; i < adapters.size(); i++) {
+        for (int i = 0; i < adapters.size(); i++) {
             int key = adapters.keyAt(i);
-            state.setTextSpanEnable(key,adapters.get(key).changeStatusBySelection(start, end));
+            state.setTextSpanEnable(key, adapters.get(key).changeStatusBySelection(start, end));
         }
         QuoteSpan[] quoteSpans = getEditableText().getSpans(start - 1, start, QuoteSpan.class);
         if (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end)) {
             state.enableQuote(true);
         }
-        ReplacementSpan[] replacementSpan = getEditableText().getSpans(start - 1, start, RichQuoteSpan
-                .ReplaceQuoteSpan.class);
-        if (replacementSpan.length != 0 && isRangeInSpan(replacementSpan[0], start, end)) {
-            state.enableQuote(true);
-        }
+//        ReplacementSpan[] replacementSpan = getEditableText().getSpans(start - 1, start, RichQuoteSpan
+//                .ReplaceQuoteSpan.class);
+//        if (replacementSpan.length != 0 && isRangeInSpan(replacementSpan[0], start, end)) {
+//            state.enableQuote(true);
+//        }
         BulletSpan[] bulletSpans = getEditableText().getSpans(start - 1, start, BulletSpan.class);
         if (bulletSpans.length != 0 && isRangeInSpan(bulletSpans[0], start, end)) {
             state.enableBullet(true);
@@ -673,6 +692,14 @@ public class RichEditText extends AppCompatEditText
         Class<?> clazz;
     }
 
+    @Override
+    final public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_ENTER && getEditableText().charAt(getEditableText().length() - 1) == '\n') {
+            return false;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
 
     public interface TextSpanChangeListener
     {

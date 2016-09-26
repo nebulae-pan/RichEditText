@@ -3,6 +3,7 @@ package com.pxh.sample;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.LinkMovementMethod;
@@ -142,7 +143,7 @@ public class MainActivity extends AppCompatActivity
         if (!isValid) {
             ((TextView) view).setTextColor(0x88000000);
         } else {
-            ((TextView) view).setTextColor(getResources().getColor(R.color.colorAccent));
+            ((TextView) view).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
         }
     }
 

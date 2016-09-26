@@ -34,7 +34,7 @@ public abstract class SpanAdapter
     public abstract int getSpanStatusCode();
 
 
-    public void enableSpan(boolean isEnable, TextSpanStatus state)
+    public void enableSpan(boolean isEnable, TextSpanStatus state, int code)
     {
         int start = editor.getSelectionStart();
         int end = editor.getSelectionEnd();
@@ -45,7 +45,7 @@ public abstract class SpanAdapter
         }
         if (start < end)
             setSelectionText(isEnable, start, end);
-        state.enableBold(isEnable);
+        state.setTextSpanEnable(code,isEnable);
     }
 
     /**
