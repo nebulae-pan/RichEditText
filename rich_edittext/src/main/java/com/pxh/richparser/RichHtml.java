@@ -216,8 +216,7 @@ public class RichHtml
                     out.append(color);
                     out.append("\">");
                 }
-                if (style[j] instanceof RichBulletSpan.ReplaceBulletSpan || style[j] instanceof RichQuoteSpan
-                        .ReplaceQuoteSpan) {
+                if (style[j] instanceof RichBulletSpan.ReplaceBulletSpan) {
                     skip = true;
                 }
             }
@@ -229,8 +228,7 @@ public class RichHtml
             }
 
             for (int j = style.length - 1; j >= 0; j--) {
-                if (style[j] instanceof RichBulletSpan.ReplaceBulletSpan || style[j] instanceof RichQuoteSpan
-                        .ReplaceQuoteSpan) {
+                if (style[j] instanceof RichBulletSpan.ReplaceBulletSpan) {
                     skip = false;
                     continue;
                 }

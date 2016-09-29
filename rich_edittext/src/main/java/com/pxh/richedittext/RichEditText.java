@@ -21,7 +21,6 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.pxh.adapter.BoldSpanAdapter;
@@ -34,6 +33,7 @@ import com.pxh.span.RichBulletSpan;
 import com.pxh.span.RichQuoteSpan;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
@@ -58,6 +58,13 @@ public class RichEditText extends AppCompatEditText
 
     HashMap<Class<?>, ReplaceInfo> replaceMap = new HashMap<>();
 
+    boolean addedEnter = false;
+    boolean needToChange = false;
+
+    Field count;
+    Field spans;
+    Field ends;
+
     public RichEditText(Context context)
     {
         this(context, null);
@@ -69,7 +76,6 @@ public class RichEditText extends AppCompatEditText
 
         initSpanAdapterArray();
 
-        replaceMap.put(RichQuoteSpan.class, new ReplaceInfo(RichQuoteSpan.ReplaceQuoteSpan.class));
         replaceMap.put(RichBulletSpan.class, new ReplaceInfo(RichBulletSpan.ReplaceBulletSpan.class));
 
         post(new Runnable()
@@ -337,25 +343,59 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
-//        Log.d(TAG, "onTextChanged() called with: " + "text = [" + text + "], start = [" + start + "], lengthBefore = " +
-//                "[" + lengthBefore + "], lengthAfter = [" + lengthAfter + "]");
-//        if (text.charAt(start + lengthAfter - 1) == '\n') {
-//            Log.v("tag", text.getClass().toString());
-//            Field field = null;
-//            try {
-//                field = text.getClass().getDeclaredField("mText");
-//                field.setAccessible(true);
-//                char[] mText = (char[]) field.get(text);
-//                if (mText.length > text.length() + 1) {
-//                    mText[text.length()] = '1';
-//                }
-//                field.set(text, mText);
-//                Log.v("tag", mText.length + "" + new String(mText));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+//        if (start + lengthAfter >= 1
+//                && text.charAt(start + lengthAfter - 1) == '\n'
+//                && !addedEnter
+//                && getSelectionStart() == text.length()) {
+//            addedEnter = true;
+//            getEditableText().append("\n");
+//        }
+//        if (needToChange) {
+//            needToChange = false;
+//            addedEnter = false;
+//            lengthAfter++;
+//        } else if (addedEnter) {
+//            needToChange = true;
 //            return;
 //        }
+
+        if (start + lengthAfter >= 1 && text.charAt(start + lengthAfter - 1) == '\n') {
+            try {
+//                Field textField = text.getClass().getDeclaredField("mText");
+//                Field gapLengthField = text.getClass().getDeclaredField("mGapLength");
+//                Field gapStartField = text.getClass().getDeclaredField("mGapStart");
+//                textField.setAccessible(true);
+//                gapStartField.setAccessible(true);
+//                gapLengthField.setAccessible(true);
+//                char[] mText = (char[]) textField.get(text);
+//                int mGapLength = (int) gapLengthField.get(text);
+//                int mGapStart = (int) gapStartField.get(text);
+//                if (mGapLength == 0) {
+//                    Method resize = text.getClass().getMethod("resizeFor");
+//                    resize.invoke(text, mText.length + 1 - mGapLength);
+//                }
+//                mText[text.length()] = '1';
+//                mGapLength--;
+//                mGapStart++;
+//                textField.set(text, mText);
+//                gapLengthField.set(text, mGapLength);
+//                gapStartField.set(text, mGapStart);
+//                Log.v("tag", mText.length + ":" + new String(mText));
+//                lengthAfter++;
+                Method change = text.getClass().getDeclaredMethod("change", int.class, int.class, CharSequence
+                        .class, int.class, int.class);
+                change.setAccessible(true);
+                Method sendToSpanWatchers = text.getClass().getDeclaredMethod("sendToSpanWatchers", int.class, int
+                        .class, int.class);
+                sendToSpanWatchers.setAccessible(true);
+
+                change.invoke(text, 0, 0, "1", 0, 1);
+//                sendToSpanWatchers.invoke(text,start + lengthAfter, start + lengthAfter, 1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+//            return;
+        }
 //        Log.v("line", getLayout().getLineForOffset(getSelectionStart()) + "");
 //        Log.v("line", String.valueOf(getLayout() instanceof DynamicLayout));
 
@@ -367,11 +407,15 @@ public class RichEditText extends AppCompatEditText
         }
         if (state.isQuoteEnable()) {
             //onEnabledInput(RichQuoteSpan.class, text, start, lengthAfter);
-            setTextSpan(new RichQuoteSpan(this), start, lengthAfter);
+            setTextSpan(new RichQuoteSpan(), start, lengthAfter);
         }
         if (state.isBulletEnable()) {
             onEnabledInput(RichBulletSpan.class, text, start, lengthAfter);
         }
+//        if (needToChange) {
+//
+//            setSelection(getEditableText().length() - 1);
+//        }
     }
 
     private void onEnabledInput(Class<?> clazz, CharSequence text, int start, int lengthAfter)
@@ -477,11 +521,6 @@ public class RichEditText extends AppCompatEditText
         if (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end)) {
             state.enableQuote(true);
         }
-//        ReplacementSpan[] replacementSpan = getEditableText().getSpans(start - 1, start, RichQuoteSpan
-//                .ReplaceQuoteSpan.class);
-//        if (replacementSpan.length != 0 && isRangeInSpan(replacementSpan[0], start, end)) {
-//            state.enableQuote(true);
-//        }
         BulletSpan[] bulletSpans = getEditableText().getSpans(start - 1, start, BulletSpan.class);
         if (bulletSpans.length != 0 && isRangeInSpan(bulletSpans[0], start, end)) {
             state.enableBullet(true);
@@ -531,14 +570,15 @@ public class RichEditText extends AppCompatEditText
         if (lengthAfter == 0)
             return;
         try {
-            Class<?> classType = ss.getClass();
-
-            Field count = classType.getDeclaredField("mSpanCount");
-            Field spans = classType.getDeclaredField("mSpans");
-            Field ends = classType.getDeclaredField("mSpanEnds");
-            count.setAccessible(true);
-            spans.setAccessible(true);
-            ends.setAccessible(true);
+            if (count == null) {
+                Class<?> classType = ss.getClass();
+                count = classType.getDeclaredField("mSpanCount");
+                spans = classType.getDeclaredField("mSpans");
+                ends = classType.getDeclaredField("mSpanEnds");
+                count.setAccessible(true);
+                spans.setAccessible(true);
+                ends.setAccessible(true);
+            }
 
             int mSpanCount = (int) count.get(ss);
             Object[] mSpans = (Object[]) spans.get(ss);
@@ -558,7 +598,7 @@ public class RichEditText extends AppCompatEditText
 
     private void setSelectionTextQuote(boolean isValid, int start, int end)
     {
-        setSelectionTextSpan(isValid, new RichQuoteSpan(this), start, end);
+        setSelectionTextSpan(isValid, new RichQuoteSpan(), start, end);
     }
 
     private void setSelectionTextBullet(boolean isValid, int start, int end)
@@ -690,15 +730,6 @@ public class RichEditText extends AppCompatEditText
         boolean isNeedSet = true;
         boolean isEnterOnce = false;
         Class<?> clazz;
-    }
-
-    @Override
-    final public boolean onKeyUp(int keyCode, KeyEvent event)
-    {
-        if (keyCode == KeyEvent.KEYCODE_ENTER && getEditableText().charAt(getEditableText().length() - 1) == '\n') {
-            return false;
-        }
-        return super.onKeyUp(keyCode, event);
     }
 
     public interface TextSpanChangeListener
