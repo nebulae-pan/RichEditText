@@ -20,6 +20,10 @@ public abstract class SpanAdapter
 
     RichEditText editor;
 
+    Field count;
+    Field spans;
+    Field ends;
+
     public SpanAdapter(RichEditText editor)
     {
         this.editor = editor;
@@ -45,7 +49,7 @@ public abstract class SpanAdapter
         }
         if (start < end)
             setSelectionText(isEnable, start, end);
-        state.setTextSpanEnable(code,isEnable);
+        state.setTextSpanEnable(code, isEnable);
     }
 
     /**
@@ -66,8 +70,11 @@ public abstract class SpanAdapter
             if (styleSpan == null) {
                 setSpan(new StyleSpan(style), start, start + lengthAfter);
             } else {
+                if (start < editor.getEditableText().getSpanEnd(styleSpan)) {
+                    return;
+                }
                 //if have span , change the span's effect scope
-                changeSpanEnd(styleSpan, lengthAfter,editor.getEditableText());
+                changeSpanEnd(styleSpan, lengthAfter, editor.getEditableText());
             }
         }
     }
@@ -89,6 +96,9 @@ public abstract class SpanAdapter
                 if (preSpan == null) {
                     setSpan(clazz.newInstance(), start, start + lengthAfter);
                 } else {
+                    if (start < editor.getEditableText().getSpanEnd(preSpan)) {
+                        return;
+                    }
                     changeSpanEnd(preSpan, lengthAfter, editor.getEditableText());
                 }
             }
@@ -107,6 +117,9 @@ public abstract class SpanAdapter
             if (preSpan == null) {
                 setSpan(span, start, start + lengthAfter);
             } else {
+                if (start < editor.getEditableText().getSpanEnd(preSpan)) {
+                    return;
+                }
                 changeSpanEnd(preSpan, lengthAfter, editor.getEditableText());
             }
         }
@@ -124,15 +137,15 @@ public abstract class SpanAdapter
         if (lengthAfter == 0)
             return;
         try {
-            Class<?> classType = ss.getClass();
-
-            Field count = classType.getDeclaredField("mSpanCount");
-            Field spans = classType.getDeclaredField("mSpans");
-            Field ends = classType.getDeclaredField("mSpanEnds");
-            count.setAccessible(true);
-            spans.setAccessible(true);
-            ends.setAccessible(true);
-
+            if (count == null) {
+                Class<?> classType = ss.getClass();
+                count = classType.getDeclaredField("mSpanCount");
+                spans = classType.getDeclaredField("mSpans");
+                ends = classType.getDeclaredField("mSpanEnds");
+                count.setAccessible(true);
+                spans.setAccessible(true);
+                ends.setAccessible(true);
+            }
             int mSpanCount = (int) count.get(ss);
             Object[] mSpans = (Object[]) spans.get(ss);
             int[] mSpanEnds = (int[]) ends.get(ss);
@@ -177,10 +190,11 @@ public abstract class SpanAdapter
 
     /**
      * make the text which selected enable or disable span. if enable, it will merge same and adjacent spans
+     *
      * @param isValid whether enable
-     * @param style style span
-     * @param start span start
-     * @param end span end
+     * @param style   style span
+     * @param start   span start
+     * @param end     span end
      */
     protected void setSelectionTextSpan(boolean isValid, int style, int start, int end)
     {
@@ -194,7 +208,7 @@ public abstract class SpanAdapter
             }
             int newStart = start;
             int newEnd = end;
-            StyleSpan before = getStyleSpan(style,  start - 1, start);
+            StyleSpan before = getStyleSpan(style, start - 1, start);
             if (before != null) {
                 newStart = editor.getEditableText().getSpanStart(before);
                 editor.getEditableText().removeSpan(before);
@@ -290,9 +304,9 @@ public abstract class SpanAdapter
     /**
      * get styleSpan by specified style from the editable text
      *
-     * @param style    the specified style
-     * @param start    start of editable
-     * @param end      end of editable
+     * @param style the specified style
+     * @param start start of editable
+     * @param end   end of editable
      * @return if there has a StyleSpan which style is specified in start to end,return it,or return null
      */
     protected StyleSpan getStyleSpan(int style, int start, int end)

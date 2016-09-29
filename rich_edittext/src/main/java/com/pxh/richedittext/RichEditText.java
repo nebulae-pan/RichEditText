@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.pxh.adapter.BoldSpanAdapter;
@@ -33,7 +34,6 @@ import com.pxh.span.RichBulletSpan;
 import com.pxh.span.RichQuoteSpan;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
@@ -60,7 +60,11 @@ public class RichEditText extends AppCompatEditText
 
     boolean addedEnter = false;
     boolean needToChange = false;
+    boolean needToSetStatus = true;
 
+    /**
+     * spans reflect cache
+     */
     Field count;
     Field spans;
     Field ends;
@@ -213,8 +217,31 @@ public class RichEditText extends AppCompatEditText
             end = start ^ end;
             start = start ^ end;
         }
+        state.enableQuote(isValid);
         if (start < end) {
             setSelectionTextQuote(isValid, start, end);
+        } else {
+            if (isValid) {
+                int quoteStart = getParagraphStart(start);
+                int quoteEnd = getParagraphEnd(start);
+                //if there is just a single line,insert a replacement span
+                if (quoteStart == start &&
+                        (getEditableText().length() == quoteStart ||
+                                getEditableText().charAt(quoteStart) == '\n')) {
+                    append("\n");
+                    setSelection(getText().length() - 1);
+                } else {
+                    //else set whole paragraph by quote span
+                    setSpan(new RichQuoteSpan(), quoteStart, quoteEnd);
+                }
+            } else {
+//                if (start == replaceMap.get(RichQuoteSpan.class).position) {
+//                    removeReplacementSpan(RichQuoteSpan.class, start);
+//                } else {
+//                    Object richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start, start);
+//                    getEditableText().removeSpan(richQuoteSpan);
+//                }
+            }
 //        } else {// start == end
 //            if (isValid) {
 //                int quoteStart = getParagraphStart(start);
@@ -237,7 +264,6 @@ public class RichEditText extends AppCompatEditText
 //                }
 //            }
         }
-        state.enableQuote(isValid);
     }
 
     public void enableBullet(boolean isValid)
@@ -334,7 +360,9 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
-        changeSpanStateBySelection(selStart, selEnd);
+        if (needToSetStatus) {
+            changeSpanStateBySelection(selStart, selEnd);
+        }
     }
 
     @Override
@@ -343,62 +371,22 @@ public class RichEditText extends AppCompatEditText
         if (state == null) {
             return;
         }
+        if (addedEnter) {
+            return;
+        }
 //        if (start + lengthAfter >= 1
 //                && text.charAt(start + lengthAfter - 1) == '\n'
-//                && !addedEnter
 //                && getSelectionStart() == text.length()) {
 //            addedEnter = true;
+//            needToSetStatus = false;
 //            getEditableText().append("\n");
+//            setSelection(start + lengthAfter);
+//            needToSetStatus = true;
 //        }
-//        if (needToChange) {
-//            needToChange = false;
+//        if (addedEnter) {
 //            addedEnter = false;
 //            lengthAfter++;
-//        } else if (addedEnter) {
-//            needToChange = true;
-//            return;
 //        }
-
-        if (start + lengthAfter >= 1 && text.charAt(start + lengthAfter - 1) == '\n') {
-            try {
-//                Field textField = text.getClass().getDeclaredField("mText");
-//                Field gapLengthField = text.getClass().getDeclaredField("mGapLength");
-//                Field gapStartField = text.getClass().getDeclaredField("mGapStart");
-//                textField.setAccessible(true);
-//                gapStartField.setAccessible(true);
-//                gapLengthField.setAccessible(true);
-//                char[] mText = (char[]) textField.get(text);
-//                int mGapLength = (int) gapLengthField.get(text);
-//                int mGapStart = (int) gapStartField.get(text);
-//                if (mGapLength == 0) {
-//                    Method resize = text.getClass().getMethod("resizeFor");
-//                    resize.invoke(text, mText.length + 1 - mGapLength);
-//                }
-//                mText[text.length()] = '1';
-//                mGapLength--;
-//                mGapStart++;
-//                textField.set(text, mText);
-//                gapLengthField.set(text, mGapLength);
-//                gapStartField.set(text, mGapStart);
-//                Log.v("tag", mText.length + ":" + new String(mText));
-//                lengthAfter++;
-                Method change = text.getClass().getDeclaredMethod("change", int.class, int.class, CharSequence
-                        .class, int.class, int.class);
-                change.setAccessible(true);
-                Method sendToSpanWatchers = text.getClass().getDeclaredMethod("sendToSpanWatchers", int.class, int
-                        .class, int.class);
-                sendToSpanWatchers.setAccessible(true);
-
-                change.invoke(text, 0, 0, "1", 0, 1);
-//                sendToSpanWatchers.invoke(text,start + lengthAfter, start + lengthAfter, 1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-//            return;
-        }
-//        Log.v("line", getLayout().getLineForOffset(getSelectionStart()) + "");
-//        Log.v("line", String.valueOf(getLayout() instanceof DynamicLayout));
-
         for (int i = 0; i < adapters.size(); i++) {
             int key = adapters.keyAt(i);
             if (state.isTextSpanEnable(key)) {
@@ -406,7 +394,6 @@ public class RichEditText extends AppCompatEditText
             }
         }
         if (state.isQuoteEnable()) {
-            //onEnabledInput(RichQuoteSpan.class, text, start, lengthAfter);
             setTextSpan(new RichQuoteSpan(), start, lengthAfter);
         }
         if (state.isBulletEnable()) {
@@ -520,6 +507,11 @@ public class RichEditText extends AppCompatEditText
         QuoteSpan[] quoteSpans = getEditableText().getSpans(start - 1, start, QuoteSpan.class);
         if (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end)) {
             state.enableQuote(true);
+        } else {
+            boolean s = isInHolderMode(start);
+//            Log.v("tag", String.valueOf(s));
+
+            state.enableQuote(s);
         }
         BulletSpan[] bulletSpans = getEditableText().getSpans(start - 1, start, BulletSpan.class);
         if (bulletSpans.length != 0 && isRangeInSpan(bulletSpans[0], start, end)) {
@@ -530,6 +522,36 @@ public class RichEditText extends AppCompatEditText
         if (replaceBulletSpans.length != 0 && isRangeInSpan(replaceBulletSpans[0], start, end)) {
             state.enableBullet(true);
         }
+    }
+
+    /**
+     *                      1、replaceSpan                                       2、换行
+     * 无字符时的空行             1
+     * 回车时占位                                                                  无需处理
+     * 删除                      1
+     * 状态维护
+     *                      处理replace和span的draw
+     */
+
+
+    private boolean isInHolderMode(int start)
+    {
+//        Log.v("tag", start + "");
+        if (start >= getEditableText().length()) {
+            return false;
+        }
+        if (getEditableText().charAt(start) != '\n') {
+            return false;
+        }
+        QuoteSpan[] quoteSpans = getEditableText().getSpans(start, start + 1, QuoteSpan.class);
+        if (quoteSpans.length > 0) {
+            int len = getEditableText().getSpanEnd(quoteSpans[0]) - getEditableText().getSpanStart
+                    (quoteSpans[0]);
+            if (len == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -699,9 +721,9 @@ public class RichEditText extends AppCompatEditText
     {
         try {
             replaceMap.get(clazz).isNeedSet = false;
-            String replacementString = "Replace";
+            String replacementString = "T";
             getEditableText().insert(start, replacementString);
-            setSpan(replaceMap.get(clazz).clazz.newInstance(), start, start + replacementString.length());
+            setSpan(replaceMap.get(clazz).clazz.newInstance(), start, start + 1);
             replaceMap.get(clazz).position = start + replacementString.length();
             // save paragraph parameters
             replaceMap.get(clazz).isNeedSet = true;
@@ -711,11 +733,24 @@ public class RichEditText extends AppCompatEditText
         }
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_DEL) {
+//            Log.v("tag", "delete");
+            if (isInHolderMode(getSelectionStart())) {
+                getEditableText().delete(getSelectionStart(), getSelectionStart() + 1);
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
     private void removeReplacementSpan(Class<?> clazz, int start)
     {
         Object replacementSpan = getAssignSpan(replaceMap.get(clazz).clazz, start, start);
         getEditableText().removeSpan(replacementSpan);
-        getEditableText().delete(start - 7, start);
+        getEditableText().delete(start - 1, start);
         replaceMap.get(clazz).position = -1;
     }
 

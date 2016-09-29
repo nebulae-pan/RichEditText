@@ -32,7 +32,6 @@ public class UnderLineSpanAdapter extends SpanAdapter
     public void changeSpanByTextChanged(int start, int lengthAfter)
     {
         setTextSpanByTextChanged(UnderlineSpan.class, start, lengthAfter);
-
     }
 
     @Override
