@@ -1,5 +1,7 @@
 package com.pxh.richedittext;
 
+import com.pxh.RichEditText;
+
 /**
  * Created by pxh on 2016/5/23.
  * status handler

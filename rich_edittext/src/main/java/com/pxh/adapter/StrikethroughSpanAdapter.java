@@ -2,7 +2,7 @@ package com.pxh.adapter;
 
 import android.text.style.StrikethroughSpan;
 
-import com.pxh.richedittext.RichEditText;
+import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpans;
 
 /**
@@ -29,7 +29,7 @@ public class StrikethroughSpanAdapter extends SpanAdapter
     }
 
     @Override
-    public void changeSpanByTextChanged(int start, int lengthAfter)
+    public void changeSpanByTextChanged(int start,int lengthBefore, int lengthAfter)
     {
         setTextSpanByTextChanged(StrikethroughSpan.class, start, lengthAfter);
     }

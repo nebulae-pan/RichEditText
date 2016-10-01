@@ -5,7 +5,7 @@ import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
-import com.pxh.richedittext.RichEditText;
+import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpanStatus;
 
 import java.lang.reflect.Field;
@@ -33,7 +33,7 @@ public abstract class SpanAdapter
 
     public abstract boolean changeStatusBySelection(int start, int end);
 
-    public abstract void changeSpanByTextChanged(int start, int lengthAfter);
+    public abstract void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter);
 
     public abstract int getSpanStatusCode();
 
@@ -61,21 +61,34 @@ public abstract class SpanAdapter
      */
     protected void setTextSpanByTextChanged(int style, int start, int lengthAfter)
     {
+        Object span;
         if (start == 0) {
             //if start = 0, text must doesn't have spans, use new StyleSpan
-            setSpan(new StyleSpan(style), start, start + lengthAfter);
+            span = new StyleSpan(style);
+            setSpan(span, start, start + lengthAfter);
         } else {
             //estimate the character what in front of input whether have span
             StyleSpan styleSpan = getStyleSpan(style, start - 1, start);
             if (styleSpan == null) {
-                setSpan(new StyleSpan(style), start, start + lengthAfter);
+                span = new StyleSpan(style);
+                setSpan(span, start, start + lengthAfter);
             } else {
                 if (start < editor.getEditableText().getSpanEnd(styleSpan)) {
                     return;
                 }
                 //if have span , change the span's effect scope
+                span = styleSpan;
                 changeSpanEnd(styleSpan, lengthAfter, editor.getEditableText());
             }
+        }
+        //merge two span
+        Object nextSpan = getAssignSpan(span.getClass(), start + lengthAfter, start + lengthAfter + 1);
+        if (nextSpan != null) {
+            int nextEnd = getEditableText().getSpanEnd(nextSpan);
+            getEditableText().removeSpan(nextSpan);
+            int curStart = getEditableText().getSpanStart(span);
+            getEditableText().removeSpan(span);
+            getEditableText().setSpan(span, curStart, nextEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
@@ -88,23 +101,44 @@ public abstract class SpanAdapter
      */
     protected void setTextSpanByTextChanged(Class<?> clazz, int start, int lengthAfter)
     {
+        Object span = null;
         try {
             if (start == 0) {
-                setSpan(clazz.newInstance(), start, start + lengthAfter);
+                span = clazz.newInstance();
+                setSpan(span, start, start + lengthAfter);
             } else {
                 Object preSpan = getAssignSpan(clazz, start - 1, start);
                 if (preSpan == null) {
-                    setSpan(clazz.newInstance(), start, start + lengthAfter);
+                    span = clazz.newInstance();
+                    setSpan(span, start, start + lengthAfter);
                 } else {
                     if (start < editor.getEditableText().getSpanEnd(preSpan)) {
                         return;
                     }
+                    span = preSpan;
                     changeSpanEnd(preSpan, lengthAfter, editor.getEditableText());
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, "can not instantiated " + clazz);
             e.printStackTrace();
+        }
+        //merge two span
+        if (span == null) return;
+        Object nextSpan = getAssignSpan(span.getClass(), start + lengthAfter, start + lengthAfter + 1);
+        if (nextSpan != span) {
+            int nextEnd = getEditableText().getSpanEnd(nextSpan);
+            if (nextEnd == -1) {
+                return;
+            }
+            getEditableText().removeSpan(nextSpan);
+            int curStart = getEditableText().getSpanStart(span);
+            if (curStart == -1) {
+                return;
+            }
+            getEditableText().removeSpan(span);
+            getEditableText().setSpan(span, curStart, nextEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            Log.v("tag", getEditableText().getSpanStart(span) + ":" + getEditableText().getSpanEnd(span));
         }
     }
 
@@ -120,8 +154,18 @@ public abstract class SpanAdapter
                 if (start < editor.getEditableText().getSpanEnd(preSpan)) {
                     return;
                 }
+                span = preSpan;
                 changeSpanEnd(preSpan, lengthAfter, editor.getEditableText());
             }
+        }
+        //merge two span
+        Object nextSpan = getAssignSpan(span.getClass(), start + lengthAfter, start + lengthAfter + 1);
+        if (nextSpan != null) {
+            int nextEnd = getEditableText().getSpanEnd(nextSpan);
+            getEditableText().removeSpan(nextSpan);
+            int curStart = getEditableText().getSpanStart(span);
+            getEditableText().removeSpan(span);
+            getEditableText().setSpan(span, curStart, nextEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
@@ -269,36 +313,9 @@ public abstract class SpanAdapter
         }
     }
 
-    /**
-     * get current paragraph's start
-     *
-     * @param selectionStart selectionStart
-     * @return paragraph's start position
-     */
-    protected int getParagraphStart(int selectionStart)
+    protected Editable getEditableText()
     {
-        for (int i = selectionStart - 1; i > 0; i--) {
-            if (editor.getEditableText().charAt(i) == '\n') {
-                return i + 1;
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * exclude \n
-     *
-     * @param selectionEnd selectionEnd
-     * @return paragraph's end position
-     */
-    protected int getParagraphEnd(int selectionEnd)
-    {
-        for (int i = selectionEnd; i < editor.getEditableText().length() - 1; i++) {
-            if (editor.getEditableText().charAt(i) == '\n') {
-                return i;
-            }
-        }
-        return editor.getEditableText().length();
+        return editor.getEditableText();
     }
 
     /**
@@ -337,10 +354,10 @@ public abstract class SpanAdapter
         return editor.getEditableText().getSpans(start, end, clazz);
     }
 
-    protected Object getAssignSpan(Class<?> clazz, int start, int end)
+    protected <T> T getAssignSpan(Class<T> clazz, int start, int end)
     {
-        Object[] spans = editor.getEditableText().getSpans(start, end, clazz);
-        for (Object span : spans) {
+        T[] spans = editor.getEditableText().getSpans(start, end, clazz);
+        for (T span : spans) {
             if (span.getClass().equals(clazz)) {
                 return span;
             }

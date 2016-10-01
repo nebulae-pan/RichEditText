@@ -3,7 +3,7 @@ package com.pxh.adapter;
 import android.graphics.Typeface;
 import android.text.style.StyleSpan;
 
-import com.pxh.richedittext.RichEditText;
+import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpans;
 
 /**
@@ -30,7 +30,7 @@ public class BoldSpanAdapter extends SpanAdapter
     }
 
     @Override
-    public void changeSpanByTextChanged(int start, int lengthAfter)
+    public void changeSpanByTextChanged(int start,int lengthBefore, int lengthAfter)
     {
         setTextSpanByTextChanged(Typeface.BOLD, start, lengthAfter);
     }

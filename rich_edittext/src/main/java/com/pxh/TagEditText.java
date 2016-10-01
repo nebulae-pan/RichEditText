@@ -1,4 +1,4 @@
-package com.pxh.richedittext;
+package com.pxh;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,6 +8,8 @@ import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+
+import com.pxh.RichEditText;
 
 /**
  * Created by pxh on 2016/5/7.

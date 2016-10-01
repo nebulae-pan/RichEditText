@@ -84,7 +84,7 @@
 
     </HorizontalScrollView>
 
-    <com.pxh.richedittext.RichEditText
+    <com.pxh.RichEditText
         android:id="@+id/rich_edit_text"
         android:layout_width="match_parent"
         android:layout_height="300dp"
