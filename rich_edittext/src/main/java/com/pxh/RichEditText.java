@@ -286,7 +286,7 @@ public class RichEditText extends AppCompatEditText
         }
         Log.d(TAG, "onTextChanged() called with: " + "text = [" + text + "], start = [" + start + "], lengthBefore = " +
                 "[" + lengthBefore + "], lengthAfter = [" + lengthAfter + "]");
-        if (!needToSetStatus) return;
+        if (!needToSetStatus || lengthBefore > 0) return;
         for (int i = 0; i < adapters.size(); i++) {
             int key = adapters.keyAt(i);
             if (state.isTextSpanEnable(key)) {

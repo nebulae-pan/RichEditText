@@ -3,7 +3,6 @@ package com.pxh.adapter;
 import android.util.Log;
 
 import com.pxh.RichEditText;
-import com.pxh.span.RichBulletSpan;
 
 /**
  * Created by pxh on 2016/9/30.

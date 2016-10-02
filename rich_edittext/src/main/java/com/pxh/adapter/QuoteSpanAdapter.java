@@ -158,6 +158,9 @@ public class QuoteSpanAdapter extends ParagraphAdapter
                     setSelectionTextSpan(true, new RichQuoteSpan(), quoteStart, quoteEnd);
                 }
             } else {
+                RichQuoteSpan span = getAssignSpan(RichQuoteSpan.class, start, end);
+                getEditableText().removeSpan(span);
+                //todo:estimate
                 getEditableText().delete(start, start + 1);
             }
         }
@@ -204,10 +207,6 @@ public class QuoteSpanAdapter extends ParagraphAdapter
         if (addedEnter) {
             return;
         }
-        if (lengthBefore > 0) {
-            Object span = getAssignSpan(RichQuoteSpan.class, start, start + 1);
-            Log.v("tag", getEditableText().getSpanStart(span) + ":" + getEditableText().getSpanEnd(span));
-        }
         if (start + lengthAfter >= 1
                 && getEditableText().charAt(start + lengthAfter - 1) == '\n'
                 && editor.getSelectionStart() == getEditableText().length()
@@ -217,9 +216,6 @@ public class QuoteSpanAdapter extends ParagraphAdapter
             getEditableText().append("\n");
             editor.setSelection(start + lengthAfter);
             editor.setEnableStatusChangeBySelection(true);
-        }
-        if (addedEnter) {
-            addedEnter = false;
             lengthAfter++;
         }
         setTextSpanByTextChanged(RichQuoteSpan.class, start, lengthAfter);
