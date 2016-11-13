@@ -31,7 +31,7 @@ public abstract class SpanAdapter
 
     protected abstract void setSelectionText(boolean isEnable, int start, int end);
 
-    public abstract boolean changeStatusBySelection(int start, int end);
+    public abstract boolean changeStatusBySelectionChanged(int start, int end);
 
     public abstract void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter);
 

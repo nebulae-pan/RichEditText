@@ -1,10 +1,12 @@
 package com.pxh.adapter;
 
-import android.util.Log;
+import android.text.Spanned;
+import android.text.style.LeadingMarginSpan;
 
 import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpanStatus;
 import com.pxh.richedittext.TextSpans;
+import com.pxh.span.HolderSpan;
 import com.pxh.span.RichQuoteSpan;
 
 /**
@@ -13,8 +15,7 @@ import com.pxh.span.RichQuoteSpan;
  * 无字时插入，换行时插入。一旦当前行有新的输入，则去掉占位符，当前行文字全部被取消，则插入占位符
  * 连续两次回车取消QuoteSpan影响
  */
-public class QuoteSpanAdapter extends ParagraphAdapter
-{
+public class QuoteSpanAdapter extends ParagraphAdapter {
 //    RichQuoteSpan quoteSpan;
 //
 //    boolean flag = true;
@@ -119,17 +120,15 @@ public class QuoteSpanAdapter extends ParagraphAdapter
 //        }
 //    }
 
-    boolean addedEnter = false;
-    boolean firstAdd = false;
+    private boolean addReplacement = false;
+    private LeadingMarginSpan leadingMarginSpan;
 
-    public QuoteSpanAdapter(RichEditText editor)
-    {
+    public QuoteSpanAdapter(RichEditText editor) {
         super(editor);
     }
 
     @Override
-    public void enableSpan(boolean isEnable, TextSpanStatus state, int code)
-    {
+    public void enableSpan(boolean isEnable, TextSpanStatus state, int code) {
         int start = editor.getSelectionStart();
         int end = editor.getSelectionEnd();
         if (end < start) {
@@ -147,12 +146,15 @@ public class QuoteSpanAdapter extends ParagraphAdapter
                 if (quoteStart == start &&
                         (getEditableText().length() == quoteStart ||
                                 getEditableText().charAt(quoteStart) == '\n')) {
-                    firstAdd = true;
-                    editor.append("\n");
-                    firstAdd = false;
-                    editor.setEnableStatusChangeBySelection(false);
-                    editor.setSelection(start);
-                    editor.setEnableStatusChangeBySelection(true);
+                    if (leadingMarginSpan == null) {
+                        leadingMarginSpan = new RichQuoteSpan();
+                    }
+                    addReplacement = true;
+                    insertReplacement(quoteStart);
+                    addReplacement = false;
+//                    editor.setEnableStatusChangeBySelection(false);
+//                    editor.setSelection(start);
+//                    editor.setEnableStatusChangeBySelection(true);
                 } else {
                     //else set whole paragraph by quote span
                     setSelectionTextSpan(true, new RichQuoteSpan(), quoteStart, quoteEnd);
@@ -167,14 +169,18 @@ public class QuoteSpanAdapter extends ParagraphAdapter
     }
 
     @Override
-    protected void setSelectionText(boolean isEnable, int start, int end)
-    {
+    protected void setSelectionText(boolean isEnable, int start, int end) {
 
     }
 
     @Override
-    public boolean changeStatusBySelection(int start, int end)
-    {
+    public boolean changeStatusBySelectionChanged(int start, int end) {
+        HolderSpan[] holderSpans = getAssignSpans(HolderSpan.class, start - 1, start);
+        for (HolderSpan span : holderSpans) {
+            if (span.getInnerSpan() instanceof RichQuoteSpan) {
+                return true;
+            }
+        }
         RichQuoteSpan[] quoteSpans = getEditableText().getSpans(start - 1, start, RichQuoteSpan.class);
         if (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end)) {
             return true;
@@ -183,8 +189,7 @@ public class QuoteSpanAdapter extends ParagraphAdapter
         }
     }
 
-    private boolean isInHolderMode(int start)
-    {
+    private boolean isInHolderMode(int start) {
         if (start >= getEditableText().length()) {
             return false;
         }
@@ -202,16 +207,14 @@ public class QuoteSpanAdapter extends ParagraphAdapter
     }
 
     @Override
-    public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter)
-    {
-        if (addedEnter) {
+    public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter) {
+        if (addReplacement) {//add replacement will not change span
             return;
         }
         if (start + lengthAfter >= 1
                 && getEditableText().charAt(start + lengthAfter - 1) == '\n'
                 && editor.getSelectionStart() == getEditableText().length()
-                && !firstAdd) {
-            addedEnter = true;
+                && !addReplacement) {
             editor.setEnableStatusChangeBySelection(false);
             getEditableText().append("\n");
             editor.setSelection(start + lengthAfter);
@@ -222,9 +225,17 @@ public class QuoteSpanAdapter extends ParagraphAdapter
     }
 
     @Override
-    public int getSpanStatusCode()
-    {
+    public int getSpanStatusCode() {
         return TextSpans.Quote;
     }
 
+    protected void insertReplacement(int start) {
+        HolderSpan holderSpan = new HolderSpan(leadingMarginSpan);
+        getEditableText().insert(start, "|");
+        getEditableText().setSpan(holderSpan, start, start + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    protected void removeReplacement(int start) {
+//        getEditableText().getSpans()
+    }
 }

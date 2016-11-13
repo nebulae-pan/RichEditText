@@ -23,7 +23,7 @@ abstract public class ParagraphAdapter extends SpanAdapter
     }
 
     @Override
-    abstract public boolean changeStatusBySelection(int start, int end);
+    abstract public boolean changeStatusBySelectionChanged(int start, int end);
 
     @Override
     abstract public void changeSpanByTextChanged(int start,int lengthBefore, int lengthAfter);

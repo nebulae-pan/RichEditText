@@ -22,7 +22,7 @@ public class StrikethroughSpanAdapter extends SpanAdapter
     }
 
     @Override
-    public boolean changeStatusBySelection(int start, int end)
+    public boolean changeStatusBySelectionChanged(int start, int end)
     {
         StrikethroughSpan[] strikethroughSpans = getAssignSpans(StrikethroughSpan.class,start - 1,start);
         return strikethroughSpans.length != 0 && isRangeInSpan(strikethroughSpans[0], start, end);

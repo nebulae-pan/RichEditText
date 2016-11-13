@@ -274,7 +274,7 @@ public class RichEditText extends AppCompatEditText
         state.clearSelection();
         for (int i = 0; i < adapters.size(); i++) {
             int key = adapters.keyAt(i);
-            state.setTextSpanEnable(key, adapters.get(key).changeStatusBySelection(selStart, selEnd));
+            state.setTextSpanEnable(key, adapters.get(key).changeStatusBySelectionChanged(selStart, selEnd));
         }
     }
 

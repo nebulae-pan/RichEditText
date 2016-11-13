@@ -23,7 +23,7 @@ public class BoldSpanAdapter extends SpanAdapter
     }
 
     @Override
-    public boolean changeStatusBySelection(int start, int end)
+    public boolean changeStatusBySelectionChanged(int start, int end)
     {
         StyleSpan styleSpan = getStyleSpan(Typeface.BOLD, start - 1, start);
         return isRangeInSpan(styleSpan, start, end);

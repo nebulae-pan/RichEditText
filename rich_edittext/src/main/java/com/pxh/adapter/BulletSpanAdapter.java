@@ -55,7 +55,7 @@ public class BulletSpanAdapter extends ParagraphAdapter
     }
 
     @Override
-    public boolean changeStatusBySelection(int start, int end)
+    public boolean changeStatusBySelectionChanged(int start, int end)
     {
         RichBulletSpan[] bulletSpans = getEditableText().getSpans(start - 1, start, RichBulletSpan.class);
         if (bulletSpans.length != 0 && isRangeInSpan(bulletSpans[0], start, end)) {

@@ -25,7 +25,7 @@ public class ItalicSpanAdapter extends SpanAdapter
     }
 
     @Override
-    public boolean changeStatusBySelection(int start, int end)
+    public boolean changeStatusBySelectionChanged(int start, int end)
     {
         StyleSpan styleSpan = getStyleSpan(Typeface.ITALIC, start - 1, start);
         return isRangeInSpan(styleSpan, start, end);

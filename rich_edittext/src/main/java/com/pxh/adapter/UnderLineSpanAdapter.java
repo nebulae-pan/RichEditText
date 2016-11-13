@@ -22,7 +22,7 @@ public class UnderLineSpanAdapter extends SpanAdapter
     }
 
     @Override
-    public boolean changeStatusBySelection(int start, int end)
+    public boolean changeStatusBySelectionChanged(int start, int end)
     {
         UnderlineSpan[] underLineSpans = getAssignSpans(UnderlineSpan.class, start - 1, start);
         return underLineSpans.length != 0 && isRangeInSpan(underLineSpans[0], start, end);
