@@ -303,6 +303,6 @@ public class RichEditText extends AppCompatEditText
          * @param type    span type
          * @param isValid is span Valid
          */
-        void OnTextSpanChanged(int type, boolean isValid);
+        void onTextSpanChanged(int type, boolean isValid);
     }
 }

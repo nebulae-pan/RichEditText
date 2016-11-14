@@ -216,7 +216,10 @@ public abstract class SpanAdapter
      */
     protected boolean isRangeInSpan(Object span, int start, int end)
     {
-        return editor.getEditableText().getSpanStart(span) <= start && editor.getEditableText().getSpanEnd(span) >= end;
+        int sstart = getEditableText().getSpanStart(span);
+        int send = getEditableText().getSpanEnd(span);
+        boolean result = editor.getEditableText().getSpanStart(span) <= start && editor.getEditableText().getSpanEnd(span) >= end;
+        return result;
     }
 
     /**

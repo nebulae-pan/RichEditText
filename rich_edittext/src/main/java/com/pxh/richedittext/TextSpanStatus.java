@@ -57,7 +57,7 @@ public class TextSpanStatus
         else
             spanSelection &= (Integer.MAX_VALUE ^ type);
         if (spanChangeListener != null)
-            spanChangeListener.OnTextSpanChanged(type, isValid);
+            spanChangeListener.onTextSpanChanged(type, isValid);
 
     }
 
@@ -113,7 +113,7 @@ public class TextSpanStatus
             int i = 1;
             while (i <= spanSelection) {
                 if (isStateSelection(i))
-                    spanChangeListener.OnTextSpanChanged(i, false);
+                    spanChangeListener.onTextSpanChanged(i, false);
                 i <<= 1;
             }
         }

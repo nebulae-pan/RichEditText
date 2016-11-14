@@ -1,5 +1,6 @@
 package com.pxh.adapter;
 
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.LeadingMarginSpan;
 
@@ -120,7 +121,7 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
 //        }
 //    }
 
-    private boolean addReplacement = false;
+    private boolean changeReplacement = false;
     private LeadingMarginSpan leadingMarginSpan;
 
     public QuoteSpanAdapter(RichEditText editor) {
@@ -149,12 +150,7 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
                     if (leadingMarginSpan == null) {
                         leadingMarginSpan = new RichQuoteSpan();
                     }
-                    addReplacement = true;
                     insertReplacement(quoteStart);
-                    addReplacement = false;
-//                    editor.setEnableStatusChangeBySelection(false);
-//                    editor.setSelection(start);
-//                    editor.setEnableStatusChangeBySelection(true);
                 } else {
                     //else set whole paragraph by quote span
                     setSelectionTextSpan(true, new RichQuoteSpan(), quoteStart, quoteEnd);
@@ -162,8 +158,8 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             } else {
                 RichQuoteSpan span = getAssignSpan(RichQuoteSpan.class, start, end);
                 getEditableText().removeSpan(span);
-                //todo:estimate
-                getEditableText().delete(start, start + 1);
+//                //todo:estimate
+//                getEditableText().delete(start, start + 1);
             }
         }
     }
@@ -182,11 +178,11 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             }
         }
         RichQuoteSpan[] quoteSpans = getEditableText().getSpans(start - 1, start, RichQuoteSpan.class);
-        if (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end)) {
-            return true;
-        } else {
-            return isInHolderMode(start);
-        }
+        return (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end));
+//        else {
+//            return isInHolderMode(start);
+//        }
+//        return false;
     }
 
     private boolean isInHolderMode(int start) {
@@ -208,13 +204,16 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
 
     @Override
     public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter) {
-        if (addReplacement) {//add replacement will not change span
+        if (changeReplacement) {//add replacement will not change span
             return;
+        }
+        if (removeReplacementIfExist(start)) {
+            start--;
         }
         if (start + lengthAfter >= 1
                 && getEditableText().charAt(start + lengthAfter - 1) == '\n'
                 && editor.getSelectionStart() == getEditableText().length()
-                && !addReplacement) {
+                && !changeReplacement) {
             editor.setEnableStatusChangeBySelection(false);
             getEditableText().append("\n");
             editor.setSelection(start + lengthAfter);
@@ -230,12 +229,26 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
     }
 
     protected void insertReplacement(int start) {
+        changeReplacement = true;
         HolderSpan holderSpan = new HolderSpan(leadingMarginSpan);
-        getEditableText().insert(start, "|");
-        getEditableText().setSpan(holderSpan, start, start + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        SpannableStringBuilder sb = new SpannableStringBuilder("|");
+        sb.setSpan(holderSpan, start, start + sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        getEditableText().insert(start, sb);
+        changeReplacement = false;
+
     }
 
-    protected void removeReplacement(int start) {
-//        getEditableText().getSpans()
+    protected boolean removeReplacementIfExist(int end) {
+        HolderSpan[] holderSpans = getAssignSpans(HolderSpan.class, end - 1, end);
+        for (HolderSpan holderSpan : holderSpans) {
+            if (holderSpan.getInnerSpan() instanceof RichQuoteSpan) {
+                changeReplacement = true;
+                getEditableText().removeSpan(holderSpan);
+                getEditableText().delete(end - 1, end);
+                changeReplacement = false;
+                return true;
+            }
+        }
+        return false;
     }
 }

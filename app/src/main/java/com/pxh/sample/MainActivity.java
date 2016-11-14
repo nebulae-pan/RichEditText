@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
         richEditText.setSpanChangeListener(new RichEditText.TextSpanChangeListener()
         {
             @Override
-            public void OnTextSpanChanged(int type, boolean isValid)
+            public void onTextSpanChanged(int type, boolean isValid)
             {
                 View v = views.get(type);
                 changeTextColor(v, isValid);
