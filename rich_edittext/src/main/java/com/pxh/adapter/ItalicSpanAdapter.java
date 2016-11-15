@@ -34,7 +34,7 @@ public class ItalicSpanAdapter extends SpanAdapter
     @Override
     public void changeSpanByTextChanged(int start,int lengthBefore, int lengthAfter)
     {
-        setTextSpanByTextChanged(Typeface.BOLD, start, lengthAfter);
+        setTextSpanByTextChanged(Typeface.ITALIC, start, lengthAfter);
     }
 
     @Override

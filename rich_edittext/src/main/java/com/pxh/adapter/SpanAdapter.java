@@ -14,8 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by pxh on 2016/9/25.
  */
-public abstract class SpanAdapter
-{
+public abstract class SpanAdapter {
     private static final String TAG = "SpanAdapter";
 
     RichEditText editor;
@@ -24,8 +23,7 @@ public abstract class SpanAdapter
     Field spans;
     Field ends;
 
-    public SpanAdapter(RichEditText editor)
-    {
+    public SpanAdapter(RichEditText editor) {
         this.editor = editor;
     }
 
@@ -33,13 +31,15 @@ public abstract class SpanAdapter
 
     public abstract boolean changeStatusBySelectionChanged(int start, int end);
 
+    public void changeSpanBeforeTextChanged(int start, int lengthBefore, int lengthAfter) {
+    }
+
     public abstract void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter);
 
     public abstract int getSpanStatusCode();
 
 
-    public void enableSpan(boolean isEnable, TextSpanStatus state, int code)
-    {
+    public void enableSpan(boolean isEnable, TextSpanStatus state, int code) {
         int start = editor.getSelectionStart();
         int end = editor.getSelectionEnd();
         if (end < start) {
@@ -59,8 +59,7 @@ public abstract class SpanAdapter
      * @param start       the start of character's input
      * @param lengthAfter the length of character's input
      */
-    protected void setTextSpanByTextChanged(int style, int start, int lengthAfter)
-    {
+    protected void setTextSpanByTextChanged(int style, int start, int lengthAfter) {
         Object span;
         if (start == 0) {
             //if start = 0, text must doesn't have spans, use new StyleSpan
@@ -99,8 +98,7 @@ public abstract class SpanAdapter
      * @param start       the start of character's input
      * @param lengthAfter the length of character's input
      */
-    protected void setTextSpanByTextChanged(Class<?> clazz, int start, int lengthAfter)
-    {
+    protected void setTextSpanByTextChanged(Class<?> clazz, int start, int lengthAfter) {
         Object span = null;
         try {
             if (start == 0) {
@@ -142,8 +140,7 @@ public abstract class SpanAdapter
         }
     }
 
-    protected void setTextSpanByTextChanged(Object span, int start, int lengthAfter)
-    {
+    protected void setTextSpanByTextChanged(Object span, int start, int lengthAfter) {
         if (start == 0) {
             setSpan(span, start, start + lengthAfter);
         } else {
@@ -176,8 +173,7 @@ public abstract class SpanAdapter
      * @param lengthAfter the input character's increment
      * @param ss          use method EditText.getEditableText()
      */
-    protected void changeSpanEnd(Object span, int lengthAfter, Editable ss)
-    {
+    protected void changeSpanEnd(Object span, int lengthAfter, Editable ss) {
         if (lengthAfter == 0)
             return;
         try {
@@ -214,8 +210,7 @@ public abstract class SpanAdapter
      * @param end   end of the range
      * @return if in this bound return true else return false
      */
-    protected boolean isRangeInSpan(Object span, int start, int end)
-    {
+    protected boolean isRangeInSpan(Object span, int start, int end) {
         int sstart = getEditableText().getSpanStart(span);
         int send = getEditableText().getSpanEnd(span);
         boolean result = editor.getEditableText().getSpanStart(span) <= start && editor.getEditableText().getSpanEnd(span) >= end;
@@ -230,8 +225,7 @@ public abstract class SpanAdapter
      * @param end   end of the text
      * @return if in this bound return true else return false
      */
-    protected boolean isSpanInRange(Object span, int start, int end)
-    {
+    protected boolean isSpanInRange(Object span, int start, int end) {
         return editor.getEditableText().getSpanStart(span) >= start && editor.getEditableText().getSpanEnd(span) <= end;
     }
 
@@ -243,8 +237,7 @@ public abstract class SpanAdapter
      * @param start   span start
      * @param end     span end
      */
-    protected void setSelectionTextSpan(boolean isValid, int style, int start, int end)
-    {
+    protected void setSelectionTextSpan(boolean isValid, int style, int start, int end) {
         //merge span
         if (isValid) {
             StyleSpan[] spans = getStyleSpans(style, start, end);
@@ -280,8 +273,7 @@ public abstract class SpanAdapter
         }
     }
 
-    protected void setSelectionTextSpan(boolean isValid, Object assignSpan, int start, int end)
-    {
+    protected void setSelectionTextSpan(boolean isValid, Object assignSpan, int start, int end) {
         if (isValid) {
             Object[] spans = getAssignSpans(assignSpan.getClass(), start, end);
             for (Object span : spans) {
@@ -316,8 +308,7 @@ public abstract class SpanAdapter
         }
     }
 
-    protected Editable getEditableText()
-    {
+    protected Editable getEditableText() {
         return editor.getEditableText();
     }
 
@@ -329,8 +320,7 @@ public abstract class SpanAdapter
      * @param end   end of editable
      * @return if there has a StyleSpan which style is specified in start to end,return it,or return null
      */
-    protected StyleSpan getStyleSpan(int style, int start, int end)
-    {
+    protected StyleSpan getStyleSpan(int style, int start, int end) {
         StyleSpan[] spans = editor.getEditableText().getSpans(start, end, StyleSpan.class);
         for (StyleSpan span : spans) {
             if (span.getStyle() == style) {
@@ -340,8 +330,7 @@ public abstract class SpanAdapter
         return null;
     }
 
-    protected StyleSpan[] getStyleSpans(int style, int start, int end)
-    {
+    protected StyleSpan[] getStyleSpans(int style, int start, int end) {
         StyleSpan[] spans = editor.getEditableText().getSpans(start, end, StyleSpan.class);
         ArrayList<StyleSpan> result = new ArrayList<>();
         for (StyleSpan span : spans) {
@@ -352,13 +341,11 @@ public abstract class SpanAdapter
         return result.toArray(new StyleSpan[result.size()]);
     }
 
-    protected <T> T[] getAssignSpans(Class<T> clazz, int start, int end)
-    {
+    protected <T> T[] getAssignSpans(Class<T> clazz, int start, int end) {
         return editor.getEditableText().getSpans(start, end, clazz);
     }
 
-    protected <T> T getAssignSpan(Class<T> clazz, int start, int end)
-    {
+    protected <T> T getAssignSpan(Class<T> clazz, int start, int end) {
         T[] spans = editor.getEditableText().getSpans(start, end, clazz);
         for (T span : spans) {
             if (span.getClass().equals(clazz)) {
@@ -368,8 +355,7 @@ public abstract class SpanAdapter
         return null;
     }
 
-    protected void setSpan(Object span, int start, int end)
-    {
+    protected void setSpan(Object span, int start, int end) {
         editor.getEditableText().setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 }
