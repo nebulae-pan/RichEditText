@@ -258,7 +258,7 @@ public class RichEditText extends AppCompatEditText {
         if (state == null) {
             return;
         }
-        if (!needToSetStatus || lengthBefore > 0) return;
+        if (!needToSetStatus) return;
         for (int i = 0; i < adapters.size(); i++) {
             int key = adapters.keyAt(i);
             if (state.isTextSpanEnable(key)) {

@@ -124,6 +124,7 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
 
     private boolean changeReplacement = false;
     private LeadingMarginSpan leadingMarginSpan;
+    private int spanDeletedIndex = -1;
 
     public QuoteSpanAdapter(RichEditText editor) {
         super(editor);
@@ -204,30 +205,13 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
         if (changeReplacement) {//add replacement will not change span
             return;
         }
-        if (removeReplacementIfExist(start)) {
-            start--;
-        }
-        if (start + lengthAfter >= 1
-                && getEditableText().charAt(start + lengthAfter - 1) == '\n'
-                && editor.getSelectionStart() == getEditableText().length()
-                && !changeReplacement) {
-            //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
-            editor.setEnableStatusChangeBySelection(false);
-            getEditableText().append("\n");
-            editor.setSelection(start + lengthAfter);
-            editor.setEnableStatusChangeBySelection(true);
-            lengthAfter++;
-        }
-        setTextSpanByTextChanged(RichQuoteSpan.class, start, lengthAfter);
-    }
-
-    @Override
-    public void changeSpanBeforeTextChanged(int start, int lengthBefore, int lengthAfter) {
-        if (changeReplacement) {//add replacement will not change span
-            return;
-        }
-        if (lengthBefore > lengthAfter) {
-            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start + lengthBefore - 1, start + lengthBefore);
+        Log.v("tag", lengthBefore + ":" + lengthAfter);
+        if (lengthBefore > lengthAfter) {//when text delete
+            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start + lengthBefore - 1, start + lengthBefore + 1);
+            if (spanDeletedIndex >= 0) {
+                insertReplacement(spanDeletedIndex);
+                spanDeletedIndex = -1;
+            }
             if (richQuoteSpan == null) {
                 return;
             }
@@ -239,10 +223,43 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
                     getEditableText().delete(sStart, sEnd);
                     changeReplacement = false;
                 }
-                Log.v("tag", "insert");
-                insertReplacement(sStart);
             }
-            Log.v("tag", lengthBefore + ":" + lengthAfter);
+        } else {
+            //text insert or replace old text
+            if (removeReplacementIfExist(start)) {
+                start--;
+            }
+            if (start + lengthAfter >= 1
+                    && getEditableText().charAt(start + lengthAfter - 1) == '\n'
+                    && editor.getSelectionStart() == getEditableText().length()
+                    && !changeReplacement) {
+                //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
+                editor.setEnableStatusChangeBySelection(false);
+                getEditableText().append("\n");
+                editor.setSelection(start + lengthAfter);
+                editor.setEnableStatusChangeBySelection(true);
+                lengthAfter++;
+            }
+        }
+
+        setTextSpanByTextChanged(RichQuoteSpan.class, start, lengthAfter);
+    }
+
+    @Override
+    public void changeSpanBeforeTextChanged(int start, int lengthBefore, int lengthAfter) {
+        if (changeReplacement) {//add replacement will not change span
+            return;
+        }
+        if (lengthBefore > lengthAfter) {
+            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start + lengthBefore - 1, start + lengthBefore + 1);
+            if (richQuoteSpan == null) {
+                return;
+            }
+            int sStart = getEditableText().getSpanStart(richQuoteSpan);
+            Log.d("tag", "changeSpanBeforeTextChanged() called with: start = [" + start + "], lengthBefore = [" + lengthBefore + "], lengthAfter = [" + lengthAfter + "]" + sStart);
+            if (sStart == start && lengthAfter == 0) {
+                spanDeletedIndex = start;
+            }
         }
     }
 
