@@ -218,7 +218,7 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             int sStart = getEditableText().getSpanStart(richQuoteSpan);
             int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
             if (sEnd - sStart == 1) {
-                if (getEditableText().subSequence(sStart, sEnd).equals("\n")) {
+                if (getEditableText().subSequence(sStart, sEnd).toString().equals("\n")) {
                     changeReplacement = true;
                     getEditableText().delete(sStart, sEnd);
                     changeReplacement = false;
