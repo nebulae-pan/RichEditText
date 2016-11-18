@@ -244,7 +244,6 @@ public class RichEditText extends AppCompatEditText {
         if (state == null) {
             return;
         }
-        Log.d(TAG, "onSelectionChanged() called with: " + "selStart = [" + selStart + "], selEnd = [" + selEnd + "]");
         if (!needToSetStatus) return;
         state.clearSelection();
         for (int i = 0; i < adapters.size(); i++) {

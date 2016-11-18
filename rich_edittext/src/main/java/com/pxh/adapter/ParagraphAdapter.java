@@ -1,8 +1,13 @@
 package com.pxh.adapter;
 
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.LeadingMarginSpan;
 import android.util.Log;
 
 import com.pxh.RichEditText;
+import com.pxh.span.HolderSpan;
+import com.pxh.span.RichQuoteSpan;
 
 /**
  * Created by pxh on 2016/9/30.
@@ -10,6 +15,14 @@ import com.pxh.RichEditText;
 abstract public class ParagraphAdapter extends SpanAdapter
 {
     private static final String TAG = "ParagraphAdapter";
+
+    protected boolean changeReplacement = false;
+    protected LeadingMarginSpan leadingMarginSpan;
+    /**
+     * span index
+     */
+    protected int spanDeletedIndex = -1;
+
 
     public ParagraphAdapter(RichEditText editor)
     {
@@ -80,6 +93,36 @@ abstract public class ParagraphAdapter extends SpanAdapter
             Log.e(TAG, "can not instantiated " + clazz);
             e.printStackTrace();
         }
+    }
+
+    protected void insertReplacement(int start) {
+        changeReplacement = true;
+        HolderSpan holderSpan = new HolderSpan(leadingMarginSpan);
+        SpannableStringBuilder sb = new SpannableStringBuilder("|");
+        sb.setSpan(holderSpan, start, start + sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        getEditableText().insert(start, sb);
+        changeReplacement = false;
+
+    }
+
+    /**
+     * this method will change text length
+     *
+     * @param end replacement's end
+     * @return if true, text length sub 1,else text length not change
+     */
+    protected boolean removeReplacementIfExist(int end) {
+        HolderSpan[] holderSpans = getAssignSpans(HolderSpan.class, end - 1, end);
+        for (HolderSpan holderSpan : holderSpans) {
+            if (holderSpan.getInnerSpan() instanceof RichQuoteSpan) {
+                changeReplacement = true;
+                getEditableText().removeSpan(holderSpan);
+                getEditableText().delete(end - 1, end);
+                changeReplacement = false;
+                return true;
+            }
+        }
+        return false;
     }
 
 //    private void onEnabledInput(Class<?> clazz, CharSequence text, int start, int lengthAfter)
