@@ -83,7 +83,6 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
 
     @Override
     public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter) {
-        Log.v("tag", "123");
         if (changeReplacement) {//add replacement will not change span
             return;
         }
@@ -110,9 +109,12 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             if (removeReplacementIfExist(start)) {
                 start--;
             }
+            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
+            int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
+            Log.v("tag", sEnd + ":");
             if (start + lengthAfter >= 1
                     && getEditableText().charAt(start + lengthAfter - 1) == '\n'
-                    && editor.getSelectionStart() == getEditableText().length()
+                    && editor.getSelectionStart() == sEnd + lengthAfter
                     && !changeReplacement) {
                 //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
                 editor.setEnableStatusChangeBySelection(false);
@@ -125,13 +127,11 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
 
         setTextSpanByTextChanged(RichQuoteSpan.class, start, lengthAfter);
 
-        Log.v("tag", lengthAfter + ":" + getEditableText().charAt(start));
         if (start > 0 && lengthAfter == 1
                 && getEditableText().charAt(start) == '\n'
                 && getEditableText().charAt(start - 1) == '\n') {
             RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
             int sStart = getEditableText().getSpanStart(richQuoteSpan);
-            int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
             getEditableText().removeSpan(richQuoteSpan);
             getEditableText().setSpan(richQuoteSpan, sStart, start, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
