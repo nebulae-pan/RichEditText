@@ -111,11 +111,14 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             }
             RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
             int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
-            Log.v("tag", sEnd + ":");
             if (start + lengthAfter >= 1
                     && getEditableText().charAt(start + lengthAfter - 1) == '\n'
                     && editor.getSelectionStart() == sEnd + lengthAfter
                     && !changeReplacement) {
+                if (getEditableText().length() > sEnd + lengthAfter + 1
+                        && getEditableText().charAt(sEnd + lengthAfter + 1) == '\n') {
+
+                }
                 //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
                 editor.setEnableStatusChangeBySelection(false);
                 getEditableText().append("\n");
