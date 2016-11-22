@@ -17,6 +17,8 @@ import com.pxh.span.RichQuoteSpan;
  */
 public class QuoteSpanAdapter extends ParagraphAdapter {
 
+    public static boolean debug = false;
+
     public QuoteSpanAdapter(RichEditText editor) {
         super(editor);
         leadingMarginSpan = new RichQuoteSpan();
@@ -115,15 +117,14 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
                     && getEditableText().charAt(start + lengthAfter - 1) == '\n'
                     && editor.getSelectionStart() == sEnd + lengthAfter
                     && !changeReplacement) {
-                if (getEditableText().length() > sEnd + lengthAfter + 1
-                        && getEditableText().charAt(sEnd + lengthAfter + 1) == '\n') {
-
+                if (!(getEditableText().length() > sEnd + lengthAfter + 1
+                        && getEditableText().charAt(sEnd + lengthAfter + 1) == '\n')) {
+                    //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
+                    editor.setEnableStatusChangeBySelection(false);
+                    getEditableText().insert(sEnd + lengthAfter, "\n");
+                    editor.setSelection(start + lengthAfter);
+                    editor.setEnableStatusChangeBySelection(true);
                 }
-                //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
-                editor.setEnableStatusChangeBySelection(false);
-                getEditableText().append("\n");
-                editor.setSelection(start + lengthAfter);
-                editor.setEnableStatusChangeBySelection(true);
                 lengthAfter++;
             }
         }
@@ -138,6 +139,10 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             getEditableText().removeSpan(richQuoteSpan);
             getEditableText().setSpan(richQuoteSpan, sStart, start, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
+        RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
+        int sStart = getEditableText().getSpanStart(richQuoteSpan);
+        int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
+        Log.v("tag", sStart + ":::" + sEnd);
     }
 
     @Override

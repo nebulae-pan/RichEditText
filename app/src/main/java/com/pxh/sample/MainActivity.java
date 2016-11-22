@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.pxh.RichEditText;
+import com.pxh.adapter.QuoteSpanAdapter;
 import com.pxh.richedittext.TextSpans;
 import com.pxh.richparser.RichHtml;
 
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.post:
                 String s = richEditText.getHtml();
                 Log.v("html", s);
+                QuoteSpanAdapter.debug = true;
                 content.setText(RichHtml.fromHtml(s, null, null));
 
                 break;
