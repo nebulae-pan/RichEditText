@@ -91,9 +91,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.post:
                 String s = richEditText.getHtml();
                 Log.v("html", s);
-                QuoteSpanAdapter.debug = true;
                 content.setText(RichHtml.fromHtml(s, null, null));
-
                 break;
         }
         return super.onOptionsItemSelected(item);

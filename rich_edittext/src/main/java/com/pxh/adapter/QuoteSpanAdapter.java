@@ -1,7 +1,6 @@
 package com.pxh.adapter;
 
 import android.text.Spanned;
-import android.util.Log;
 
 import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpanStatus;
@@ -16,8 +15,6 @@ import com.pxh.span.RichQuoteSpan;
  * 连续两次回车取消QuoteSpan影响
  */
 public class QuoteSpanAdapter extends ParagraphAdapter {
-
-    public static boolean debug = false;
 
     public QuoteSpanAdapter(RichEditText editor) {
         super(editor);
@@ -139,10 +136,6 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
             getEditableText().removeSpan(richQuoteSpan);
             getEditableText().setSpan(richQuoteSpan, sStart, start, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
-        int sStart = getEditableText().getSpanStart(richQuoteSpan);
-        int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
-        Log.v("tag", sStart + ":::" + sEnd);
     }
 
     @Override
