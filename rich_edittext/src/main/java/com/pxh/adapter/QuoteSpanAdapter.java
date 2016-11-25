@@ -1,11 +1,10 @@
 package com.pxh.adapter;
 
-import android.text.Spanned;
+import android.text.style.LeadingMarginSpan;
 
 import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpanStatus;
 import com.pxh.richedittext.TextSpans;
-import com.pxh.span.HolderSpan;
 import com.pxh.span.RichQuoteSpan;
 
 /**
@@ -69,94 +68,12 @@ public class QuoteSpanAdapter extends ParagraphAdapter {
     }
 
     @Override
-    public boolean changeStatusBySelectionChanged(int start, int end) {
-        HolderSpan[] holderSpans = getAssignSpans(HolderSpan.class, start - 1, start);
-        for (HolderSpan span : holderSpans) {
-            if (span.getInnerSpan() instanceof RichQuoteSpan) {
-                return true;
-            }
-        }
-        RichQuoteSpan[] quoteSpans = getEditableText().getSpans(start - 1, start, RichQuoteSpan.class);
-        return (quoteSpans.length != 0 && isRangeInSpan(quoteSpans[0], start, end));
-    }
-
-    @Override
-    public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter) {
-        if (changeReplacement) {//add replacement will not change span
-            return;
-        }
-        if (lengthBefore > lengthAfter) {//when text delete
-            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start + lengthBefore - 1, start + lengthBefore + 1);
-            if (spanDeletedIndex >= 0) {
-                insertReplacement(spanDeletedIndex);
-                spanDeletedIndex = -1;
-            }
-            if (richQuoteSpan == null) {
-                return;
-            }
-            int sStart = getEditableText().getSpanStart(richQuoteSpan);
-            int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
-            if (sEnd - sStart == 1) {
-                if (getEditableText().subSequence(sStart, sEnd).toString().equals("\n")) {
-                    changeReplacement = true;
-                    getEditableText().delete(sStart, sEnd);
-                    changeReplacement = false;
-                }
-            }
-        } else {
-            //text insert or replace old text
-            if (removeReplacementIfExist(start)) {
-                start--;
-            }
-            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
-            int sEnd = getEditableText().getSpanEnd(richQuoteSpan);
-            if (start + lengthAfter >= 1
-                    && getEditableText().charAt(start + lengthAfter - 1) == '\n'
-                    && editor.getSelectionStart() == sEnd + lengthAfter
-                    && !changeReplacement) {
-                if (!(getEditableText().length() > sEnd + lengthAfter + 1
-                        && getEditableText().charAt(sEnd + lengthAfter + 1) == '\n')) {
-                    //while '\n' input and there only this '\n' at tail of text, add another '\n' after text to show quote effect
-                    editor.setEnableStatusChangeBySelection(false);
-                    getEditableText().insert(sEnd + lengthAfter, "\n");
-                    editor.setSelection(start + lengthAfter);
-                    editor.setEnableStatusChangeBySelection(true);
-                }
-                lengthAfter++;
-            }
-        }
-
-        setTextSpanByTextChanged(RichQuoteSpan.class, start, lengthAfter);
-
-        if (start > 0 && lengthAfter == 1
-                && getEditableText().charAt(start) == '\n'
-                && getEditableText().charAt(start - 1) == '\n') {
-            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start - 1, start);
-            int sStart = getEditableText().getSpanStart(richQuoteSpan);
-            getEditableText().removeSpan(richQuoteSpan);
-            getEditableText().setSpan(richQuoteSpan, sStart, start, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-    }
-
-    @Override
-    public void changeSpanBeforeTextChanged(int start, int lengthBefore, int lengthAfter) {
-        if (changeReplacement) {//add replacement will not change span
-            return;
-        }
-        if (lengthBefore > lengthAfter) {
-            RichQuoteSpan richQuoteSpan = getAssignSpan(RichQuoteSpan.class, start + lengthBefore - 1, start + lengthBefore + 1);
-            if (richQuoteSpan == null) {
-                return;
-            }
-            int sStart = getEditableText().getSpanStart(richQuoteSpan);
-            if (sStart == start && lengthAfter == 0) {
-                spanDeletedIndex = start;
-            }
-        }
-    }
-
-    @Override
     public int getSpanStatusCode() {
         return TextSpans.Quote;
+    }
+
+    @Override
+    protected Class<? extends LeadingMarginSpan> getSpanClass() {
+        return RichQuoteSpan.class;
     }
 }
