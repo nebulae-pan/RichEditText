@@ -6,6 +6,7 @@ import android.text.style.LeadingMarginSpan;
 import android.util.Log;
 
 import com.pxh.RichEditText;
+import com.pxh.richedittext.TextSpanStatus;
 import com.pxh.span.HolderSpan;
 import com.pxh.span.RichQuoteSpan;
 
@@ -32,7 +33,44 @@ abstract public class ParagraphAdapter extends SpanAdapter {
 
     }
 
-
+    @Override
+    public void enableSpan(boolean isEnable, TextSpanStatus state, int code) {
+        int start = editor.getSelectionStart();
+        int end = editor.getSelectionEnd();
+        if (end < start) {
+            start = start ^ end;
+            end = start ^ end;
+            start = start ^ end;
+        }
+        state.setTextSpanEnable(code, isEnable);
+        if (start < end) {
+            int quoteStart = getParagraphStart(start);
+            int quoteEnd = getParagraphEnd(end);
+            if (isEnable) {
+                setSelectionTextSpan(true, getSpanClass(), quoteStart, quoteEnd);
+            } else {
+                removeSpan(getSpanClass(), quoteStart, quoteEnd);
+            }
+        } else {
+            if (isEnable) {
+                int sStart = getParagraphStart(start);
+                int sEnd = getParagraphEnd(start);
+                //if there is just a single line,insert a replacement span
+                if (sStart == start &&
+                        (getEditableText().length() == sStart ||
+                                getEditableText().charAt(sStart) == '\n')) {
+                    insertReplacement(sStart);
+                } else {
+                    //else set whole paragraph by quote span
+                    setSelectionTextSpan(true, getSpanClass(), sStart, sEnd);
+                }
+            } else {
+                LeadingMarginSpan span = getAssignSpan(getSpanClass(), start, end);
+                getEditableText().removeSpan(span);
+                removeReplacementIfExist(start);
+            }
+        }
+    }
 
     @Override
     public boolean changeStatusBySelectionChanged(int start, int end) {
@@ -47,7 +85,7 @@ abstract public class ParagraphAdapter extends SpanAdapter {
     }
 
     @Override
-    public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter){
+    public void changeSpanByTextChanged(int start, int lengthBefore, int lengthAfter) {
         if (changeReplacement) {//add replacement will not change span
             return;
         }
@@ -111,7 +149,7 @@ abstract public class ParagraphAdapter extends SpanAdapter {
             return;
         }
         if (lengthBefore > lengthAfter) {
-            LeadingMarginSpan richSpan = getAssignSpan(getSpanClass() , start + lengthBefore - 1, start + lengthBefore + 1);
+            LeadingMarginSpan richSpan = getAssignSpan(getSpanClass(), start + lengthBefore - 1, start + lengthBefore + 1);
             if (richSpan == null) {
                 return;
             }

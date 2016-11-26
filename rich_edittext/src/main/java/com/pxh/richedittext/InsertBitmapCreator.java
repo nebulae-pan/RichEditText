@@ -114,7 +114,7 @@ public class InsertBitmapCreator implements BitmapCreator
     /**
      * @return font length
      */
-    public static float getFontLength(Paint paint, String str)
+    private static float getFontLength(Paint paint, String str)
     {
         return paint.measureText(str);
     }
@@ -122,7 +122,7 @@ public class InsertBitmapCreator implements BitmapCreator
     /**
      * @return font height
      */
-    public static float getFontHeight(Paint paint)
+    private static float getFontHeight(Paint paint)
     {
         Paint.FontMetrics fm = paint.getFontMetrics();
         return fm.descent - fm.ascent;
@@ -131,7 +131,7 @@ public class InsertBitmapCreator implements BitmapCreator
     /**
      * @return font leading
      */
-    public static float getFontLeading(Paint paint)
+    private static float getFontLeading(Paint paint)
     {
         Paint.FontMetrics fm = paint.getFontMetrics();
         return fm.leading - fm.ascent;
