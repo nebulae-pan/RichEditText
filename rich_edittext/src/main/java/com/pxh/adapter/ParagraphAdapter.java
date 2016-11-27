@@ -217,7 +217,7 @@ abstract public class ParagraphAdapter extends SpanAdapter {
         changeReplacement = true;
         HolderSpan holderSpan = new HolderSpan(leadingMarginSpan);
         SpannableStringBuilder sb = new SpannableStringBuilder("|");
-        sb.setSpan(holderSpan, start, start + sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(holderSpan, 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         getEditableText().insert(start, sb);
         changeReplacement = false;
 

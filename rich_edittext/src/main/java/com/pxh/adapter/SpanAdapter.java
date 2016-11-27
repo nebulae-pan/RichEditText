@@ -2,6 +2,7 @@ package com.pxh.adapter;
 
 import android.text.Editable;
 import android.text.Spanned;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 
@@ -276,6 +277,16 @@ public abstract class SpanAdapter {
                 setSpan(new StyleSpan(style), end, spanEnd);
             }
             editor.getEditableText().removeSpan(span);
+        }
+    }
+
+    protected void setSelectionTextSpan(boolean isValid, Class<? extends LeadingMarginSpan> clazz, int start, int end) {
+        try {
+            LeadingMarginSpan assignSpan = clazz.newInstance();
+            setSelectionTextSpan(isValid, assignSpan, start, end);
+        } catch (Exception e) {
+            Log.e(TAG, "can not instantiated " + clazz);
+            e.printStackTrace();
         }
     }
 
