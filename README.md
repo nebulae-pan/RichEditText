@@ -1,5 +1,5 @@
 # RichEditText
-##intro
+##introduce
 Support insert
 - bold
 - italic
@@ -8,5 +8,6 @@ Support insert
 - quote
 - bullet
 - image
+- url
 
-and you can export the format to html text, which can use at persistence and transport.
+Can export the format text to HTML text, which can use at persistence and transport.

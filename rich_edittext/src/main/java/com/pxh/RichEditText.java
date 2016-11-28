@@ -96,7 +96,7 @@ public class RichEditText extends AppCompatEditText {
     }
 
     public RichEditText addSpanAdapter(SpanAdapter adapter) {
-        if (adapters.get(adapter.getSpanStatusCode()) == null) {
+        if (adapters.get(adapter.getSpanStatusCode()) != null) {
             throw new IllegalArgumentException(TAG + ":adapter code already exist");
         }
         int code = adapter.getSpanStatusCode();
@@ -179,7 +179,7 @@ public class RichEditText extends AppCompatEditText {
      * enable the span which is assigned by code, use for custom span
      *
      * @param isValid whether enable
-     * @param code    span code, must be integer power of 2
+     * @param code  span code, must be integer power of 2
      */
     public void enableSpan(boolean isValid, int code) {
         adapters.get(code).enableSpan(isValid, state, code);
