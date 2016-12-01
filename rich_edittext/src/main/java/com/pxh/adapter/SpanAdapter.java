@@ -9,6 +9,7 @@ import android.util.Log;
 import com.pxh.RichEditText;
 import com.pxh.richedittext.TextSpanStatus;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -26,7 +27,8 @@ public abstract class SpanAdapter {
     private Field ends;
 
     public SpanAdapter(RichEditText editor) {
-        this.editor = editor;
+        WeakReference<RichEditText> reference = new WeakReference<RichEditText>(editor);
+        this.editor = reference.get();
     }
 
     protected abstract void setSelectionText(boolean isEnable, int start, int end);
