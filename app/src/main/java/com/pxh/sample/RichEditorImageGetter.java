@@ -1,4 +1,4 @@
-package com.pxh.richedittext;
+package com.pxh.sample;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +14,9 @@ import android.widget.EditText;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.pxh.richedittext.BitmapCreator;
+import com.pxh.richedittext.InsertBitmapCreator;
+import com.pxh.richedittext.RichEditorDrawable;
 
 import java.lang.ref.WeakReference;
 
@@ -55,7 +58,7 @@ public class RichEditorImageGetter implements Html.ImageGetter
                         editor.setText(editor.getText());
                     }
                 });
-        BitmapDrawable bd = (BitmapDrawable) ContextCompat.getDrawable(editor.getContext(), R.drawable.holder);
+        BitmapDrawable bd = (BitmapDrawable) ContextCompat.getDrawable(editor.getContext(), com.pxh.richedittext.R.drawable.holder);
         Bitmap holder = bd.getBitmap();
         float scaleWidth = ((float) width) / holder.getWidth();
         Matrix matrix = new Matrix();

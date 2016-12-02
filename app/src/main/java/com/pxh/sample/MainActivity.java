@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +28,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity
 {
     private RichEditText richEditText;
-    private HashMap<Integer, View> views = new HashMap<>();
+    private SparseArray<View> views = new SparseArray<>();
 
     private TextView content;
 

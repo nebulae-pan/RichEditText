@@ -17,7 +17,6 @@ import android.text.style.ImageSpan;
 import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.WindowManager;
 
@@ -30,7 +29,6 @@ import com.pxh.adapter.StrikethroughSpanAdapter;
 import com.pxh.adapter.UnderLineSpanAdapter;
 import com.pxh.richedittext.BitmapCreator;
 import com.pxh.richedittext.InsertBitmapCreator;
-import com.pxh.richedittext.RichEditorImageGetter;
 import com.pxh.richedittext.TextSpanStatus;
 import com.pxh.richedittext.TextSpans;
 import com.pxh.richedittext.UriUtils;
@@ -221,10 +219,10 @@ public class RichEditText extends AppCompatEditText {
         return state.isBulletEnable();
     }
 
-    public void setHtml(String html) {
-        Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
-        setText(RichHtml.fromHtml(html, imgGetter, null));
-    }
+//    public void setHtml(String html) {
+//        Html.ImageGetter imgGetter = new RichEditorImageGetter(this);
+//        setText(RichHtml.fromHtml(html, imgGetter, null));
+//    }
 
     public String getHtml() {
         return RichHtml.toHtml(getText());
