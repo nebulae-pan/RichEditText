@@ -1,5 +1,5 @@
 # RichEditText
-##introduce
+## introduce
 Support insert
 - bold
 - italic
